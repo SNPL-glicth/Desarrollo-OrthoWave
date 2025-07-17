@@ -8,6 +8,8 @@ import { CitasModule } from './citas/citas.module';
 import { PerfilMedicoModule } from './perfil-medico/perfil-medico.module';
 import { PacientesModule } from './pacientes/pacientes.module';
 import { HistoriaClinicaModule } from './historia-clinica/historia-clinica.module';
+import { WebSocketModule } from './websocket/websocket.module';
+import { CacheModule } from './cache/cache.module';
 import { databaseConfig } from './config/database.config';
 
 @Module({
@@ -21,6 +23,8 @@ import { databaseConfig } from './config/database.config';
     PerfilMedicoModule,
     PacientesModule,
     HistoriaClinicaModule,
+    WebSocketModule,
+    CacheModule,
   ],
 })
 export class AppModule {}

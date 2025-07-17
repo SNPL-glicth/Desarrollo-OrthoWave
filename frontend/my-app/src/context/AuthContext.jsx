@@ -21,7 +21,13 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       const currentUser = authService.getCurrentUser();
       if (currentUser) {
-        setUser(currentUser);
+        // No cargar automáticamente si es administrador
+        if (currentUser.rol?.toLowerCase() !== 'admin') {
+          setUser(currentUser);
+        } else {
+          // Limpiar sesión del administrador
+          authService.logout();
+        }
       }
       setLoading(false);
     };
@@ -62,8 +68,18 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Error en login:', error);
-      const message = error.message || 'Error al iniciar sesión. Por favor verifica tus credenciales.';
+      
+      // Determinar el mensaje de error apropiado
+      let message = 'Error al iniciar sesión. Por favor verifica tus credenciales.';
+      
+      if (error.message) {
+        message = error.message;
+      }
+      
+      // Mostrar toast con el mensaje de error
       toast.error(message);
+      
+      // Re-lanzar el error para que pueda ser manejado por el componente
       throw error;
     }
   };

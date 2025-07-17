@@ -32,14 +32,15 @@ api.interceptors.response.use(
     if (error.response) {
       // El servidor respondió con un código de estado fuera del rango 2xx
       if (error.response.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        // Solo redirigir si no estamos ya en la página de login
+        if (window.location.pathname !== '/login') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
       }
-      return Promise.reject({
-        ...error,
-        message: error.response.data.message || 'Error en la solicitud'
-      });
+      // Mantener la estructura original del error para que auth.service.js pueda manejarlo
+      return Promise.reject(error);
     } else if (error.request) {
       // La solicitud se realizó pero no se recibió respuesta
       return Promise.reject({

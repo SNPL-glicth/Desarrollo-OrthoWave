@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Delete, Body, UseGuards, Request, Param, ParseIntPipe, HttpException, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Put, Post, Delete, Patch, Body, UseGuards, Request, Param, ParseIntPipe, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { CrearUsuarioAdminDto } from './dto/crear-usuario-admin.dto';
@@ -69,8 +69,21 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('admin/todos')
+  @Get('admin')
   async obtenerTodosLosUsuarios(@Request() req) {
+    const usuario = req.user;
+
+    // Solo administradores pueden ver todos los usuarios
+    if (usuario.rol.nombre !== 'admin') {
+      throw new HttpException('No tienes permisos para ver esta información', HttpStatus.FORBIDDEN);
+    }
+
+    return await this.usersService.obtenerTodosLosUsuarios();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('admin/todos')
+  async obtenerTodosLosUsuariosLegacy(@Request() req) {
     const usuario = req.user;
 
     // Solo administradores pueden ver todos los usuarios
@@ -169,6 +182,23 @@ export class UsersController {
     }
 
     return await this.usersService.cambiarEstadoUsuario(id, activo);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('admin/:id/status')
+  async cambiarEstadoUsuarioPatch(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('isVerified') isVerified: boolean,
+    @Request() req
+  ) {
+    const usuario = req.user;
+
+    // Solo administradores pueden cambiar estado de usuarios
+    if (usuario.rol.nombre !== 'admin') {
+      throw new HttpException('No tienes permisos para cambiar el estado de usuarios', HttpStatus.FORBIDDEN);
+    }
+
+    return await this.usersService.cambiarEstadoUsuario(id, isVerified);
   }
 
   @UseGuards(JwtAuthGuard)

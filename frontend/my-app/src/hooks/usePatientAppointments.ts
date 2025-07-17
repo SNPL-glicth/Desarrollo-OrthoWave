@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
+import { authService } from '../services/auth.service';
 
 export const usePatientAppointments = () => {
     const [upcomingAppointments, setUpcomingAppointments] = useState([]);
@@ -9,27 +10,44 @@ export const usePatientAppointments = () => {
 
     const fetchAppointments = async () => {
         try {
-            const [upcomingRes, pastRes] = await Promise.all([
-                axios.get('/api/patients/appointments/upcoming'),
-                axios.get('/api/patients/appointments/history')
-            ]);
+            const user = authService.getCurrentUser();
+            if (!user) {
+                throw new Error('Usuario no autenticado');
+            }
+
+            const response = await api.get(`/citas/paciente/${user.id}`);
+            const allAppointments = response.data;
             
-            setUpcomingAppointments(upcomingRes.data);
-            setPastAppointments(pastRes.data);
-        } catch (err) {
-            setError(err);
+            const now = new Date();
+            const upcoming = allAppointments.filter(apt => 
+                new Date(apt.fechaHora) > now && apt.estado !== 'cancelada'
+            );
+            const past = allAppointments.filter(apt => 
+                new Date(apt.fechaHora) <= now || apt.estado === 'completada'
+            );
+            
+            setUpcomingAppointments(upcoming);
+            setPastAppointments(past);
+        } catch (err: any) {
+            setError(err.message || 'Error al cargar las citas');
         } finally {
             setLoading(false);
         }
     };
 
     const cancelAppointment = async (appointmentId: string, reason: string) => {
-        await axios.post(`/api/appointments/state/${appointmentId}/cancel`, { reason });
+        await api.patch(`/citas/${appointmentId}/estado`, { 
+            estado: 'cancelada',
+            motivoCancelacion: reason 
+        });
         await fetchAppointments();
     };
 
     const requestReschedule = async (appointmentId: string, reason: string) => {
-        await axios.post(`/api/appointments/state/${appointmentId}/reschedule-request`, { reason });
+        await api.patch(`/citas/${appointmentId}/estado`, { 
+            estado: 'pendiente',
+            motivoCancelacion: reason 
+        });
         await fetchAppointments();
     };
 
@@ -46,4 +64,4 @@ export const usePatientAppointments = () => {
         requestReschedule,
         refreshAppointments: fetchAppointments
     };
-}; 
+};

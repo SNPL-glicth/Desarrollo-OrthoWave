@@ -1,70 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import UserOffcanvas from './UserOffcanvas';
+import { getPatientsByDoctor } from '../../services/patientService.ts';
+import PendingAppointments from '../appointment/PendingAppointments.tsx';
+
+// Interfaz simple para los datos del paciente
+interface Paciente {
+  id: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string;
+}
 
 const DoctorDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [showOffcanvas, setShowOffcanvas] = useState(false);
-  const [activeTab, setActiveTab] = useState('inicio');
+  const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleViewPatientDetails = (patientId: string) => {
-    navigate(`/pacientes/${patientId}`);
-  };
+  useEffect(() => {
+    const fetchPacientes = async () => {
+      try {
+        setLoading(true);
+        console.log('Doctor Dashboard - Fetch pacientes iniciado');
+        console.log('Usuario actual:', user);
+        console.log('Rol del usuario:', user?.rol);
+        
+        const data = await getPatientsByDoctor();
+        console.log('Datos recibidos del backend:', data);
+        
+        setPacientes(data || []); // Asegurarse de que pacientes sea siempre un array
+        setError(null);
+      } catch (err: any) {
+        console.error('Error al cargar pacientes:', err);
+        console.error('Response data:', err.response?.data);
+        console.error('Response status:', err.response?.status);
+        
+        setError(err.response?.data?.message || 'Error al cargar la lista de pacientes.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleViewAppointments = () => {
-    navigate('/citas');
-  };
+    if (user) {
+      console.log('Usuario existe, fetching pacientes...');
+      fetchPacientes();
+    } else {
+      console.log('No hay usuario, no se puede cargar pacientes');
+    }
+  }, [user]);
 
-  const handleViewMedicalRecords = () => {
-    navigate('/historias-clinicas');
-  };
+  if (loading) {
+    return <div className="p-8 text-center">Cargando pacientes...</div>;
+  }
 
-  // Mock data
-  const estadisticas = {
-    citasHoy: 8,
-    citasPendientes: 25,
-    pacientesActivos: 45,
-    tratamientosActivos: 30
-  };
-
-  const citasProximas = [
-    { paciente: 'Ana Martínez', hora: '10:00 AM', tipo: 'Control', estado: 'Confirmada' },
-    { paciente: 'Pedro Sánchez', hora: '11:30 AM', tipo: 'Primera Vez', estado: 'Pendiente' },
-    { paciente: 'Laura Gómez', hora: '2:00 PM', tipo: 'Revisión', estado: 'Confirmada' }
-  ];
-
-  const pacientesRecientes = [
-    { nombre: 'Ana Martínez', edad: 28, ultimaCita: '2024-03-10', proximaCita: '2024-03-24' },
-    { nombre: 'Pedro Sánchez', edad: 35, ultimaCita: '2024-03-12', proximaCita: '2024-03-26' },
-    { nombre: 'Laura Gómez', edad: 42, ultimaCita: '2024-03-14', proximaCita: '2024-03-28' }
-  ];
+  if (error) {
+    return <div className="p-8 text-center text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <img className="h-8 w-auto" src="/logo.png" alt="Logo" />
-              </div>
+            <div className="flex items-center">
+              <img className="h-8 w-auto" src="/images/White logo - no background_page-0001.webp" alt="Logo" />
+              <h1 className="ml-4 text-xl font-semibold text-gray-900">Dashboard Doctor</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setShowOffcanvas(true)}
-                className="p-2 rounded-md text-gray-600 hover:text-gray-900 focus:outline-none"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-              </button>
+              <span className="text-sm text-gray-600">Dr. {user?.nombre} {user?.apellido}</span>
               <button
                 onClick={handleLogout}
                 className="text-red-600 hover:text-red-800 font-medium"
@@ -78,186 +89,61 @@ const DoctorDashboard: React.FC = () => {
 
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Panel Médico</h1>
-            <div className="flex space-x-4">
-              <button
-                onClick={handleViewAppointments}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              >
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Ver Agenda
-              </button>
-              <button
-                onClick={handleViewMedicalRecords}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              >
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
-                Historias Clínicas
-              </button>
+          <h1 className="text-3xl font-bold mb-6 text-gray-800">Dashboard Doctor</h1>
+          <p className="mb-6 text-lg text-gray-600">Bienvenido, Dr. {user?.nombre} {user?.apellido}.</p>
+          
+          {/* Grid para citas pendientes y pacientes */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Columna izquierda - Citas Pendientes */}
+            <div className="space-y-6">
+              <PendingAppointments />
             </div>
-          </div>
-
-          {/* Estadísticas */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-            <div className="bg-white overflow-hidden shadow-lg rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Citas Hoy</dt>
-                      <dd className="text-lg font-semibold text-gray-900">{estadisticas.citasHoy}</dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow-lg rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
-                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                        </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Citas Pendientes</dt>
-                      <dd className="text-lg font-semibold text-gray-900">{estadisticas.citasPendientes}</dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow-lg rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
-                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Pacientes Activos</dt>
-                      <dd className="text-lg font-semibold text-gray-900">{estadisticas.pacientesActivos}</dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow-lg rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-indigo-500 rounded-md p-3">
-                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Tratamientos Activos</dt>
-                      <dd className="text-lg font-semibold text-gray-900">{estadisticas.tratamientosActivos}</dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Próximas Citas */}
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Próximas Citas</h2>
-                  <button
-                    onClick={handleViewAppointments}
-                    className="text-primary hover:text-primary-dark text-sm font-medium"
-                  >
-                    Ver todas
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  {citasProximas.map((cita, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex-shrink-0">
-                          <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center">
-                            {cita.paciente.split(' ').map(n => n[0]).join('')}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{cita.paciente}</p>
-                          <p className="text-sm text-gray-500">{cita.tipo}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">{cita.hora}</p>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          cita.estado === 'Confirmada' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {cita.estado}
-                        </span>
+            
+            {/* Columna derecha - Mis Pacientes */}
+            <div className="space-y-6">
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Mis Pacientes</h2>
+                
+                {pacientes.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="bg-blue-50 p-6 rounded-lg">
+                      <h3 className="text-lg font-semibold text-blue-900 mb-2">¡Bienvenido Dr. {user?.nombre}!</h3>
+                      <p className="text-blue-700 mb-4">Aún no tienes pacientes asignados en tu agenda.</p>
+                      <div className="text-sm text-blue-600 space-y-2">
+                        <p>• Los pacientes aparecerán aquí cuando tengas citas programadas</p>
+                        <p>• Una vez que los pacientes reserven citas contigo, aparecerán en esta lista</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Pacientes Recientes */}
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Pacientes Recientes</h2>
-                  <button
-                    onClick={handleViewMedicalRecords}
-                    className="text-primary hover:text-primary-dark text-sm font-medium"
-                  >
-                    Ver todos
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  {pacientesRecientes.map((paciente, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex-shrink-0">
-                          <div className="w-12 h-12 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center">
-                            {paciente.nombre.split(' ').map(n => n[0]).join('')}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{paciente.nombre}</p>
-                          <p className="text-sm text-gray-500">{paciente.edad} años</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">Última cita: {paciente.ultimaCita}</p>
-                        <p className="text-sm font-medium text-primary">Próxima: {paciente.proximaCita}</p>
+                    <div className="mt-6 bg-white p-4 rounded-lg shadow-sm">
+                      <h4 className="font-semibold text-gray-900 mb-2">Información del Sistema</h4>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <p><strong>Usuario:</strong> {user?.nombre} {user?.apellido}</p>
+                        <p><strong>Email:</strong> {user?.email}</p>
+                        <p><strong>Rol:</strong> {user?.rol}</p>
+                        <p><strong>Estado:</strong> Sesión activa</p>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pacientes.map((paciente) => (
+                      <div key={paciente.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-lg font-semibold text-gray-900">{paciente.nombre} {paciente.apellido}</p>
+                            <p className="text-sm text-gray-600">{paciente.email}</p>
+                          </div>
+                          <p className="text-sm text-gray-700">Tel: {paciente.telefono || 'No disponible'}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <UserOffcanvas show={showOffcanvas} onClose={() => setShowOffcanvas(false)} user={user} />
     </div>
   );
 };

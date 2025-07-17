@@ -17,9 +17,16 @@ export class AuthController {
       loginDto.email,
       loginDto.password,
     );
-    if (!user) {
-      throw new UnauthorizedException('Credenciales inválidas');
+    
+    // Verificar si el resultado contiene un error específico
+    if (user && user.error) {
+      throw new UnauthorizedException(user.message);
     }
+    
+    if (!user) {
+      throw new UnauthorizedException('Credenciales inválidas. Por favor verifica tu correo electrónico y contraseña.');
+    }
+    
     return this.authService.login(user);
   }
 

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
 
 const CreateUserForm = ({ onClose, onUserCreated }) => {
-  const { user } = useAuth();
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',

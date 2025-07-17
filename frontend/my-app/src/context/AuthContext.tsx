@@ -4,6 +4,7 @@ import { User } from '../types/User';
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<any>;
@@ -16,18 +17,27 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const mapRoleToValidRole = (rol: string): 'admin' | 'doctor' | 'paciente' => {
-    switch (rol.toLowerCase()) {
+    if (!rol) return 'paciente';
+    
+    switch (rol.toLowerCase().trim()) {
       case 'admin':
       case 'administrador':
         return 'admin';
       case 'doctor':
+      case 'medico':
+      case 'doctor especialista':
         return 'doctor';
+      case 'paciente':
+      case 'patient':
+        return 'paciente';
       default:
+        console.warn(`Rol desconocido: ${rol}, asignando 'paciente' por defecto`);
         return 'paciente';
     }
   };
@@ -35,8 +45,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (token) {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+          setToken(storedToken);
           const currentUser = await authService.getCurrentUser();
           if (currentUser) {
             const userWithRole: User = {
@@ -46,10 +57,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             };
             setUser(userWithRole);
             setIsAuthenticated(true);
-            console.log('Usuario autenticado:', userWithRole);
+            console.log('Usuario autenticado:', {
+              id: userWithRole.id,
+              email: userWithRole.email,
+              nombre: userWithRole.nombre,
+              rol: userWithRole.rol
+            });
         } else {
           console.log('No hay sesión activa');
           setUser(null);
+          setToken(null);
             setIsAuthenticated(false);
           }
         }
@@ -78,8 +95,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: response.user.id.toString(),
       };
       setUser(userWithRole);
+      setToken(response.access_token);
       setIsAuthenticated(true);
-      return response;
+      
+      console.log('Login exitoso:', {
+        id: userWithRole.id,
+        email: userWithRole.email,
+        nombre: userWithRole.nombre,
+        rol: userWithRole.rol
+      });
+      
+      return { ...response, user: userWithRole };
     } catch (err) {
       console.error('Error en login:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -91,6 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     setError(null);
     setIsAuthenticated(false);
     authService.logout();
@@ -113,6 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = {
     user,
+    token,
     loading,
     error,
     login,

@@ -72,9 +72,19 @@ export const authService = {
       if (error.response) {
         // El servidor respondió con un status fuera del rango 2xx
         if (error.response.status === 401) {
-          throw new Error('Credenciales incorrectas. Por favor verifica tu email y contraseña.');
+          // Usar el mensaje específico del servidor si está disponible
+          const serverMessage = error.response.data?.message;
+          if (serverMessage) {
+            throw new Error(serverMessage);
+          } else {
+            throw new Error('Credenciales incorrectas. Por favor verifica tu email y contraseña.');
+          }
         } else if (error.response.status === 404) {
           throw new Error('Servicio de autenticación no encontrado. Por favor contacta al administrador.');
+        } else if (error.response.status === 400) {
+          // Manejar errores de validación
+          const serverMessage = error.response.data?.message;
+          throw new Error(serverMessage || 'Datos inválidos. Por favor verifica la información ingresada.');
         } else {
           throw new Error(error.response.data?.message || 'Error en el servidor. Por favor intenta más tarde.');
         }

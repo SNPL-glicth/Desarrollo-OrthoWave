@@ -8,41 +8,31 @@ import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import { useAuth } from './context/AuthContext';
 import CreateUserForm from './components/CreateUserForm';
+import UserManagement from './components/UserManagement.tsx';
+import AutoRedirect from './components/AutoRedirect.tsx';
+import DebugInfo from './components/DebugInfo.tsx';
 
-// Dashboards temporales simples
-const AdminDashboard = () => (
-  <div className="min-h-screen bg-gray-100 p-8">
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Panel de Administración</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Gestión de Usuarios</h2>
-        <a
-          href="/usuarios/crear"
-          className="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Crear Nuevo Usuario
-        </a>
-      </div>
-    </div>
-  </div>
-);
-
-const DoctorDashboard = () => (
-  <div className="min-h-screen bg-gray-100 p-8">
-    <h1 className="text-3xl font-bold">Panel del Doctor</h1>
-  </div>
-);
-
-const PatientDashboard = () => (
-  <div className="min-h-screen bg-gray-100 p-8">
-    <h1 className="text-3xl font-bold">Panel del Paciente</h1>
-  </div>
-);
+// Importar dashboards principales
+import AdminDashboard from './components/dashboards/AdminDashboard.tsx';
+import DoctorDashboard from './components/dashboards/DoctorDashboard.tsx';
+import PatientDashboard from './components/dashboards/PatientDashboard.tsx';
 
 function ProtectedRoute({ children, role }) {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" />;
-  if (role && user.role?.toLowerCase() !== role) return <Navigate to="/" />;
+  const { user, isAuthenticated } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" />;
+  if (role && user?.rol?.toLowerCase() !== role) {
+    // Redirigir a su dashboard correspondiente si no tiene permisos para esta ruta
+    switch (user?.rol?.toLowerCase()) {
+      case 'admin':
+        return <Navigate to="/dashboard/admin" />;
+      case 'doctor':
+        return <Navigate to="/dashboard/doctor" />;
+      case 'paciente':
+        return <Navigate to="/dashboard/patient" />;
+      default:
+        return <Navigate to="/" />;
+    }
+  }
   return children;
 }
 
@@ -101,7 +91,16 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               }
             />
-            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route
+              path="/usuarios"
+              element={
+                <ProtectedRoute role="admin">
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/dashboard" element={<AutoRedirect />} />
+            <Route path="/debug" element={<DebugInfo />} />
           </Routes>
         </Router>
       </CartProvider>

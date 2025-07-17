@@ -78,11 +78,24 @@ export class UsersService {
   }
 
   async obtenerTodosLosUsuarios(): Promise<User[]> {
-    return await this.usersRepository.find({
-      relations: ['rol'],
-      order: { fechaCreacion: 'DESC' },
-      select: ['id', 'email', 'nombre', 'apellido', 'telefono', 'direccion', 'isVerified', 'fechaCreacion']
-    });
+    return await this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.rol', 'rol')
+      .where('rol.nombre != :adminRole', { adminRole: 'admin' })
+      .orderBy('user.fechaCreacion', 'DESC')
+      .select([
+        'user.id',
+        'user.email', 
+        'user.nombre', 
+        'user.apellido', 
+        'user.telefono', 
+        'user.direccion', 
+        'user.isVerified', 
+        'user.fechaCreacion',
+        'rol.id',
+        'rol.nombre'
+      ])
+      .getMany();
   }
 
   async obtenerUsuariosPorRol(rolNombre: string): Promise<User[]> {
@@ -146,10 +159,18 @@ export class UsersService {
     return await this.usersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.rol', 'rol')
-      .where('user.nombre LIKE :termino', { termino: `%${termino}%` })
-      .orWhere('user.apellido LIKE :termino', { termino: `%${termino}%` })
-      .orWhere('user.email LIKE :termino', { termino: `%${termino}%` })
-      .select(['user.id', 'user.email', 'user.nombre', 'user.apellido', 'user.telefono', 'user.isVerified'])
+      .where('rol.nombre != :adminRole', { adminRole: 'admin' })
+      .andWhere('(user.nombre LIKE :termino OR user.apellido LIKE :termino OR user.email LIKE :termino)', { termino: `%${termino}%` })
+      .select([
+        'user.id', 
+        'user.email', 
+        'user.nombre', 
+        'user.apellido', 
+        'user.telefono', 
+        'user.isVerified',
+        'rol.id',
+        'rol.nombre'
+      ])
       .getMany();
   }
 

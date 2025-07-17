@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 
-interface Specialist {
-    id: string;
-    name: string;
-    specialty: string;
+interface Doctor {
+    id: number;
+    nombre: string;
+    apellido: string;
+    especialidad: string;
 }
 
 interface AvailableSlot {
-    id: string;
-    startTime: string;
-    endTime: string;
-    specialist: Specialist;
-    date: string;
+    hora: string;
+    doctor: Doctor;
+    fecha: string;
 }
 
 interface Specialty {
@@ -21,47 +20,72 @@ interface Specialty {
     name: string;
 }
 
-export const useAvailableSlots = (selectedDate?: Date, specialtyId?: string) => {
+export const useAvailableSlots = (selectedDate?: Date, doctorId?: number) => {
     const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
     const [specialties, setSpecialties] = useState<Specialty[]>([]);
+    const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Simular datos para desarrollo
+    // Obtener especialidades disponibles
     useEffect(() => {
-        setSpecialties([
-            { id: '1', name: 'Ortodoncia' },
-            { id: '2', name: 'Odontología General' },
-            { id: '3', name: 'Endodoncia' }
-        ]);
+        const fetchSpecialties = async () => {
+            try {
+                const response = await api.get('/dashboard/citas/especialidades');
+                const specialtiesData = response.data.map((especialidad: string, index: number) => ({
+                    id: (index + 1).toString(),
+                    name: especialidad
+                }));
+                setSpecialties(specialtiesData);
+            } catch (err) {
+                console.error('Error al cargar especialidades:', err);
+            }
+        };
+
+        fetchSpecialties();
     }, []);
 
+    // Obtener doctores disponibles
+    useEffect(() => {
+        const fetchDoctors = async () => {
+            try {
+                const response = await api.get('/perfil-medico/doctores-disponibles');
+                setDoctors(response.data);
+            } catch (err) {
+                console.error('Error al cargar doctores:', err);
+            }
+        };
+
+        fetchDoctors();
+    }, []);
+
+    // Obtener horarios disponibles
     useEffect(() => {
         const fetchAvailableSlots = async () => {
-            if (!selectedDate) return;
+            if (!selectedDate || !doctorId) return;
 
             setLoading(true);
             try {
-                // Simular llamada a la API
-                const simulatedSlots = [
-                    {
-                        id: '1',
-                        startTime: `${format(selectedDate, 'yyyy-MM-dd')}T09:00:00`,
-                        endTime: `${format(selectedDate, 'yyyy-MM-dd')}T10:00:00`,
-                        date: format(selectedDate, 'yyyy-MM-dd'),
-                        specialist: {
-                            id: '1',
-                            name: 'Dr. García',
-                            specialty: 'Ortodoncia'
-                        }
-                    },
-                    // Añadir más slots simulados aquí
-                ];
+                const fecha = format(selectedDate, 'yyyy-MM-dd');
+                const response = await api.get('/citas/disponibilidad', {
+                    params: {
+                        doctorId,
+                        fecha,
+                        duracion: 60
+                    }
+                });
                 
-                setAvailableSlots(simulatedSlots);
+                const doctor = doctors.find(d => d.id === doctorId);
+                const horariosDisponibles = response.data.map((hora: string) => ({
+                    hora,
+                    doctor: doctor || { id: doctorId, nombre: 'Doctor', apellido: 'Desconocido', especialidad: 'General' },
+                    fecha
+                }));
+                
+                setAvailableSlots(horariosDisponibles);
                 setError(null);
-            } catch (err) {
-                setError('Error al cargar horarios disponibles');
+            } catch (err: any) {
+                setError(err.response?.data?.message || 'Error al cargar horarios disponibles');
                 setAvailableSlots([]);
             } finally {
                 setLoading(false);
@@ -69,12 +93,13 @@ export const useAvailableSlots = (selectedDate?: Date, specialtyId?: string) => 
         };
 
         fetchAvailableSlots();
-    }, [selectedDate, specialtyId]);
+    }, [selectedDate, doctorId, doctors]);
 
     return {
         availableSlots,
         specialties,
+        doctors,
         loading,
         error
     };
-}; 
+};

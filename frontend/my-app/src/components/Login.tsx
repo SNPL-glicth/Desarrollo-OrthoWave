@@ -13,8 +13,10 @@ export const Login: React.FC = () => {
     try {
       const response = await authService.login(email, password);
       navigate(response.redirect);
-    } catch (err) {
-      setError('Credenciales inválidas');
+    } catch (err: any) {
+      console.error('Error en login:', err);
+      const errorMessage = err.message || 'Credenciales inválidas. Por favor verifica tu correo electrónico y contraseña.';
+      setError(errorMessage);
     }
   };
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 export const useAppointments = () => {
     const [appointments, setAppointments] = useState([]);
@@ -8,7 +8,7 @@ export const useAppointments = () => {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('/api/appointments');
+            const response = await api.get('/citas/mis-citas');
             setAppointments(response.data);
         } catch (err) {
             setError(err);
@@ -18,13 +18,13 @@ export const useAppointments = () => {
     };
 
     const createAppointment = async (data) => {
-        const response = await axios.post('/api/appointments', data);
+        const response = await api.post('/citas', data);
         setAppointments([...appointments, response.data]);
         return response.data;
     };
 
     const updateAppointment = async (id, data) => {
-        const response = await axios.put(`/api/appointments/${id}`, data);
+        const response = await api.patch(`/citas/${id}/estado`, data);
         setAppointments(appointments.map(apt => 
             apt.id === id ? response.data : apt
         ));
@@ -32,9 +32,9 @@ export const useAppointments = () => {
     };
 
     const rescheduleAppointment = async (id, newDateTime) => {
-        const response = await axios.post(
-            `/api/appointments/state/${id}/reschedule`,
-            { newDateTime }
+        const response = await api.patch(
+            `/citas/${id}/estado`,
+            { fechaHora: newDateTime }
         );
         setAppointments(appointments.map(apt => 
             apt.id === id ? response.data : apt
@@ -55,4 +55,4 @@ export const useAppointments = () => {
         rescheduleAppointment,
         refreshAppointments: fetchAppointments
     };
-}; 
+};

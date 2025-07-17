@@ -62,7 +62,14 @@ const LoginPage = () => {
       // Guardar el error para referencia futura
       localStorage.setItem('auth_error', 'true');
       
-      setError(error.message || 'Error al iniciar sesión. Por favor, intenta de nuevo.');
+      // Mostrar mensaje de error específico o uno genérico
+      let errorMessage = 'Error al iniciar sesión. Por favor, intenta de nuevo.';
+      
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -70,12 +77,14 @@ const LoginPage = () => {
 
   const getRedirectPathByRole = (rol) => {
     const rolePaths = {
-      'administrador': '/dashboard/admin',
+      'admin': '/dashboard/admin',
+      'administrador': '/dashboard/admin', // Mantener compatibilidad
       'doctor': '/dashboard/doctor',
       'paciente': '/dashboard/patient'
     };
-    return rolePaths[rol.toLowerCase()] || '/login';
+    return rolePaths[rol.toLowerCase()] || '/dashboard';
   };
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
@@ -107,13 +116,13 @@ const LoginPage = () => {
               Credenciales de prueba:
             </p>
             <p className="text-gray-600">
-              <strong>Administrador:</strong> admin@ortowhite.com / admin123
+              <strong>Administrador:</strong> admin@ortowhave.com / admin123
             </p>
             <p className="text-gray-600">
-              <strong>Doctor:</strong> doctor@ortowhite.com / doctor123
+              <strong>Doctor:</strong> doctor@ortowhave.com / doctor123
             </p>
             <p className="text-gray-600 mb-4">
-              <strong>Paciente:</strong> paciente@ortowhite.com / paciente123
+              <strong>Paciente:</strong> paciente@ortowhave.com / paciente123
             </p>
           </div>
           <p className="mt-2 text-center text-sm text-gray-600">

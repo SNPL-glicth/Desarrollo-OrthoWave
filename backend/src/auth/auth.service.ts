@@ -22,6 +22,7 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     this.logger.log(`Intentando validar usuario: ${email}`);
+    this.logger.log(`DEBUG: Función validateUser actualizada - SIN BLOQUEO DE ADMIN`);
 
     try {
       const user = await this.usersRepository.findOne({
@@ -31,12 +32,13 @@ export class AuthService {
 
       if (!user) {
         this.logger.warn(`Usuario no encontrado: ${email}`);
-        return null;
+        // Devolver un objeto con información del error específico
+        return { error: 'USER_NOT_FOUND', message: 'No existe una cuenta registrada con este correo electrónico.' };
       }
 
       if (!user.isVerified) {
         this.logger.warn(`Intento de login con cuenta no verificada: ${email}`);
-        throw new UnauthorizedException('La cuenta no ha sido verificada. Por favor revisa tu correo.');
+        throw new UnauthorizedException('La cuenta no ha sido verificada. Por favor revisa tu correo electrónico y completa el proceso de verificación.');
       }
 
       // Usar bcrypt para comparar contraseñas
@@ -48,8 +50,9 @@ export class AuthService {
         return result;
       } else {
         this.logger.warn(`Contraseña incorrecta para usuario: ${email}`);
+        // Devolver un objeto con información del error específico
+        return { error: 'INVALID_PASSWORD', message: 'La contraseña ingresada es incorrecta. Por favor verifica e intenta nuevamente.' };
       }
-      return null;
     } catch (error) {
       this.logger.error(`Error en validateUser para ${email}:`, error.message);
       throw error;
