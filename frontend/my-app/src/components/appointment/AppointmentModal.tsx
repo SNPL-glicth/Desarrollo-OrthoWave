@@ -119,14 +119,33 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
       const nuevaCita = await citasService.crearCita(citaData);
       
+      // Mostrar feedback de éxito antes de cerrar
+      const fechaFormateada = new Date(nuevaCita.fechaHora).toLocaleDateString('es-ES', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      const horaFormateada = new Date(nuevaCita.fechaHora).toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
       if (onSuccess) {
-        onSuccess(nuevaCita);
+        onSuccess({
+          ...nuevaCita,
+          successMessage: `Cita agendada exitosamente para el ${fechaFormateada} a las ${horaFormateada}`
+        });
       }
       
-      onClose();
+      // Cerrar el modal después de un pequeño delay para mostrar el feedback
+      setTimeout(() => {
+        onClose();
+      }, 100);
     } catch (err: any) {
       console.error('Error al crear cita:', err);
-      setError(err.response?.data?.message || 'Error al agendar la cita');
+      setError(err.message || 'Error al agendar la cita');
     } finally {
       setLoading(false);
     }

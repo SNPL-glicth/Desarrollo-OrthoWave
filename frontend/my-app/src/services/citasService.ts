@@ -66,12 +66,93 @@ export interface AgendaDoctorResponse {
   horariosDisponibles: string[];
 }
 
-// Servicio de citas médicas
-export const citasService = {
-  // Crear una nueva cita
+// Callbacks para notificaciones en tiempo real
+type CitaCallback = (cita: Cita) => void;
+type CitasCallback = (citas: Cita[]) => void;
+
+class CitasServiceClass {
+  private callbacks: {
+    onCitaCreated: CitaCallback[];
+    onCitaUpdated: CitaCallback[];
+    onCitasChanged: CitasCallback[];
+  } = {
+    onCitaCreated: [],
+    onCitaUpdated: [],
+    onCitasChanged: []
+  };
+
+  // Suscribirse a eventos
+  onCitaCreated(callback: CitaCallback) {
+    this.callbacks.onCitaCreated.push(callback);
+    return () => {
+      this.callbacks.onCitaCreated = this.callbacks.onCitaCreated.filter(cb => cb !== callback);
+    };
+  }
+
+  onCitaUpdated(callback: CitaCallback) {
+    this.callbacks.onCitaUpdated.push(callback);
+    return () => {
+      this.callbacks.onCitaUpdated = this.callbacks.onCitaUpdated.filter(cb => cb !== callback);
+    };
+  }
+
+  onCitasChanged(callback: CitasCallback) {
+    this.callbacks.onCitasChanged.push(callback);
+    return () => {
+      this.callbacks.onCitasChanged = this.callbacks.onCitasChanged.filter(cb => cb !== callback);
+    };
+  }
+
+  // Notificar cambios
+  private notifyCreated(cita: Cita) {
+    this.callbacks.onCitaCreated.forEach(callback => callback(cita));
+  }
+
+  private notifyUpdated(cita: Cita) {
+    this.callbacks.onCitaUpdated.forEach(callback => callback(cita));
+  }
+
+  private notifyChanged(citas: Cita[]) {
+    this.callbacks.onCitasChanged.forEach(callback => callback(citas));
+  }
+
+  // Crear una nueva cita con persistencia mejorada
   async crearCita(citaData: CrearCitaDto): Promise<Cita> {
-    const response = await api.post('/citas', citaData);
-    return response.data;
+    try {
+      // Validar datos antes de enviar
+      if (!citaData.pacienteId || !citaData.doctorId || !citaData.fechaHora) {
+        throw new Error('Datos incompletos para crear la cita');
+      }
+
+      // Verificar disponibilidad antes de crear
+      const disponibilidad = await this.buscarDisponibilidad({
+        doctorId: citaData.doctorId,
+        fecha: citaData.fechaHora.split('T')[0],
+        duracion: citaData.duracion || 60
+      });
+
+      const horaSeleccionada = citaData.fechaHora.split('T')[1].substring(0, 5);
+      if (!disponibilidad.includes(horaSeleccionada)) {
+        throw new Error('El horario seleccionado ya no está disponible');
+      }
+
+      // Crear la cita
+      const response = await api.post('/citas', {
+        ...citaData,
+        estado: 'pendiente',
+        fechaCreacion: new Date().toISOString()
+      });
+
+      const nuevaCita = response.data;
+      
+      // Notificar creación
+      this.notifyCreated(nuevaCita);
+      
+      return nuevaCita;
+    } catch (error: any) {
+      console.error('Error al crear cita:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Error al crear la cita');
+    }
   },
 
   // Obtener citas por paciente
@@ -98,10 +179,45 @@ export const citasService = {
     return response.data;
   },
 
-  // Actualizar estado de cita
+  // Actualizar estado de cita con notificaciones
   async actualizarEstadoCita(id: number, estadoData: ActualizarEstadoCitaDto): Promise<Cita> {
-    const response = await api.patch(`/citas/${id}/estado`, estadoData);
-    return response.data;
+    try {
+      const response = await api.patch(`/citas/${id}/estado`, {
+        ...estadoData,
+        fechaActualizacion: new Date().toISOString()
+      });
+      
+      const citaActualizada = response.data;
+      
+      // Notificar actualización
+      this.notifyUpdated(citaActualizada);
+      
+      return citaActualizada;
+    } catch (error: any) {
+      console.error('Error al actualizar cita:', error);
+      throw new Error(error.response?.data?.message || 'Error al actualizar la cita');
+    }
+  },
+
+  // Método optimizado para recargar citas con polling
+  async recargarCitas(userId: number, userRole: string): Promise<Cita[]> {
+    try {
+      let citas: Cita[] = [];
+      
+      if (userRole === 'paciente') {
+        citas = await this.obtenerCitasPorPaciente(userId);
+      } else if (userRole === 'doctor') {
+        citas = await this.obtenerCitasPorDoctor(userId);
+      }
+      
+      // Notificar cambios
+      this.notifyChanged(citas);
+      
+      return citas;
+    } catch (error: any) {
+      console.error('Error al recargar citas:', error);
+      throw new Error(error.response?.data?.message || 'Error al cargar las citas');
+    }
   },
 
   // Eliminar cita
@@ -178,6 +294,9 @@ export const citasService = {
       minute: '2-digit'
     });
   }
-};
+}
+
+// Instancia del servicio
+export const citasService = new CitasServiceClass();
 
 export default citasService;

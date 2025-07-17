@@ -1,38 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { citasService, Cita } from '../../services/citasService.ts';
 import { useAuth } from '../../context/AuthContext';
+import usePollingCitas from '../../hooks/usePollingCitas.ts';
 
 const PendingAppointments: React.FC = () => {
   const { user } = useAuth();
-  const [citasPendientes, setCitasPendientes] = useState<Cita[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [processingCita, setProcessingCita] = useState<number | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
-  useEffect(() => {
-    if (user?.id) {
-      cargarCitasPendientes();
-    }
-  }, [user]);
+  // Usar el hook de polling para obtener citas automáticamente
+  const { citas, loading, error, lastUpdate, refresh } = usePollingCitas({
+    interval: 15000, // 15 segundos para citas pendientes
+    enabled: user?.rol === 'doctor',
+    onError: (err) => console.error('Error en polling:', err)
+  });
 
-  const cargarCitasPendientes = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Obtener citas del doctor con estado pendiente
-      const todasLasCitas = await citasService.obtenerCitasPorDoctor(user!.id);
-      const pendientes = todasLasCitas.filter(cita => 
-        cita.estado === 'pendiente' || cita.estado === 'confirmada'
-      );
-      
-      setCitasPendientes(pendientes);
-    } catch (err: any) {
-      console.error('Error al cargar citas pendientes:', err);
-      setError(err.response?.data?.message || 'Error al cargar las citas pendientes');
-    } finally {
-      setLoading(false);
-    }
+  // Filtrar solo citas pendientes y confirmadas
+  const citasPendientes = useMemo(() => {
+    return citas.filter(cita => 
+      cita.estado === 'pendiente' || cita.estado === 'confirmada'
+    );
+  }, [citas]);
+
+  // Ocultar feedback después de 3 segundos
+  const showFeedback = (type: 'success' | 'error', message: string) => {
+    setActionFeedback({ type, message });
+    setTimeout(() => setActionFeedback(null), 3000);
   };
 
   const actualizarEstadoCita = async (citaId: number, nuevoEstado: string, razon?: string) => {
@@ -44,11 +40,15 @@ const PendingAppointments: React.FC = () => {
         razonRechazo: razon
       });
       
-      // Recargar la lista
-      await cargarCitasPendientes();
+      // Mostrar feedback inmediato
+      const accionTexto = nuevoEstado === 'confirmada' ? 'confirmada' : 'cancelada';
+      showFeedback('success', `Cita ${accionTexto} exitosamente`);
+      
+      // El hook de polling se encargará de actualizar automáticamente
+      refresh();
     } catch (err: any) {
       console.error('Error al actualizar cita:', err);
-      setError(err.response?.data?.message || 'Error al actualizar la cita');
+      showFeedback('error', err.message || 'Error al actualizar la cita');
     } finally {
       setProcessingCita(null);
     }
@@ -120,7 +120,7 @@ const PendingAppointments: React.FC = () => {
           </div>
           <p className="text-red-700">{error}</p>
           <button
-            onClick={cargarCitasPendientes}
+            onClick={refresh}
             className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Reintentar
@@ -134,14 +134,22 @@ const PendingAppointments: React.FC = () => {
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-900">Citas Pendientes</h2>
-        <button
-          onClick={cargarCitasPendientes}
-          className="text-blue-600 hover:text-blue-800"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </button>
+        <div className="flex items-center space-x-2">
+          {lastUpdate && (
+            <span className="text-xs text-gray-500">
+              Última actualización: {lastUpdate.toLocaleTimeString()}
+            </span>
+          )}
+          <button
+            onClick={refresh}
+            className="text-blue-600 hover:text-blue-800"
+            title="Actualizar citas"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {citasPendientes.length === 0 ? (
@@ -256,6 +264,24 @@ const PendingAppointments: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+      
+      {/* Feedback de acciones */}
+      {actionFeedback && (
+        <div className={`fixed top-4 right-4 p-3 rounded-lg shadow-lg z-50 ${
+          actionFeedback.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white`}>
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {actionFeedback.type === 'success' ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              )}
+            </svg>
+            {actionFeedback.message}
+          </div>
         </div>
       )}
     </div>

@@ -6,10 +6,14 @@ Sistema completo de gestión para clínicas de ortopedia y traumatología, desar
 
 - **Sistema de Autenticación Completo**: Login, registro, verificación de email y recuperación de contraseñas
 - **Gestión de Roles**: Administrador, Doctor y Paciente con permisos específicos
-- **Sistema de Citas**: Agendamiento, gestión y seguimiento de citas médicas
+- **Sistema de Citas Avanzado**: Agendamiento inteligente con validación de disponibilidad
+- **Actualización en Tiempo Real**: Sistema de polling automático para dashboards
+- **Feedback Instantáneo**: Notificaciones inmediatas de acciones exitosas o errores
 - **Historia Clínica Digital**: Registro completo de consultas y tratamientos
 - **Gestión de Usuarios**: Panel administrativo para crear y gestionar usuarios
 - **Notificaciones por Email**: Sistema completo de notificaciones configurado con Gmail
+- **Persistencia de Datos**: Sistema robusto de validación y persistencia de citas
+- **Interfaz Responsiva**: Diseño optimizado para dispositivos móviles y desktop
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -29,6 +33,9 @@ Sistema completo de gestión para clínicas de ortopedia y traumatología, desar
 - **React Router**: Navegación entre páginas
 - **Axios**: Cliente HTTP para comunicación con el backend
 - **React Bootstrap**: Componentes de interfaz
+- **Hooks Personalizados**: Sistema de polling automático y gestión de estado
+- **Context API**: Gestión global de estado de autenticación
+- **Componentes Modulares**: Arquitectura escalable y reutilizable
 
 ## 📋 Requisitos Previos
 
@@ -134,6 +141,30 @@ npm start
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:4000
 
+## 💡 Nuevas Características Implementadas
+
+### 🔄 Sistema de Actualización Automática
+- **Polling Inteligente**: Actualización automática de dashboards cada 15-30 segundos
+- **Notificaciones en Tiempo Real**: Sistema de callbacks para cambios inmediatos
+- **Optimización de Rendimiento**: Polling pausable y configurable
+
+### 📋 Módulo de Citas Mejorado
+- **Validación de Disponibilidad**: Verificación en tiempo real antes de agendar
+- **Feedback Instantáneo**: Mensajes de éxito/error inmediatos
+- **Persistencia Robusta**: Validación de datos antes de envío al backend
+- **Estados de Cita**: Pendiente → Confirmada → En Curso → Completada
+
+### 🎨 Interfaz de Usuario Optimizada
+- **Componentes Reactivos**: Botones con estados de carga y feedback visual
+- **Modales Inteligentes**: Cierre automático con confirmación
+- **Dashboards Dinámicos**: Actualización automática sin recarga manual
+- **Indicadores de Estado**: Timestamps de última actualización
+
+### 🛠️ Hooks Personalizados
+- **usePollingCitas**: Polling automático para citas con configuración flexible
+- **Gestión de Estado**: Manejo optimizado de loading, error y datos
+- **Suscripción a Eventos**: Sistema de callbacks para cambios en tiempo real
+
 ## 👥 Usuarios del Sistema
 
 ### Roles Disponibles:
@@ -175,7 +206,7 @@ Desarrollo-Orto-Whave/
 │   ├── src/                # Código fuente
 │   │   ├── auth/          # Módulo de autenticación
 │   │   ├── users/         # Gestión de usuarios
-│   │   ├── citas/         # Sistema de citas
+│   │   ├── citas/         # Sistema de citas avanzado
 │   │   ├── pacientes/     # Gestión de pacientes
 │   │   ├── historia-clinica/ # Historia clínica
 │   │   └── mail/          # Servicio de email
@@ -184,6 +215,17 @@ Desarrollo-Orto-Whave/
 ├── frontend/               # Aplicación React
 │   └── my-app/            # Código del frontend
 │       ├── src/           # Código fuente React
+│       │   ├── components/ # Componentes reutilizables
+│       │   │   ├── dashboards/    # PatientDashboard, DoctorDashboard
+│       │   │   ├── appointment/   # AppointmentModal, PendingAppointments
+│       │   │   └── patient/       # Componentes de paciente
+│       │   ├── hooks/     # Hooks personalizados
+│       │   │   ├── usePollingCitas.ts # Polling automático
+│       │   │   └── usePatientAppointments.ts # Gestión de citas
+│       │   ├── services/  # Servicios de API
+│       │   │   ├── citasService.ts # Servicio de citas mejorado
+│       │   │   └── api.js # Cliente HTTP
+│       │   └── context/   # Context providers
 │       └── package.json   # Dependencias del frontend
 ├── install.sh             # Instalador para Linux/macOS
 ├── install.bat            # Instalador para Windows
@@ -217,10 +259,14 @@ Desarrollo-Orto-Whave/
 - `DELETE /users/admin/:id` - Eliminar usuario
 
 ### Citas
-- `POST /citas` - Crear nueva cita
+- `POST /citas` - Crear nueva cita con validación avanzada
 - `GET /citas/mis-citas` - Obtener mis citas
-- `PATCH /citas/:id/estado` - Actualizar estado de cita
-- `GET /citas/disponibilidad` - Consultar disponibilidad
+- `GET /citas/paciente/:id` - Obtener citas por paciente
+- `GET /citas/doctor/:id` - Obtener citas por doctor
+- `PATCH /citas/:id/estado` - Actualizar estado de cita con notificaciones
+- `GET /citas/disponibilidad` - Consultar disponibilidad en tiempo real
+- `GET /citas/doctor/:id/agenda/:fecha` - Obtener agenda específica del doctor
+- `DELETE /citas/:id` - Eliminar cita (solo admin)
 
 ### Pacientes
 - `GET /pacientes/mi-perfil` - Obtener perfil del paciente
@@ -249,6 +295,21 @@ Desarrollo-Orto-Whave/
 2. Comprobar que las credenciales de Gmail sean correctas
 3. Verificar que la "verificación en 2 pasos" esté habilitada en Gmail
 
+### Error: "Citas no se actualizan automáticamente"
+1. Verificar que el polling esté habilitado en usePollingCitas
+2. Comprobar conexión a internet estable
+3. Revisar logs de la consola del navegador
+
+### Error: "Modal no se cierra después de agendar cita"
+1. Verificar que el callback onSuccess esté configurado correctamente
+2. Comprobar que no haya errores en el proceso de persistencia
+3. Revisar logs del servicio de citas
+
+### Error de Compilación de TypeScript
+1. Verificar que todos los imports tengan las extensiones correctas (.ts, .tsx)
+2. Ejecutar `npm run build` para verificar errores de tipo
+3. Limpiar caché con `npm run clean` si existe
+
 ## 📞 Soporte
 
 Para reportar problemas o solicitar ayuda:
@@ -269,8 +330,53 @@ Este proyecto está bajo la Licencia ISC. Ver el archivo LICENSE para más detal
 4. Push a la rama (`git push origin feature/nueva-feature`)
 5. Crear un Pull Request
 
+## 🧪 Funcionalidades Destacadas
+
+### 📱 Dashboard del Paciente
+- **Visualización de Doctores**: Lista completa con especialidades y disponibilidad
+- **Botón Agendar Cita**: Funcional con validación de disponibilidad
+- **Modal de Agendamiento**: Formulario completo con selección de fecha/hora
+- **Feedback Visual**: Mensajes de éxito y error en tiempo real
+- **Estados de Botón**: Deshabilitado para doctores no disponibles
+
+### 🩺 Dashboard del Doctor
+- **Citas Pendientes**: Listado automático con información del paciente
+- **Acciones Rápidas**: Botones para confirmar/cancelar citas
+- **Actualización Automática**: Polling cada 15 segundos
+- **Información Completa**: Motivo, notas del paciente, costo y duración
+- **Estados de Cita**: Gestión completa del flujo de estados
+
+### 🔄 Sistema de Tiempo Real
+- **Polling Inteligente**: Actualización automática sin intervención manual
+- **Notificaciones Push**: Callbacks para cambios inmediatos
+- **Optimización de Rendimiento**: Polling pausable según contexto
+- **Timestamps**: Indicadores de última actualización
+
+### 🛡️ Validación y Persistencia
+- **Validación Previa**: Verificación de disponibilidad antes de agendar
+- **Persistencia Robusta**: Manejo de errores y reintento automático
+- **Feedback Inmediato**: Confirmación visual de acciones exitosas
+- **Estados de Carga**: Indicadores durante procesamiento
+
 ---
 
-**¡Sistema Orto-Whave listo para usar! 🚀**
+**¡Sistema Orto-Whave con Funcionalidades Avanzadas! 🚀**
 
-Para iniciar rápidamente: `./install.sh && ./start.sh` (Linux/macOS) o `install.bat && start.bat` (Windows)
+### 🚀 Inicio Rápido
+```bash
+# Linux/macOS
+./install.sh && ./start.sh
+
+# Windows
+install.bat && start.bat
+```
+
+### 📊 Últimas Actualizaciones
+- ✅ Sistema de agendamiento optimizado con validación en tiempo real
+- ✅ Polling automático para dashboards con configuración flexible
+- ✅ Feedback instantáneo para todas las acciones del usuario
+- ✅ Componentes mejorados con estados de carga y error
+- ✅ Persistencia robusta con manejo avanzado de errores
+- ✅ Hooks personalizados para gestión de estado optimizada
+
+**¡Listo para producción con todas las funcionalidades implementadas! 🎉**
