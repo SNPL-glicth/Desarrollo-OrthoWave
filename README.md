@@ -227,12 +227,26 @@ Desarrollo-Orto-Whave/
 │       │   │   └── api.js # Cliente HTTP
 │       │   └── context/   # Context providers
 │       └── package.json   # Dependencias del frontend
-├── install.sh             # Instalador para Linux/macOS
-├── install.bat            # Instalador para Windows
-├── start.sh               # Iniciador para Linux/macOS
-├── start.bat              # Iniciador para Windows
-└── README.md              # Este archivo
+├── 📄 Archivos de Instalación
+├── install.sh             # Instalador automático (Linux/macOS)
+├── install.bat            # Instalador automático (Windows)
+├── 🚀 Archivos de Inicio
+├── start.sh               # Iniciador completo (Linux/macOS)
+├── start.bat              # Iniciador completo (Windows)
+├── start-backend.sh       # Solo backend (Linux/macOS)
+├── start-backend.bat      # Solo backend (Windows)
+├── start-frontend.sh      # Solo frontend (Linux/macOS)
+├── start-frontend.bat     # Solo frontend (Windows)
+├── 📚 Documentación
+├── README.md              # Documentación principal
+├── CHANGELOG.md           # Registro de cambios
+├── STRUCTURE.md           # Estructura del proyecto
+└── ⚙️ Configuración Git
+    ├── .gitignore         # Archivos ignorados
+    └── .gitattributes     # Configuración de archivos
 ```
+
+> **Nota**: La estructura ha sido limpiada eliminando scripts de desarrollo temporales y manteniendo solo archivos con funciones específicas.
 
 ## 🔒 Seguridad
 
@@ -370,6 +384,16 @@ Este proyecto está bajo la Licencia ISC. Ver el archivo LICENSE para más detal
 # Windows
 install.bat && start.bat
 ```
+
+### 📁 Estructura Limpia
+El proyecto ha sido organizado con archivos específicos para cada función:
+- **Instalación**: `install.sh` / `install.bat`
+- **Inicio completo**: `start.sh` / `start.bat`
+- **Backend solo**: `start-backend.sh` / `start-backend.bat`
+- **Frontend solo**: `start-frontend.sh` / `start-frontend.bat`
+- **Documentación**: `README.md`, `CHANGELOG.md`, `STRUCTURE.md`
+
+> Ver `STRUCTURE.md` para detalles completos de cada archivo.
 
 ### 📊 Últimas Actualizaciones
 - ✅ Sistema de agendamiento optimizado con validación en tiempo real
