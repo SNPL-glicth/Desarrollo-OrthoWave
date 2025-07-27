@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import UserOffcanvas from './UserOffcanvas.tsx';
-import { useAdminDashboard } from '../../hooks/useAdminDashboard.ts';
+import UserOffcanvas from './UserOffcanvas';
+import { useAdminDashboard } from '../../hooks/useAdminDashboard';
+import CreateUserForm from '../CreateUserForm';
 import api from '../../services/api';
 
 interface User {
@@ -20,15 +21,7 @@ interface User {
   };
 }
 
-interface NewUser {
-  nombre: string;
-  apellido: string;
-  email: string;
-  password: string;
-  telefono?: string;
-  direccion?: string;
-  rolId: number;
-}
+// Interfaz NewUser ya no es necesaria, se maneja en CreateUserForm
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -38,21 +31,12 @@ const AdminDashboard: React.FC = () => {
   // Usar el hook de administración en tiempo real
   const { estadisticas, usuarios, loading, error, forceRefresh } = useAdminDashboard();
   
+  // Estados para gestión de usuarios
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newUser, setNewUser] = useState<NewUser>({
-    nombre: '',
-    apellido: '',
-    email: '',
-    password: '',
-    telefono: '',
-    direccion: '',
-    rolId: 3 // Paciente por defecto
-  });
-  const [creatingUser, setCreatingUser] = useState(false);
 
   // Mostrar errores si los hay
   useEffect(() => {
@@ -92,52 +76,12 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newUser.nombre || !newUser.apellido || !newUser.email || !newUser.password) {
-      alert('Por favor completa todos los campos obligatorios');
-      return;
-    }
-
-    try {
-      setCreatingUser(true);
-      
-      // Crear usuario usando el endpoint del administrador que lo marca como verificado
-      await api.post('/users/admin/crear-usuario', {
-        ...newUser,
-        isVerified: true // Los usuarios creados por admin están verificados automáticamente
-      });
-
-      // Actualizar datos usando el hook
-      await forceRefresh();
-      
-      // Limpiar formulario y cerrar modal
-      setNewUser({
-        nombre: '',
-        apellido: '',
-        email: '',
-        password: '',
-        telefono: '',
-        direccion: '',
-        rolId: 3
-      });
-      setShowCreateModal(false);
-      
-      alert('Usuario creado exitosamente. El usuario puede iniciar sesión inmediatamente.');
-    } catch (error: any) {
-      console.error('Error al crear usuario:', error);
-      alert(error.response?.data?.message || 'Error al crear usuario');
-    } finally {
-      setCreatingUser(false);
-    }
+  const handleUserCreated = (userData: any) => {
+    console.log('Usuario creado exitosamente:', userData);
+    // Actualizar datos usando el hook
+    forceRefresh();
   };
 
-  const handleInputChange = (field: keyof NewUser, value: string | number) => {
-    setNewUser(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
 
   // Filtrar usuarios activos y aplicar filtros de búsqueda
   const filteredUsers = usuarios.filter(user => {
@@ -286,6 +230,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           </div>
+
 
           {/* Panel de Usuarios */}
           <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
@@ -490,193 +435,12 @@ const AdminDashboard: React.FC = () => {
       
       {/* Modal para crear usuario */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Crear Nuevo Usuario</h3>
-                <button
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setNewUser({
-                      nombre: '',
-                      apellido: '',
-                      email: '',
-                      password: '',
-                      telefono: '',
-                      direccion: '',
-                      rolId: 3
-                    });
-                  }}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <form onSubmit={handleCreateUser} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nombre *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={newUser.nombre}
-                      onChange={(e) => handleInputChange('nombre', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Nombre del usuario"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Apellido *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={newUser.apellido}
-                      onChange={(e) => handleInputChange('apellido', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Apellido del usuario"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={newUser.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="correo@ejemplo.com"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contraseña *
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={newUser.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Contraseña para el usuario"
-                    minLength={6}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Rol *
-                  </label>
-                  <select
-                    required
-                    value={newUser.rolId}
-                    onChange={(e) => handleInputChange('rolId', parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value={3}>Paciente</option>
-                    <option value={2}>Doctor</option>
-                  </select>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Teléfono
-                    </label>
-                    <input
-                      type="tel"
-                      value={newUser.telefono || ''}
-                      onChange={(e) => handleInputChange('telefono', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Número de teléfono"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dirección
-                    </label>
-                    <input
-                      type="text"
-                      value={newUser.direccion || ''}
-                      onChange={(e) => handleInputChange('direccion', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Dirección del usuario"
-                    />
-                  </div>
-                </div>
-                
-                <div className="bg-blue-50 p-4 rounded-md">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-blue-700">
-                        El usuario será creado con la cuenta verificada automáticamente y podrá iniciar sesión inmediatamente con las credenciales proporcionadas.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-end space-x-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowCreateModal(false);
-                      setNewUser({
-                        nombre: '',
-                        apellido: '',
-                        email: '',
-                        password: '',
-                        telefono: '',
-                        direccion: '',
-                        rolId: 3
-                      });
-                    }}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                    disabled={creatingUser}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={creatingUser}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {creatingUser ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Creando...
-                      </>
-                    ) : (
-                      'Crear Usuario'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+        <CreateUserForm
+          onClose={() => setShowCreateModal(false)}
+          onUserCreated={handleUserCreated}
+        />
       )}
+      
     </div>
   );
 };

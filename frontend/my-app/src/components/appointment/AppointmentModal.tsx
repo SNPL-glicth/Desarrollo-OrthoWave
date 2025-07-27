@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { citasService, CrearCitaDto } from '../../services/citasService.ts';
+import React, { useState, useEffect, useCallback } from 'react';
+import { citasService, CrearCitaDto } from '../../services/citasService';
 import { useAuth } from '../../context/AuthContext';
 
 interface Doctor {
@@ -39,6 +39,23 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   const [horariosDisponibles, setHorariosDisponibles] = useState<string[]>([]);
   const [loadingHorarios, setLoadingHorarios] = useState(false);
 
+  const buscarHorariosDisponibles = useCallback(async () => {
+    try {
+      setLoadingHorarios(true);
+      const horarios = await citasService.buscarDisponibilidad({
+        doctorId: doctor.id,
+        fecha: formData.fecha,
+        duracion: doctor.duracionConsultaDefault || 60
+      });
+      setHorariosDisponibles(horarios);
+    } catch (err: any) {
+      console.error('Error al buscar horarios:', err);
+      setHorariosDisponibles([]);
+    } finally {
+      setLoadingHorarios(false);
+    }
+  }, [doctor.id, formData.fecha, doctor.duracionConsultaDefault]);
+
   // Resetear formulario cuando se abre el modal
   useEffect(() => {
     if (isOpen) {
@@ -59,24 +76,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     if (formData.fecha && doctor.id) {
       buscarHorariosDisponibles();
     }
-  }, [formData.fecha, doctor.id]);
-
-  const buscarHorariosDisponibles = async () => {
-    try {
-      setLoadingHorarios(true);
-      const horarios = await citasService.buscarDisponibilidad({
-        doctorId: doctor.id,
-        fecha: formData.fecha,
-        duracion: doctor.duracionConsultaDefault || 60
-      });
-      setHorariosDisponibles(horarios);
-    } catch (err: any) {
-      console.error('Error al buscar horarios:', err);
-      setHorariosDisponibles([]);
-    } finally {
-      setLoadingHorarios(false);
-    }
-  };
+  }, [formData.fecha, doctor.id, buscarHorariosDisponibles]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -107,12 +107,12 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
       const fechaHora = `${formData.fecha}T${formData.hora}:00`;
 
       const citaData: CrearCitaDto = {
-        pacienteId: user.id,
+        pacienteId: typeof user.id === 'string' ? parseInt(user.id) : user.id,
         doctorId: doctor.id,
         fechaHora,
         duracion: doctor.duracionConsultaDefault || 60,
         tipoConsulta: formData.tipoConsulta,
-        motivoConsulta: formData.motivoConsulta || undefined,
+        motivoConsulta: formData.motivoConsulta || '',
         notasPaciente: formData.notasPaciente || undefined,
         costo: doctor.tarifaConsulta
       };

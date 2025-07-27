@@ -12,7 +12,7 @@ export const Login: React.FC = () => {
     e.preventDefault();
     try {
       const response = await authService.login(email, password);
-      navigate(response.redirect);
+      navigate('/dashboard');
     } catch (err: any) {
       console.error('Error en login:', err);
       const errorMessage = err.message || 'Credenciales inválidas. Por favor verifica tu correo electrónico y contraseña.';

@@ -10,7 +10,7 @@ interface PatientStats {
 
 interface Cita {
   id: number;
-  doctor: {
+  doctor?: {
     nombre: string;
     apellido: string;
   };

@@ -2,7 +2,7 @@ import { IsNotEmpty, IsEnum, IsOptional, IsString, IsNumber } from 'class-valida
 
 export class ActualizarEstadoCitaDto {
   @IsNotEmpty()
-  @IsEnum(['pendiente', 'confirmada', 'aprobada', 'en_curso', 'completada', 'cancelada', 'no_asistio'])
+  @IsEnum(['pendiente', 'confirmada', 'aprobada', 'en_curso', 'completada', 'cancelada', 'no_asistio', 'expirada'])
   estado: string;
 
   @IsOptional()

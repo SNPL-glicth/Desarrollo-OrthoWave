@@ -12,7 +12,7 @@ export const PatientSelection: React.FC<PatientSelectionProps> = ({
     updateFormData
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [patients, setPatients] = useState([]);
+    const [patients, setPatients] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 

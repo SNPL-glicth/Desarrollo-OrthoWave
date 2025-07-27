@@ -13,6 +13,25 @@ const developmentConfig: TypeOrmModuleOptions = {
   migrationsRun: false, // No ejecutar migraciones en desarrollo con SQLite
 };
 
+// Configuración para desarrollo con MySQL
+const developmentMySQLConfig: TypeOrmModuleOptions = {
+  type: 'mysql',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '3306', 10),
+  username: process.env.DB_USERNAME || 'ortowhave',
+  password: process.env.DB_PASSWORD || 'Root1234a',
+  database: process.env.DB_DATABASE || 'orto_whave_db',
+  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+  synchronize: false, // No sincronizar automáticamente
+  logging: true, // Mostrar queries para desarrollo
+  migrationsRun: false, // No ejecutar migraciones automáticamente
+  charset: 'utf8mb4',
+  extra: {
+    connectionLimit: 5,
+    // Removidas acquireTimeout y timeout que no son válidas para MySQL2
+  }
+};
+
 // Configuración para producción con MySQL
 const productionConfig: TypeOrmModuleOptions = {
   type: 'mysql',
@@ -29,10 +48,10 @@ const productionConfig: TypeOrmModuleOptions = {
   ssl: { rejectUnauthorized: false },
   extra: {
     connectionLimit: 10,
-    acquireTimeout: 60000,
-    timeout: 60000,
+    // Removidas acquireTimeout y timeout que no son válidas para MySQL2
   }
 };
 
 export const databaseConfig: TypeOrmModuleOptions =
-  process.env.NODE_ENV === 'production' ? productionConfig : developmentConfig;
+  process.env.NODE_ENV === 'production' ? productionConfig : 
+  process.env.DB_HOST ? developmentMySQLConfig : developmentConfig; // Usar SQLite si no hay DB_HOST configurado

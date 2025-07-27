@@ -36,10 +36,14 @@ export class AuthService {
         return { error: 'USER_NOT_FOUND', message: 'No existe una cuenta registrada con este correo electrónico.' };
       }
 
+      // Comentado: Verificaciones de aprobación eliminadas para permitir login sin burocracia
+      // Los usuarios pueden iniciar sesión inmediatamente después del registro
+      /*
       if (!user.isVerified) {
         this.logger.warn(`Intento de login con cuenta no verificada: ${email}`);
         throw new UnauthorizedException('La cuenta no ha sido verificada. Por favor revisa tu correo electrónico y completa el proceso de verificación.');
       }
+      */
 
       // Usar bcrypt para comparar contraseñas
       const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -113,52 +117,68 @@ export class AuthService {
     const saltRounds = 12; // Usar 12 rounds para mayor seguridad
     const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
 
+    // Determinar el estado de aprobación según el rol
+    const isPatientRole = rolId === 3; // Rol 3 = paciente
+    
     const newUser = this.usersRepository.create({
       ...userData,
       password: hashedPassword,
       rolId,
-      isVerified: false,
+      isVerified: true,
       verificationCode,
+      // Pacientes aprobados inmediatamente
+      isApproved: true, // Todos los usuarios aprobados inmediatamente
+      approvalStatus: 'approved',
     });
 
     await this.usersRepository.save(newUser);
 
-    // Enviar correo de verificación
-    try {
-      await this.mailerService.sendMail({
-        to: userData.email,
-        subject: 'Verifica tu cuenta en Orto-Whave',
-        template: './verification',
-        context: {
-          verificationCode,
-          email: userData.email,
-        },
-      });
-    } catch (error) {
-      console.error('Error al enviar correo de verificación:', error);
-      // No lanzar error aquí para no fallar el registro
-    }
+    // Comentado: Envío de correo de verificación eliminado
 
+    // Mensaje único para registro exitoso
+    const message = 'Usuario registrado exitosamente. Ya puedes acceder a tu cuenta.';
+    
     return {
-      message: 'Usuario registrado exitosamente. Por favor revisa tu correo para verificar tu cuenta.',
+      message,
       email: userData.email,
+      requiresApproval: false,
     };
   }
 
   async verifyCode(email: string, code: string) {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersRepository.findOne({ 
+      where: { email },
+      relations: ['rol']
+    });
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
     if (user.isVerified) {
+      // Si ya está verificado, verificar si es paciente pendiente
+      if (user.rol?.nombre === 'paciente' && user.approvalStatus === 'pending') {
+        return { 
+          message: 'Tu cuenta ha sido verificada pero está pendiente de aprobación. Será revisada en un plazo máximo de 48 horas.',
+          requiresApproval: true
+        };
+      }
       return { message: 'La cuenta ya está verificada.' };
     }
     if (user.verificationCode !== code) {
       throw new UnauthorizedException('Código de verificación incorrecto');
     }
+    
     user.isVerified = true;
     user.verificationCode = null;
     await this.usersRepository.save(user);
+    
+    // Si es un paciente, mostrar mensaje de aprobación pendiente
+    if (user.rol?.nombre === 'paciente' && user.approvalStatus === 'pending') {
+      return { 
+        message: 'Cuenta verificada exitosamente. Tu solicitud está pendiente de aprobación y será revisada en un plazo máximo de 48 horas. Para agilizar el proceso, puedes contactarnos por nuestros canales oficiales.',
+        requiresApproval: true
+      };
+    }
+    
     return { message: 'Cuenta verificada exitosamente.' };
   }
 

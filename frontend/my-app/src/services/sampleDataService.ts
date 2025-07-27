@@ -66,7 +66,7 @@ export const sampleDataService = {
         try {
           const response = await api.post('/perfil-medico', doctor);
           results.push(response.data);
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error creating doctor:', error);
           results.push({ error: error.response?.data?.message || 'Error creating doctor' });
         }
@@ -130,7 +130,7 @@ export const sampleDataService = {
         try {
           const response = await api.post('/users', user);
           results.push(response.data);
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error creating user:', error);
           results.push({ error: error.response?.data?.message || 'Error creating user' });
         }

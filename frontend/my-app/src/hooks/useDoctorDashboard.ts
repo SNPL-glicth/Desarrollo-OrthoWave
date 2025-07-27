@@ -11,7 +11,7 @@ interface DoctorStats {
 
 interface Cita {
   id: number;
-  paciente: {
+  paciente?: {
     nombre: string;
     apellido: string;
   };
@@ -54,44 +54,78 @@ export const useDoctorDashboard = (): DashboardData => {
 
   // Procesar y combinar datos
   const processedData = useMemo(() => {
-    if (!agendaHook.data || !statsHook.data) {
+    console.log('Procesando datos del doctor:', { agendaData: agendaHook.data, statsData: statsHook.data });
+    
+    // Valores por defecto
+    const defaultData = {
+      estadisticas: {
+        citasHoy: 0,
+        citasPendientes: 0,
+        pacientesActivos: 0,
+        tratamientosActivos: 0
+      },
+      citasHoy: [],
+      proximasCitas: [],
+      pacientesRecientes: []
+    };
+
+    // Si no hay datos de agenda, pero sí hay stats, usar valores por defecto con stats
+    if (!agendaHook.data) {
+      const statsData = statsHook.data || {};
       return {
+        ...defaultData,
         estadisticas: {
-          citasHoy: 0,
-          citasPendientes: 0,
-          pacientesActivos: 0,
-          tratamientosActivos: 0
-        },
-        citasHoy: [],
-        proximasCitas: [],
-        pacientesRecientes: []
+          ...defaultData.estadisticas,
+          pacientesActivos: statsData.totalCitas || 0
+        }
       };
     }
 
     const agendaData = agendaHook.data;
-    const statsData = statsHook.data;
+    const statsData = statsHook.data || {};
 
-    // Procesar datos de la agenda
-    const citasHoy = agendaData.citasHoy || [];
-    const proximasCitas = agendaData.proximasCitas || [];
+    // Validar estructura de agendaData
+    if (!agendaData || typeof agendaData !== 'object') {
+      console.warn('agendaData no tiene la estructura esperada:', agendaData);
+      return defaultData;
+    }
+
+    // Procesar datos de la agenda con validación
+    const citasHoy = Array.isArray(agendaData.citasHoy) ? agendaData.citasHoy : [];
+    const proximasCitas = Array.isArray(agendaData.proximasCitas) ? agendaData.proximasCitas : [];
+    const citasEstaSemana = Array.isArray(agendaData.citasEstaSemana) ? agendaData.citasEstaSemana : [];
 
     // Crear estadísticas basadas en datos reales
+    const estadisticasAgenda = agendaData.estadisticas || {};
     const estadisticas = {
-      citasHoy: agendaData.estadisticas?.citasHoy || 0,
-      citasPendientes: agendaData.estadisticas?.citasPendientes || 0,
-      pacientesActivos: statsData.totalCitas || 0,
-      tratamientosActivos: agendaData.estadisticas?.citasCompletadas || 0
+      citasHoy: estadisticasAgenda.citasHoy || citasHoy.length,
+      citasPendientes: estadisticasAgenda.citasPendientes || citasHoy.filter(c => c.estado === 'pendiente').length,
+      pacientesActivos: statsData.totalCitas || citasEstaSemana.length,
+      tratamientosActivos: estadisticasAgenda.citasCompletadas || citasHoy.filter(c => c.estado === 'completada').length
     };
 
     // Extraer pacientes recientes de las citas
-    const pacientesRecientes = proximasCitas.slice(0, 3).map((cita: Cita) => ({
-      id: cita.id,
-      nombre: cita.paciente?.nombre || 'Sin nombre',
-      apellido: cita.paciente?.apellido || '',
-      edad: 0,
-      ultimaCita: new Date(cita.fechaHora).toISOString().split('T')[0],
-      proximaCita: new Date(cita.fechaHora).toISOString().split('T')[0]
-    }));
+    const pacientesRecientes = proximasCitas.slice(0, 3).map((cita: Cita) => {
+      if (!cita || !cita.paciente) {
+        return {
+          id: cita?.id || 0,
+          nombre: 'Sin nombre',
+          apellido: '',
+          edad: 0,
+          ultimaCita: new Date().toISOString().split('T')[0],
+          proximaCita: new Date().toISOString().split('T')[0]
+        };
+      }
+      
+      return {
+        id: cita.id,
+        nombre: cita.paciente.nombre || 'Sin nombre',
+        apellido: cita.paciente.apellido || '',
+        edad: 0,
+        ultimaCita: new Date(cita.fechaHora).toISOString().split('T')[0],
+        proximaCita: new Date(cita.fechaHora).toISOString().split('T')[0]
+      };
+    });
 
     return {
       estadisticas,

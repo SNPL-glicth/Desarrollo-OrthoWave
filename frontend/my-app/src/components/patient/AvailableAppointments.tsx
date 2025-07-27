@@ -11,7 +11,7 @@ const AvailableAppointments: React.FC = () => {
     const [selectedSpecialty, setSelectedSpecialty] = useState('');
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-    const { availableSlots, loading, specialties } = useAvailableSlots(selectedDate, selectedSpecialty);
+    const { availableSlots, loading, specialties } = useAvailableSlots(selectedDate, selectedSpecialty ? parseInt(selectedSpecialty) : 0);
 
     const handleSlotSelection = (slot: any) => {
         setSelectedSlot(slot);
@@ -68,8 +68,8 @@ const AvailableAppointments: React.FC = () => {
                         fromDate={new Date()}
                         modifiers={{
                             available: (date) => {
-                                return availableSlots.some(slot => 
-                                    format(new Date(slot.date), 'yyyy-MM-dd') === 
+                                return availableSlots.some((slot: any) => 
+                                    format(new Date(slot.date || new Date()), 'yyyy-MM-dd') === 
                                     format(date, 'yyyy-MM-dd')
                                 );
                             }
@@ -95,20 +95,20 @@ const AvailableAppointments: React.FC = () => {
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {availableSlots.length > 0 ? (
-                                availableSlots.map(slot => (
+                                availableSlots.map((slot: any) => (
                                     <button
-                                        key={slot.id}
+                                        key={slot.id || Math.random()}
                                         onClick={() => handleSlotSelection(slot)}
                                         className="p-4 text-center border rounded-lg hover:bg-blue-50 transition-colors"
                                     >
                                         <div className="font-medium text-blue-600">
-                                            {format(new Date(slot.startTime), 'HH:mm')}
+                                            {format(new Date(slot.startTime || new Date()), 'HH:mm')}
                                         </div>
                                         <div className="text-sm text-gray-500">
-                                            Dr. {slot.specialist.name}
+                                            Dr. {slot.specialist?.name || 'N/A'}
                                         </div>
                                         <div className="text-xs text-gray-400 mt-1">
-                                            {slot.specialist.specialty}
+                                            {slot.specialist?.specialty || 'N/A'}
                                         </div>
                                     </button>
                                 ))

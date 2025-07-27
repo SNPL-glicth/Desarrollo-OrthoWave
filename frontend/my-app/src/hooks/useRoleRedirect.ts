@@ -11,7 +11,7 @@ export const useRoleRedirect = () => {
       return;
     }
 
-    const rolePaths = {
+    const rolePaths: Record<string, string> = {
       'admin': '/dashboard/admin',
       'administrador': '/dashboard/admin', // Mantener compatibilidad
       'doctor': '/dashboard/doctor',
@@ -34,7 +34,7 @@ export const useRoleRedirect = () => {
 };
 
 export const getRoleRoute = (rol: string): string => {
-  const rolePaths = {
+  const rolePaths: Record<string, string> = {
     'admin': '/dashboard/admin',
     'administrador': '/dashboard/admin', // Mantener compatibilidad
     'doctor': '/dashboard/doctor',

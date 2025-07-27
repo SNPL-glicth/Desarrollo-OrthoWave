@@ -6,6 +6,7 @@ import { Role } from '../roles/entities/role.entity';
 import { PerfilMedico } from '../perfil-medico/entities/perfil-medico.entity';
 import { Paciente } from '../pacientes/entities/paciente.entity';
 import { CrearUsuarioAdminDto } from './dto/crear-usuario-admin.dto';
+import { RegisterPatientSimpleDto } from '../auth/dto/register-patient-simple.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -77,6 +78,51 @@ export class UsersService {
     return userData as User;
   }
 
+  async crearPacienteSinVerificacion(crearPacienteDto: RegisterPatientSimpleDto): Promise<User> {
+    // Verificar que el email no esté en uso
+    const usuarioExistente = await this.usersRepository.findOne({
+      where: { email: crearPacienteDto.email }
+    });
+
+    if (usuarioExistente) {
+      throw new ConflictException('El email ya está en uso');
+    }
+
+    // Obtener rol de paciente
+    const rolPaciente = await this.rolesRepository.findOne({
+      where: { nombre: 'paciente' }
+    });
+
+    if (!rolPaciente) {
+      throw new NotFoundException('Rol de paciente no encontrado');
+    }
+
+    // Hash de la contraseña
+    const hashedPassword = await bcrypt.hash(crearPacienteDto.password, 12);
+
+    // Crear el paciente
+    const nuevoPaciente = this.usersRepository.create({
+      email: crearPacienteDto.email,
+      password: hashedPassword,
+      nombre: crearPacienteDto.nombre,
+      apellido: '', // Se puede completar después en el perfil
+      telefono: crearPacienteDto.telefono,
+      rolId: rolPaciente.id,
+      isVerified: true, // Pacientes creados por admin están verificados automáticamente
+      verificationCode: null
+    });
+
+    const usuarioGuardado = await this.usersRepository.save(nuevoPaciente);
+
+    // Retornar usuario sin contraseña
+    const { password, ...userData } = usuarioGuardado;
+    return {
+      ...userData,
+      rol: rolPaciente,
+      message: 'Paciente creado exitosamente sin verificación por email'
+    } as any;
+  }
+
   async obtenerTodosLosUsuarios(): Promise<User[]> {
     return await this.usersRepository
       .createQueryBuilder('user')
@@ -107,11 +153,82 @@ export class UsersService {
       .getMany();
   }
 
+  async obtenerCuentasPendientes(): Promise<User[]> {
+    return await this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.rol', 'rol')
+      .where('user.approvalStatus = :status', { status: 'pending' })
+      .andWhere('user.isVerified = :verified', { verified: true })
+      .orderBy('user.fechaCreacion', 'DESC')
+      .select([
+        'user.id',
+        'user.email', 
+        'user.nombre', 
+        'user.apellido', 
+        'user.telefono', 
+        'user.fechaCreacion',
+        'user.approvalStatus',
+        'user.isApproved',
+        'rol.id',
+        'rol.nombre'
+      ])
+      .getMany();
+  }
+
+  async aprobarCuenta(id: number, adminId: number): Promise<User> {
+    const usuario = await this.obtenerUsuarioPorId(id);
+
+    if (usuario.approvalStatus !== 'pending') {
+      throw new ConflictException('La cuenta ya tiene un estado definitivo.');
+    }
+
+    usuario.isApproved = true;
+    usuario.approvalStatus = 'approved';
+    usuario.approvedBy = adminId;
+    usuario.approvalDate = new Date();
+
+    const usuarioActualizado = await this.usersRepository.save(usuario);
+
+    const { password, ...userData } = usuarioActualizado;
+    return userData as User;
+  }
+
+  async rechazarCuenta(id: number, adminId: number, razon: string): Promise<User> {
+    const usuario = await this.obtenerUsuarioPorId(id);
+
+    if (usuario.approvalStatus !== 'pending') {
+      throw new ConflictException('La cuenta ya tiene un estado definitivo.');
+    }
+
+    usuario.isApproved = false;
+    usuario.approvalStatus = 'rejected';
+    usuario.rejectionReason = razon;
+
+    const usuarioActualizado = await this.usersRepository.save(usuario);
+
+    const { password, ...userData } = usuarioActualizado;
+    return userData as User;
+  }
+
   async obtenerUsuarioPorId(id: number): Promise<User> {
     const usuario = await this.usersRepository.findOne({
       where: { id },
       relations: ['rol'],
-      select: ['id', 'email', 'nombre', 'apellido', 'telefono', 'direccion', 'isVerified', 'fechaCreacion']
+      select: [
+        'id', 
+        'email', 
+        'nombre', 
+        'apellido', 
+        'telefono', 
+        'direccion', 
+        'isVerified', 
+        'fechaCreacion',
+        'isApproved',
+        'approvalStatus',
+        'approvedBy',
+        'approvalDate',
+        'rejectionReason'
+      ]
     });
 
     if (!usuario) {

@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { RegisterPatientSimpleDto } from './dto/register-patient-simple.dto';
 import { VerifyDto } from './dto/verify.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -33,6 +34,17 @@ export class AuthController {
   @Post('register')
   async register(@Body(ValidationPipe) registerDto: RegisterDto) {
     return this.authService.register(registerDto);
+  }
+
+  @Post('register-patient')
+  async registerPatient(@Body(ValidationPipe) registerDto: RegisterPatientSimpleDto) {
+    // Convertir a RegisterDto completo con valores por defecto
+    const fullRegisterDto: RegisterDto = {
+      ...registerDto,
+      apellido: '', // Se puede completar después en el perfil
+      rolId: 3, // Rol de paciente
+    };
+    return this.authService.register(fullRegisterDto);
   }
 
   @Post('verify')

@@ -18,9 +18,9 @@ export class RegisterDto {
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
   password: string;
 
-  @IsOptional()
   @IsString({ message: 'El teléfono debe ser una cadena de texto' })
-  telefono?: string;
+  @IsNotEmpty({ message: 'El teléfono es requerido' })
+  telefono: string;
 
   @IsOptional()
   @IsString({ message: 'La dirección debe ser una cadena de texto' })

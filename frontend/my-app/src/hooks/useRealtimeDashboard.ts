@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useWebSocket } from './useWebSocket.ts';
+import { useWebSocket } from './useWebSocket';
 import api from '../services/api';
 
 interface DashboardData {
@@ -30,11 +30,15 @@ export const useRealtimeDashboard = (
   const lastFetchRef = useRef<number>(0);
 
   const fetchData = useCallback(async (forceRefresh = false) => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found, skipping fetch');
+      return;
+    }
 
     // Evitar múltiples llamadas simultáneas
     const now = Date.now();
     if (!forceRefresh && now - lastFetchRef.current < 1000) {
+      console.log('Skipping fetch due to rate limiting');
       return;
     }
     lastFetchRef.current = now;
@@ -43,15 +47,20 @@ export const useRealtimeDashboard = (
       setLoading(true);
       setError(null);
 
+      console.log(`Fetching data from ${endpoint}...`);
       const response = await api.get(endpoint);
       
-      setData(response.data);
+      setData(response.data || {});
       setLastUpdated(new Date());
       
       console.log(`Dashboard data updated from ${endpoint}:`, response.data);
     } catch (err: any) {
       console.error(`Error fetching dashboard data from ${endpoint}:`, err);
-      setError(err.response?.data?.message || 'Error al cargar los datos del dashboard');
+      const errorMessage = err.response?.data?.message || err.message || 'Error al cargar los datos del dashboard';
+      setError(errorMessage);
+      
+      // No establecer data como vacío en caso de error para evitar bucles
+      // setData({});
     } finally {
       setLoading(false);
     }

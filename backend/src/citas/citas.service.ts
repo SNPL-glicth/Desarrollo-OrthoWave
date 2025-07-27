@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, LessThanOrEqual, Between } from 'typeorm';
 import { Cita } from './entities/cita.entity';
@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { CrearCitaDto } from './dto/crear-cita.dto';
 import { ActualizarEstadoCitaDto } from './dto/actualizar-estado-cita.dto';
 import { BuscarDisponibilidadDto } from './dto/buscar-disponibilidad.dto';
+import { RealtimeWebSocketGateway } from '../websocket/websocket.gateway';
 
 @Injectable()
 export class CitasService {
@@ -17,6 +18,8 @@ export class CitasService {
     private perfilMedicoRepository: Repository<PerfilMedico>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @Inject(forwardRef(() => RealtimeWebSocketGateway))
+    private websocketGateway: RealtimeWebSocketGateway,
   ) {}
 
   async crearCita(crearCitaDto: CrearCitaDto): Promise<Cita> {
@@ -40,8 +43,17 @@ export class CitasService {
       throw new NotFoundException('Paciente no encontrado');
     }
 
-    // Verificar disponibilidad del horario
+    // Validar antelación mínima de 1 hora
     const fechaHora = new Date(crearCitaDto.fechaHora);
+    const fechaActual = new Date();
+    const diferenciaMinutos = (fechaHora.getTime() - fechaActual.getTime()) / (1000 * 60);
+
+    if (diferenciaMinutos < 60) {
+      throw new BadRequestException('Las citas deben solicitarse con al menos 1 hora de antelación');
+    }
+
+    // Verificar disponibilidad del horario
+    // Ya tenemos fechaHora definida arriba
     const fechaFin = new Date(fechaHora.getTime() + (crearCitaDto.duracion || 60) * 60000);
 
     const citaConflicto = await this.citasRepository.findOne({
@@ -75,7 +87,21 @@ export class CitasService {
       estado: 'pendiente' // Las citas inician como pendientes para aprobación
     });
 
-    return await this.citasRepository.save(nuevaCita);
+    const citaGuardada = await this.citasRepository.save(nuevaCita);
+    
+    // Emitir notificación WebSocket
+    try {
+      this.websocketGateway.notifyCitaUpdate(
+        citaGuardada.id,
+        crearCitaDto.doctorId,
+        crearCitaDto.pacienteId,
+        'created'
+      );
+    } catch (error) {
+      console.error('Error al enviar notificación WebSocket:', error);
+    }
+    
+    return citaGuardada;
   }
 
   async obtenerCitasPorPaciente(pacienteId: number): Promise<Cita[]> {
@@ -121,7 +147,21 @@ export class CitasService {
     }
 
     Object.assign(cita, actualizarEstadoDto);
-    return await this.citasRepository.save(cita);
+    const citaActualizada = await this.citasRepository.save(cita);
+    
+    // Emitir notificación WebSocket
+    try {
+      this.websocketGateway.notifyCitaUpdate(
+        citaActualizada.id,
+        citaActualizada.doctorId,
+        citaActualizada.pacienteId,
+        'updated'
+      );
+    } catch (error) {
+      console.error('Error al enviar notificación WebSocket:', error);
+    }
+    
+    return citaActualizada;
   }
 
   async buscarDisponibilidad(buscarDisponibilidadDto: BuscarDisponibilidadDto): Promise<string[]> {

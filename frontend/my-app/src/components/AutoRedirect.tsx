@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getRoleRoute } from '../hooks/useRoleRedirect.ts';
+import { getRoleRoute } from '../hooks/useRoleRedirect';
 
 const AutoRedirect: React.FC = () => {
   const { user, isAuthenticated, loading } = useAuth();

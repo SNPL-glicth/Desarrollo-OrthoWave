@@ -2,6 +2,8 @@ import { Controller, Get, Put, Post, Delete, Patch, Body, UseGuards, Request, Pa
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { CrearUsuarioAdminDto } from './dto/crear-usuario-admin.dto';
+import { CrearUsuarioSimpleDto } from './dto/crear-usuario-simple.dto';
+import { RegisterPatientSimpleDto } from '../auth/dto/register-patient-simple.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -56,6 +58,39 @@ export class UsersController {
     return await this.usersService.crearUsuarioAdmin(crearUsuarioDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('admin/crear-usuario-simple')
+  async crearUsuarioSimple(@Body() crearUsuarioDto: CrearUsuarioSimpleDto, @Request() req) {
+    const usuario = req.user;
+
+    // Solo administradores pueden crear usuarios
+    if (usuario.rol.nombre !== 'admin') {
+      throw new HttpException('No tienes permisos para crear usuarios', HttpStatus.FORBIDDEN);
+    }
+
+    // Convertir a CrearUsuarioAdminDto completo
+    const fullDto: CrearUsuarioAdminDto = {
+      ...crearUsuarioDto,
+      apellido: '', // Se puede completar después
+    };
+
+    return await this.usersService.crearUsuarioAdmin(fullDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('admin/crear-paciente')
+  async crearPacienteAdmin(@Body() crearPacienteDto: RegisterPatientSimpleDto, @Request() req) {
+    const usuario = req.user;
+
+    // Solo administradores pueden crear pacientes
+    if (usuario.rol.nombre !== 'admin') {
+      throw new HttpException('No tienes permisos para crear pacientes', HttpStatus.FORBIDDEN);
+    }
+
+    // Crear paciente directamente sin verificación por email
+    return await this.usersService.crearPacienteSinVerificacion(crearPacienteDto);
+  }
+
   // Endpoint público para crear usuarios sin autenticación (para uso del administrador)
   @Post('public/crear-usuario')
   async crearUsuarioPublico(@Body() crearUsuarioDto: CrearUsuarioAdminDto) {
@@ -80,6 +115,7 @@ export class UsersController {
 
     return await this.usersService.obtenerTodosLosUsuarios();
   }
+
 
   @UseGuards(JwtAuthGuard)
   @Get('admin/todos')
@@ -137,6 +173,8 @@ export class UsersController {
     return await this.usersService.obtenerEstadisticasUsuarios();
   }
 
+  // IMPORTANT: This route must come AFTER all specific /admin/* routes
+  // to avoid conflicts with parameterized routes like /admin/:id
   @UseGuards(JwtAuthGuard)
   @Get('admin/:id')
   async obtenerUsuarioPorId(@Param('id', ParseIntPipe) id: number, @Request() req) {
@@ -150,25 +188,9 @@ export class UsersController {
     return await this.usersService.obtenerUsuarioPorId(id);
   }
 
+
   @UseGuards(JwtAuthGuard)
   @Put('admin/:id')
-  async actualizarUsuario(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() actualizarData: Partial<User>,
-    @Request() req
-  ) {
-    const usuario = req.user;
-
-    // Solo administradores pueden actualizar cualquier usuario
-    if (usuario.rol.nombre !== 'admin') {
-      throw new HttpException('No tienes permisos para actualizar usuarios', HttpStatus.FORBIDDEN);
-    }
-
-    return await this.usersService.actualizarUsuario(id, actualizarData);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Put('admin/:id/estado')
   async cambiarEstadoUsuario(
     @Param('id', ParseIntPipe) id: number,
     @Body('activo') activo: boolean,

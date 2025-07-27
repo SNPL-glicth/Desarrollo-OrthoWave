@@ -21,7 +21,7 @@ const RegisterPage = () => {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -50,7 +50,12 @@ const RegisterPage = () => {
 
     try {
       await register(userData);
-      navigate('/verify', { state: { email: userData.email } });
+      
+      // Realizar login automático después del registro exitoso
+      await login(userData.email, userData.password);
+      
+      // Redirigir directamente al dashboard del paciente después del registro
+      navigate('/dashboard/patient');
     } catch (err) {
       setError('Error al registrar usuario. Por favor intente nuevamente.');
     }

@@ -49,9 +49,14 @@ export class PerfilMedicoService {
     return await this.perfilMedicoRepository.find({
       where: {
         activo: true,
-        aceptaNuevosPacientes: true
+        aceptaNuevosPacientes: true,
+        usuario: {
+          rol: {
+            nombre: 'doctor'
+          }
+        }
       },
-      relations: ['usuario'],
+      relations: ['usuario', 'usuario.rol'],
       order: { fechaCreacion: 'DESC' }
     });
   }

@@ -87,8 +87,9 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authService.register(userData);
-      toast.success('¡Registro exitoso! Por favor revisa tu correo para verificar tu cuenta.');
-      return response;
+      const { message, requiresApproval } = response;
+      toast.success(message);
+      return { ...response, requiresApproval };
     } catch (error) {
       console.error('Error en registro:', error);
       const message = error.message || 'Error al registrarse';

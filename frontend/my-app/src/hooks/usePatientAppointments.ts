@@ -19,10 +19,10 @@ export const usePatientAppointments = () => {
             const allAppointments = response.data;
             
             const now = new Date();
-            const upcoming = allAppointments.filter(apt => 
+            const upcoming = allAppointments.filter((apt: any) => 
                 new Date(apt.fechaHora) > now && apt.estado !== 'cancelada'
             );
-            const past = allAppointments.filter(apt => 
+            const past = allAppointments.filter((apt: any) => 
                 new Date(apt.fechaHora) <= now || apt.estado === 'completada'
             );
             

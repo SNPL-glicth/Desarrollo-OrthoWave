@@ -37,12 +37,19 @@ export class PacientesService {
     return await this.pacientesRepository.save(paciente);
   }
 
-  async obtenerTodosLosPacientes(): Promise<Paciente[]> {
-    return await this.pacientesRepository.find({
-      where: { activo: true },
-      relations: ['usuario'],
-      order: { fechaRegistro: 'DESC' }
+  async obtenerTodosLosPacientes(): Promise<any[]> {
+    // Obtener todos los usuarios con rol de paciente
+    const usuarios = await this.usersRepository.find({
+      where: { 
+        rol: { nombre: 'paciente' },
+        isVerified: true 
+      },
+      relations: ['rol'],
+      select: ['id', 'nombre', 'apellido', 'email', 'telefono'],
+      order: { id: 'DESC' }
     });
+
+    return usuarios;
   }
 
   async buscarPacientePorIdentificacion(numeroIdentificacion: string): Promise<Paciente | null> {
@@ -94,5 +101,17 @@ export class PacientesService {
       nuevos,
       regulares: total - nuevos
     };
+  }
+
+  async crearPacientesPrueba(): Promise<void> {
+    const pacientesPrueba = [
+      { usuarioId: 1, activo: true, primeraConsulta: true, numeroIdentificacion: '0001', fechaRegistro: new Date() },
+      { usuarioId: 2, activo: true, primeraConsulta: false, numeroIdentificacion: '0002', fechaRegistro: new Date() },
+    ];
+
+    for (const pacienteData of pacientesPrueba) {
+      const paciente = this.pacientesRepository.create(pacienteData);
+      await this.pacientesRepository.save(paciente);
+    }
   }
 }

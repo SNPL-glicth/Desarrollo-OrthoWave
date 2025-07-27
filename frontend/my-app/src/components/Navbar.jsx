@@ -11,7 +11,7 @@ import {
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 import { useCart } from '../context/CartContext';
-import { useAuth, withAuthNavigation } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import Checkout from './Checkout';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
@@ -23,25 +23,30 @@ const navigation = [
   { name: 'Contacto', href: '/#contacto' },
 ];
 
-const NavbarBase = () => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const cartRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, logout, user } = useAuth();
+  
+  // Obtener el contexto del carrito (siempre se debe llamar)
+  const cartContext = useCart();
+  
+  // Verificar si el contexto está disponible
   const {
-    cartItems,
-    isCartOpen,
-    setIsCartOpen,
-    removeFromCart,
-    updateQuantity,
-    getCartTotal,
-    getCartCount,
-    isCheckoutOpen,
-    proceedToCheckout,
-    closeCheckout
-  } = useCart();
+    cartItems = [],
+    isCartOpen = false,
+    setIsCartOpen = () => {},
+    removeFromCart = () => {},
+    updateQuantity = () => {},
+    getCartTotal = () => 0,
+    getCartCount = () => 0,
+    isCheckoutOpen = false,
+    proceedToCheckout = () => {},
+    closeCheckout = () => {}
+  } = cartContext || {};
 
   useEffect(() => {
     const handleScroll = () => {
@@ -443,6 +448,4 @@ const NavbarBase = () => {
   );
 };
 
-// Exportamos el componente con el HOC aplicado
-const Navbar = withAuthNavigation(NavbarBase);
-export default Navbar; 
+export default Navbar;

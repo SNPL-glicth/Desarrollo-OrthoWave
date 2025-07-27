@@ -21,9 +21,9 @@ export class CrearUsuarioAdminDto {
   @IsNumber()
   rolId: number;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  telefono?: string;
+  telefono: string;
 
   @IsOptional()
   @IsString()

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useRealtimeDashboard } from './useRealtimeDashboard.ts';
+import { useRealtimeDashboard } from './useRealtimeDashboard';
 
 interface AdminStats {
   usuariosActivos: number;
@@ -59,12 +59,27 @@ export const useAdminDashboard = (): AdminDashboardData => {
     const statsData = statsHook.data;
     const usersData = usersHook.data;
 
-    // Procesar estadísticas
+    // Verificar que statsData tiene la estructura esperada
+    if (!statsData || typeof statsData !== 'object') {
+      console.warn('statsData no tiene la estructura esperada:', statsData);
+      return {
+        estadisticas: {
+          usuariosActivos: 0,
+          doctores: 0,
+          pacientes: 0,
+          total: 0
+        },
+        usuarios: Array.isArray(usersData) ? usersData : []
+      };
+    }
+
+    // Procesar estadísticas con validación segura
+    const distribuciones = statsData.distribuciones || {};
     const estadisticas = {
-      usuariosActivos: statsData.verificados - (statsData.distribuciones.admins || 0),
-      doctores: statsData.distribuciones.doctores || 0,
-      pacientes: statsData.distribuciones.pacientes || 0,
-      total: statsData.total - (statsData.distribuciones.admins || 0)
+      usuariosActivos: (statsData.verificados || 0) - (distribuciones.admins || 0),
+      doctores: distribuciones.doctores || 0,
+      pacientes: distribuciones.pacientes || 0,
+      total: (statsData.total || 0) - (distribuciones.admins || 0)
     };
 
     // Los usuarios ya vienen procesados del backend

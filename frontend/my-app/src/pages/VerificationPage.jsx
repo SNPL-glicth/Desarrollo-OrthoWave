@@ -22,7 +22,14 @@ const VerificationPage = () => {
         throw new Error('Por favor ingresa tu correo y el código de verificación');
       }
       const response = await authService.verifyCode(email, verificationCode);
-      if (response.message === 'Cuenta verificada exitosamente.') {
+      
+      if (response.requiresApproval) {
+        // Redirigir a página de registro pendiente
+        navigate('/registro-pendiente');
+        return;
+      }
+      
+      if (response.message.includes('exitosamente')) {
         setSuccess(true);
       } else {
         setError('Código incorrecto o cuenta ya verificada.');

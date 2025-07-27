@@ -31,7 +31,7 @@ export class Cita {
     length: 20,
     default: 'pendiente'
   })
-  estado: string;
+  estado: string; // estados: 'pendiente', 'aprobada', 'completada', 'cancelada', 'rechazada', 'expirada'
 
   @Column({
     type: 'varchar',
@@ -71,4 +71,7 @@ export class Cita {
 
   @Column({ type: 'text', nullable: true })
   razonRechazo: string;
+
+  @Column({ name: 'recordatorio_enviado', default: false })
+  recordatorioEnviado: boolean;
 }

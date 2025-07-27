@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 
 const AppointmentHistory: React.FC = () => {
     const { pastAppointments } = usePatientAppointments();
+    const appointmentsList = pastAppointments || [];
 
     return (
         <div className="overflow-x-auto">
@@ -26,18 +27,18 @@ const AppointmentHistory: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {pastAppointments.map(appointment => (
-                        <tr key={appointment.id}>
+                    {appointmentsList.map((appointment: any) => (
+                        <tr key={appointment.id || Math.random()}>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 {format(new Date(appointment.startTime), 
                                        "d 'de' MMMM 'de' yyyy, HH:mm", 
                                        { locale: es })}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                                Dr. {appointment.specialist.name}
+                                Dr. {appointment.specialist?.name || 'N/A'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                                {appointment.service.name}
+                                {appointment.service?.name || 'N/A'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
@@ -67,7 +68,7 @@ const getStatusColor = (status: string) => {
 };
 
 const getStatusText = (status: string) => {
-    const statusMap = {
+    const statusMap: Record<string, string> = {
         'COMPLETED': 'Completada',
         'CANCELLED': 'Cancelada',
         'NO_SHOW': 'No Asistió',

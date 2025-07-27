@@ -72,8 +72,8 @@ const CitasList: React.FC<CitasListProps> = ({ tipo = 'todas', usuarioId, onCita
     
     // Lógica de permisos según el rol del usuario
     const esAdmin = user.rol === 'admin';
-    const esDoctor = user.rol === 'doctor' && cita.doctorId === parseInt(user.id);
-    const esPaciente = user.rol === 'paciente' && cita.pacienteId === parseInt(user.id);
+    const esDoctor = user.rol === 'doctor' && cita.doctorId === (typeof user.id === 'string' ? parseInt(user.id) : user.id);
+    const esPaciente = user.rol === 'paciente' && cita.pacienteId === (typeof user.id === 'string' ? parseInt(user.id) : user.id);
     
     switch (nuevoEstado) {
       case 'aprobada':
@@ -94,7 +94,7 @@ const CitasList: React.FC<CitasListProps> = ({ tipo = 'todas', usuarioId, onCita
     if (!user) return false;
     
     const esAdmin = user.rol === 'admin';
-    const esPaciente = user.rol === 'paciente' && cita.pacienteId === parseInt(user.id);
+    const esPaciente = user.rol === 'paciente' && cita.pacienteId === (typeof user.id === 'string' ? parseInt(user.id) : user.id);
     
     return esAdmin || (esPaciente && cita.estado === 'pendiente');
   };

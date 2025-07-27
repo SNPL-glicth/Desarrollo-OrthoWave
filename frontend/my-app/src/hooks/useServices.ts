@@ -11,8 +11,8 @@ export const useServices = () => {
             try {
                 const response = await axios.get('/api/services');
                 setServices(response.data);
-            } catch (err) {
-                setError(err);
+            } catch (err: any) {
+                setError(err.message || 'Error desconocido');
             } finally {
                 setLoading(false);
             }

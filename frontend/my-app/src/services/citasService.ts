@@ -8,7 +8,7 @@ export interface Cita {
   duracion: number;
   estado: 'pendiente' | 'confirmada' | 'aprobada' | 'en_curso' | 'completada' | 'cancelada' | 'no_asistio';
   tipoConsulta: 'primera_vez' | 'control' | 'seguimiento' | 'urgencia';
-  motivoConsulta?: string;
+  motivoConsulta: string;
   notasDoctor?: string;
   notasPaciente?: string;
   costo?: number;
@@ -39,7 +39,7 @@ export interface CrearCitaDto {
   fechaHora: string;
   duracion?: number;
   tipoConsulta?: 'primera_vez' | 'control' | 'seguimiento' | 'urgencia';
-  motivoConsulta?: string;
+  motivoConsulta: string;
   notasPaciente?: string;
   costo?: number;
 }
@@ -153,31 +153,35 @@ class CitasServiceClass {
       console.error('Error al crear cita:', error);
       throw new Error(error.response?.data?.message || error.message || 'Error al crear la cita');
     }
-  },
+  }
 
   // Obtener citas por paciente
-  async obtenerCitasPorPaciente(pacienteId: number): Promise<Cita[]> {
-    const response = await api.get(`/citas/paciente/${pacienteId}`);
+  async obtenerCitasPorPaciente(pacienteId: number, signal?: AbortSignal): Promise<Cita[]> {
+    const response = await api.get(`/citas/paciente/${pacienteId}`, {
+      signal
+    });
     return response.data;
-  },
+  }
 
   // Obtener citas por doctor
-  async obtenerCitasPorDoctor(doctorId: number): Promise<Cita[]> {
-    const response = await api.get(`/citas/doctor/${doctorId}`);
+  async obtenerCitasPorDoctor(doctorId: number, signal?: AbortSignal): Promise<Cita[]> {
+    const response = await api.get(`/citas/doctor/${doctorId}`, {
+      signal
+    });
     return response.data;
-  },
+  }
 
   // Obtener mis citas (del usuario actual)
   async obtenerMisCitas(): Promise<Cita[]> {
     const response = await api.get('/citas/mis-citas');
     return response.data;
-  },
+  }
 
   // Obtener cita por ID
   async obtenerCitaPorId(id: number): Promise<Cita> {
     const response = await api.get(`/citas/${id}`);
     return response.data;
-  },
+  }
 
   // Actualizar estado de cita con notificaciones
   async actualizarEstadoCita(id: number, estadoData: ActualizarEstadoCitaDto): Promise<Cita> {
@@ -197,55 +201,86 @@ class CitasServiceClass {
       console.error('Error al actualizar cita:', error);
       throw new Error(error.response?.data?.message || 'Error al actualizar la cita');
     }
-  },
+  }
 
-  // Método optimizado para recargar citas con polling
-  async recargarCitas(userId: number, userRole: string): Promise<Cita[]> {
+  // Método optimizado para recargar citas con polling y soporte para AbortSignal
+  async recargarCitas(userId: number, userRole: string, signal?: AbortSignal): Promise<Cita[]> {
     try {
       let citas: Cita[] = [];
       
-      if (userRole === 'paciente') {
-        citas = await this.obtenerCitasPorPaciente(userId);
-      } else if (userRole === 'doctor') {
-        citas = await this.obtenerCitasPorDoctor(userId);
+      // Verificar si la operación fue cancelada
+      if (signal?.aborted) {
+        throw new Error('Operation was aborted');
       }
       
-      // Notificar cambios
+      if (userRole === 'paciente') {
+        citas = await this.obtenerCitasPorPaciente(userId, signal);
+      } else if (userRole === 'doctor') {
+        citas = await this.obtenerCitasPorDoctor(userId, signal);
+      }
+      
+      // Verificar nuevamente si fue cancelada después de la petición
+      if (signal?.aborted) {
+        throw new Error('Operation was aborted');
+      }
+      
+      // Asegurarse de que citas sea un array
+      if (!Array.isArray(citas)) {
+        console.warn('La respuesta no es un array, convirtiendo a array vacío');
+        citas = [];
+      }
+      
+      // Notificar cambios siempre, incluso si el array está vacío
       this.notifyChanged(citas);
       
       return citas;
     } catch (error: any) {
+      // Si fue cancelada por AbortSignal, re-lanzar el error
+      if (signal?.aborted || error.name === 'AbortError') {
+        throw error;
+      }
+      
       console.error('Error al recargar citas:', error);
-      throw new Error(error.response?.data?.message || 'Error al cargar las citas');
+      
+      // Si el endpoint no existe o hay error 404, devolver array vacío
+      if (error.response?.status === 404) {
+        console.log('Endpoint de citas no encontrado, devolviendo array vacío');
+        return [];
+      }
+      
+      // Para otros errores, también devolver array vacío en lugar de lanzar error
+      // Esto evita el bucle infinito
+      console.warn('Devolviendo array vacío por error en API');
+      return [];
     }
-  },
+  }
 
   // Eliminar cita
   async eliminarCita(id: number): Promise<void> {
     await api.delete(`/citas/${id}`);
-  },
+  }
 
   // Buscar disponibilidad
   async buscarDisponibilidad(params: BuscarDisponibilidadDto): Promise<string[]> {
     const response = await api.get('/citas/disponibilidad', { params });
     return response.data;
-  },
+  }
 
   // Obtener agenda de doctor
   async obtenerAgendaDoctor(doctorId: number, fecha: string): Promise<AgendaDoctorResponse> {
     const response = await api.get(`/citas/doctor/${doctorId}/agenda/${fecha}`);
     return response.data;
-  },
+  }
 
   // Obtener citas pendientes de aprobación (solo admin)
   async obtenerCitasPendientesAprobacion(): Promise<Cita[]> {
     const response = await api.get('/citas/pendientes-aprobacion');
     return response.data;
-  },
+  }
 
   // Métodos de utilidad
   getEstadoColor(estado: string): string {
-    const colores = {
+    const colores: Record<string, string> = {
       'pendiente': 'bg-yellow-100 text-yellow-800',
       'confirmada': 'bg-blue-100 text-blue-800',
       'aprobada': 'bg-green-100 text-green-800',
@@ -255,10 +290,10 @@ class CitasServiceClass {
       'no_asistio': 'bg-gray-100 text-gray-800'
     };
     return colores[estado] || 'bg-gray-100 text-gray-800';
-  },
+  }
 
   getEstadoTexto(estado: string): string {
-    const textos = {
+    const textos: Record<string, string> = {
       'pendiente': 'Pendiente',
       'confirmada': 'Confirmada',
       'aprobada': 'Aprobada',
@@ -268,7 +303,7 @@ class CitasServiceClass {
       'no_asistio': 'No Asistió'
     };
     return textos[estado] || estado;
-  },
+  }
 
   formatearFecha(fecha: string): string {
     return new Date(fecha).toLocaleDateString('es-ES', {
@@ -276,14 +311,14 @@ class CitasServiceClass {
       month: 'long',
       day: 'numeric'
     });
-  },
+  }
 
   formatearHora(fecha: string): string {
     return new Date(fecha).toLocaleTimeString('es-ES', {
       hour: '2-digit',
       minute: '2-digit'
     });
-  },
+  }
 
   formatearFechaHora(fecha: string): string {
     return new Date(fecha).toLocaleDateString('es-ES', {

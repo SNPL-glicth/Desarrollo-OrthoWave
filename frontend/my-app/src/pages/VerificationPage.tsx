@@ -16,7 +16,7 @@ const VerificationPage: React.FC = () => {
     setMessage('');
 
     try {
-      const response = await verifyCode(email, code);
+      await verifyCode(email, code);
       setMessage('¡Cuenta verificada exitosamente!');
       setTimeout(() => {
         navigate('/login');

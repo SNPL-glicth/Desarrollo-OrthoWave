@@ -166,4 +166,17 @@ export class PacientesController {
     await this.pacientesService.marcarPrimeraConsultaCompleta(usuarioId);
     return { message: 'Primera consulta marcada como completa' };
   }
+
+  // Endpoint temporal para crear pacientes de prueba
+  @Post('crear-pacientes-prueba')
+  async crearPacientesPrueba(@Request() req) {
+    const usuario = req.user;
+
+    // Solo administradores pueden crear pacientes de prueba
+    if (usuario.rol.nombre !== 'admin') {
+      throw new HttpException('Solo los administradores pueden crear pacientes de prueba', HttpStatus.FORBIDDEN);
+    }
+
+    return await this.pacientesService.crearPacientesPrueba();
+  }
 }

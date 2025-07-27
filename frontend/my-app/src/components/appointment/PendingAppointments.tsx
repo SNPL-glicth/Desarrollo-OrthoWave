@@ -1,21 +1,22 @@
 import React, { useState, useMemo } from 'react';
-import { citasService, Cita } from '../../services/citasService.ts';
-import { useAuth } from '../../context/AuthContext';
-import usePollingCitas from '../../hooks/usePollingCitas.ts';
+import { citasService } from '../../services/citasService';
+import useCitasSinPolling from '../../hooks/useCitasSinPolling';
 
 const PendingAppointments: React.FC = () => {
-  const { user } = useAuth();
   const [processingCita, setProcessingCita] = useState<number | null>(null);
   const [actionFeedback, setActionFeedback] = useState<{
     type: 'success' | 'error';
     message: string;
   } | null>(null);
 
-  // Usar el hook de polling para obtener citas automáticamente
-  const { citas, loading, error, lastUpdate, refresh } = usePollingCitas({
-    interval: 15000, // 15 segundos para citas pendientes
-    enabled: user?.rol === 'doctor',
-    onError: (err) => console.error('Error en polling:', err)
+  // Usar el hook SIN polling para obtener citas
+  const { citas, loading, error, lastUpdate, refresh } = useCitasSinPolling({
+    autoRefresh: true, // Activar auto-refresh opcional
+    refreshInterval: 2, // Cada 2 minutos (mucho más conservador)
+    onError: (err) => {
+      console.error('Error al cargar citas:', err);
+      // No mostrar errores temporales en la UI para evitar molestias
+    }
   });
 
   // Filtrar solo citas pendientes y confirmadas

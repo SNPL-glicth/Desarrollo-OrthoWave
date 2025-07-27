@@ -26,7 +26,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
                 </div>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium
                     ${getStatusStyle(appointment.status)}`}>
-                    {getStatusText(appointment.status)}
+                    {appointment.status}
                 </span>
             </div>
 

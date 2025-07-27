@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 
 interface WebSocketHook {
@@ -13,16 +13,21 @@ export const useWebSocket = (): WebSocketHook => {
   const { user, token } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [reconnectAttempts, setReconnectAttempts] = useState(0);
+  const [reconnectAttempts] = useState(0); // Eliminado setter no utilizado
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
+    // Si no hay usuario o token, no intentamos conectar
     if (!user || !token) {
+      console.log('WebSocket: No user or token, skipping connection');
       return;
     }
 
-    const connectSocket = () => {
+    // Importar socket.io-client dinámicamente para evitar errores de SSR
+    const connectSocket = async () => {
       try {
+        const { io } = await import('socket.io-client');
+        
         console.log('Connecting to WebSocket...');
         
         const socket = io('http://localhost:4000', {
@@ -31,21 +36,22 @@ export const useWebSocket = (): WebSocketHook => {
           },
           transports: ['websocket'],
           timeout: 10000,
-          forceNew: true
+          forceNew: true,
+          reconnection: true,
+          reconnectionAttempts: 3,
+          reconnectionDelay: 1000
         });
 
         socket.on('connect', () => {
           console.log('WebSocket connected');
           setIsConnected(true);
           setError(null);
-          setReconnectAttempts(0);
         });
 
         socket.on('disconnect', (reason) => {
           console.log('WebSocket disconnected:', reason);
           setIsConnected(false);
           
-          // Intentar reconectar si la desconexión no fue intencional
           if (reason === 'io server disconnect') {
             setError('Desconectado del servidor');
           } else {
@@ -57,9 +63,6 @@ export const useWebSocket = (): WebSocketHook => {
           console.error('WebSocket connection error:', error);
           setError(`Error de conexión: ${error.message}`);
           setIsConnected(false);
-          
-          // Incrementar intentos de reconexión
-          setReconnectAttempts(prev => prev + 1);
         });
 
         socket.on('user_connected', (data) => {
@@ -87,20 +90,6 @@ export const useWebSocket = (): WebSocketHook => {
       }
     };
   }, [user, token]);
-
-  // Intentar reconectar automáticamente
-  useEffect(() => {
-    if (!isConnected && reconnectAttempts > 0 && reconnectAttempts < 5) {
-      const timer = setTimeout(() => {
-        console.log(`Intentando reconectar... (${reconnectAttempts}/5)`);
-        if (socketRef.current) {
-          socketRef.current.connect();
-        }
-      }, 3000 * reconnectAttempts);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isConnected, reconnectAttempts]);
 
   return {
     socket: socketRef.current,

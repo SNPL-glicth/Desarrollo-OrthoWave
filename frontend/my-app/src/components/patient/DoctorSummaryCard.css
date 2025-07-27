@@ -1,0 +1,32 @@
+.avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.list-group-item:hover {
+  background-color: var(--bs-gray-100);
+}
+
+.list-group-item .btn-group .btn {
+  transition: all 0.2s ease;
+}
+
+.list-group-item .btn-group .btn:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .avatar-circle {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .list-group-item .d-flex.flex-column.flex-md-row {
+    margin-top: 0.5rem;
+  }
+}

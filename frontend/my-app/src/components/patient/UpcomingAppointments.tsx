@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { usePatientAppointments } from '../../hooks/usePatientAppointments';
 import AppointmentCard from './AppointmentCard';
-import RescheduleModal from './RescheduleModal';
-import CancelModal from './CancelModal';
+// TODO: Crear RescheduleModal y CancelModal
+// import RescheduleModal from './RescheduleModal';
+// import CancelModal from './CancelModal';
 
 const UpcomingAppointments: React.FC = () => {
     const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -10,6 +11,7 @@ const UpcomingAppointments: React.FC = () => {
     const [showCancelModal, setShowCancelModal] = useState(false);
 
     const { upcomingAppointments, cancelAppointment, requestReschedule } = usePatientAppointments();
+    const appointmentsList = upcomingAppointments || [];
 
     const handleRescheduleRequest = async (appointmentId: string, reason: string) => {
         await requestReschedule(appointmentId, reason);
@@ -23,14 +25,14 @@ const UpcomingAppointments: React.FC = () => {
 
     return (
         <div className="space-y-4">
-            {upcomingAppointments.length === 0 ? (
+            {appointmentsList.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                     No tienes citas programadas
                 </div>
             ) : (
-                upcomingAppointments.map(appointment => (
+                appointmentsList.map((appointment: any) => (
                     <AppointmentCard
-                        key={appointment.id}
+                        key={appointment.id || Math.random()}
                         appointment={appointment}
                         onReschedule={() => {
                             setSelectedAppointment(appointment);
@@ -44,7 +46,8 @@ const UpcomingAppointments: React.FC = () => {
                 ))
             )}
 
-            <RescheduleModal
+            {/* TODO: Implementar modales */}
+            {/* <RescheduleModal
                 show={showRescheduleModal}
                 appointment={selectedAppointment}
                 onClose={() => setShowRescheduleModal(false)}
@@ -56,7 +59,7 @@ const UpcomingAppointments: React.FC = () => {
                 appointment={selectedAppointment}
                 onClose={() => setShowCancelModal(false)}
                 onSubmit={handleCancellation}
-            />
+            /> */}
         </div>
     );
 };

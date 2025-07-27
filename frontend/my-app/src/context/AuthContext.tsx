@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/auth.service';
-import { User } from '../types/User';
+import { User } from '../types/user';
+import { clearAuthData, isTokenExpired, getStoredToken } from '../utils/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -45,8 +46,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const storedToken = localStorage.getItem('token');
+        const storedToken = getStoredToken();
         if (storedToken) {
+          // Verificar si el token está expirado
+          if (isTokenExpired(storedToken)) {
+            console.log('Token expirado, limpiando sesión');
+            clearAuthData();
+            setUser(null);
+            setToken(null);
+            setIsAuthenticated(false);
+            setLoading(false);
+            return;
+          }
+          
           setToken(storedToken);
           const currentUser = await authService.getCurrentUser();
           if (currentUser) {
@@ -63,18 +75,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               nombre: userWithRole.nombre,
               rol: userWithRole.rol
             });
-        } else {
-          console.log('No hay sesión activa');
-          setUser(null);
-          setToken(null);
+          } else {
+            console.log('No se pudo obtener el usuario actual');
+            clearAuthData();
+            setUser(null);
+            setToken(null);
             setIsAuthenticated(false);
           }
+        } else {
+          console.log('No hay token almacenado');
+          setUser(null);
+          setToken(null);
+          setIsAuthenticated(false);
         }
       } catch (err) {
         console.error('Error al verificar autenticación:', err);
         setError(err instanceof Error ? err.message : 'Error desconocido');
         setUser(null);
         setIsAuthenticated(false);
+        clearAuthData();
         authService.logout();
       } finally {
         setLoading(false);
@@ -120,7 +139,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
     setError(null);
     setIsAuthenticated(false);
+    // Limpiar todos los datos de autenticación
+    clearAuthData();
     authService.logout();
+    console.log('Sesión cerrada correctamente');
   };
 
   const verifyCode = async (email: string, code: string) => {

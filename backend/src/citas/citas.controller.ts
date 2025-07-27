@@ -124,11 +124,16 @@ export class CitasController {
 
     // Verificar permisos según el tipo de cambio de estado
     if (actualizarEstadoDto.estado === 'aprobada' || actualizarEstadoDto.estado === 'cancelada') {
-      // Solo administradores pueden aprobar o cancelar citas
-      if (usuario.rol.nombre !== 'admin') {
+      // Administradores pueden aprobar/cancelar cualquier cita, doctores solo sus propias citas
+      if (usuario.rol.nombre === 'admin') {
+        // Admin puede aprobar/cancelar cualquier cita
+        actualizarEstadoDto.aprobadaPor = usuario.id;
+      } else if (usuario.rol.nombre === 'doctor' && cita.doctorId === usuario.id) {
+        // Doctor puede aprobar/cancelar sus propias citas
+        actualizarEstadoDto.aprobadaPor = usuario.id;
+      } else {
         throw new HttpException('No tienes permisos para aprobar o cancelar citas', HttpStatus.FORBIDDEN);
       }
-      actualizarEstadoDto.aprobadaPor = usuario.id;
     } else if (actualizarEstadoDto.estado === 'confirmada') {
       // Pacientes pueden confirmar sus propias citas
       if (usuario.rol.nombre === 'paciente' && cita.pacienteId !== usuario.id) {

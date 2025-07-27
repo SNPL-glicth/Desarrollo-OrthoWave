@@ -45,4 +45,19 @@ export class User {
 
   @Column({ name: 'reset_password_expires', nullable: true, type: 'datetime' })
   resetPasswordExpires: Date;
+
+  @Column({ name: 'is_approved', default: true })
+  isApproved: boolean;
+
+  @Column({ name: 'approval_status', default: 'approved' }) // 'pending', 'approved', 'rejected'
+  approvalStatus: string;
+
+  @Column({ name: 'approved_by', nullable: true })
+  approvedBy: number;
+
+  @Column({ name: 'approval_date', nullable: true, type: 'datetime' })
+  approvalDate: Date;
+
+  @Column({ name: 'rejection_reason', nullable: true, type: 'text' })
+  rejectionReason: string;
 }
