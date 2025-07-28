@@ -1,0 +1,17 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Círculo exterior izquierdo -->
+  <ellipse cx="100" cy="200" rx="80" ry="150" fill="#000000" opacity="0.9"/>
+  <ellipse cx="120" cy="200" rx="40" ry="120" fill="#ffffff"/>
+  
+  <!-- Círculo medio -->
+  <ellipse cx="200" cy="200" rx="60" ry="180" fill="#000000"/>
+  <ellipse cx="200" cy="200" rx="25" ry="140" fill="#ffffff"/>
+  
+  <!-- Círculo interior derecho -->
+  <ellipse cx="280" cy="200" rx="45" ry="160" fill="#000000" opacity="0.95"/>
+  <ellipse cx="280" cy="200" rx="18" ry="110" fill="#ffffff"/>
+  
+  <!-- Elemento pequeño derecho -->
+  <ellipse cx="350" cy="200" rx="15" ry="50" fill="#000000"/>
+  <ellipse cx="350" cy="200" rx="6" ry="30" fill="#ffffff"/>
+</svg>

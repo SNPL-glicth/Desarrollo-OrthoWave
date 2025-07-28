@@ -90,7 +90,7 @@ const GoogleCalendarNavbar: React.FC<GoogleCalendarNavbarProps> = ({
           {/* Logo y título */}
           <div className="flex items-center space-x-3">
             <img 
-              src="/images/logo.webp" 
+              src="/images/ortowhave-logo.svg" 
               alt="OrtoWhave" 
               className="w-8 h-8 object-contain"
             />
