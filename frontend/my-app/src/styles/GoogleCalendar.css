@@ -1,99 +1,162 @@
 /* Estilos personalizados para el calendario estilo Google Calendar */
 
-.google-calendar-event {
-  border-radius: 4px !important;
-  border: none !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  padding: 2px 6px !important;
-  margin: 1px 0 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
-  transition: all 0.2s ease !important;
+/* Reset y estilos base */
+.fc {
+  font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  background-color: #ffffff;
 }
 
-.google-calendar-event:hover {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
-  transform: translateY(-1px) !important;
-}
-
-.google-calendar-day {
-  border-color: #e0e0e0 !important;
-}
-
-/* Header del calendario */
+/* Header del calendario - ocultamos el por defecto */
 .fc-header-toolbar {
-  display: none !important; /* Ocultamos el header por defecto */
-}
-
-/* Vista de mes */
-.fc-dayGridMonth-view .fc-daygrid-day {
-  min-height: 120px;
-  position: relative;
-}
-
-.fc-dayGridMonth-view .fc-daygrid-day-number {
-  color: #3c4043;
-  font-weight: 400;
-  font-size: 13px;
-  padding: 8px;
-  text-align: left;
-  display: block;
-}
-
-.fc-dayGridMonth-view .fc-daygrid-day.fc-day-today {
-  background-color: #e8f0fe !important;
-}
-
-.fc-dayGridMonth-view .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
-  background-color: #1a73e8;
-  color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  margin: 4px;
-}
-
-/* Ocultar números duplicados en el header de columna para vista mensual */
-.fc-dayGridMonth-view .fc-col-header-cell-cushion {
   display: none !important;
 }
 
-/* Vista de semana */
-.fc-timeGridWeek-view .fc-timegrid-slot {
-  border-color: #e0e0e0;
-  height: 48px;
+/* Toolbar personalizado */
+.fc-toolbar {
+  display: none !important;
 }
 
-.fc-timeGridWeek-view .fc-timegrid-slot-label {
+/* Estilos para vista mensual */
+.fc-dayGridMonth-view {
+  background-color: #ffffff;
+}
+
+.fc-dayGridMonth-view .fc-scrollgrid {
+  border: 1px solid #e0e0e0;
+}
+
+.fc-dayGridMonth-view .fc-col-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  height: 40px;
+}
+
+.fc-dayGridMonth-view .fc-col-header-cell {
+  padding: 0;
+  border-right: 1px solid #e0e0e0;
+}
+
+.fc-dayGridMonth-view .fc-col-header-cell-cushion {
   color: #70757a;
   font-size: 11px;
-  font-weight: 400;
-  text-align: right;
-  padding-right: 8px;
-}
-
-.fc-timeGridWeek-view .fc-col-header-cell {
-  background-color: #f8f9fa;
-  border-color: #e0e0e0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
   padding: 12px 8px;
   text-align: center;
 }
 
+.fc-dayGridMonth-view .fc-daygrid-day {
+  min-height: 120px;
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
+}
+
+.fc-dayGridMonth-view .fc-daygrid-day-top {
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 8px;
+}
+
+.fc-dayGridMonth-view .fc-daygrid-day-number {
+  color: #3c4043;
+  font-size: 14px;
+  font-weight: 400;
+  padding: 4px 8px;
+  margin: 0;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.fc-dayGridMonth-view .fc-daygrid-day-number:hover {
+  background-color: #f1f3f4;
+}
+
+/* Día actual en vista mensual */
+.fc-dayGridMonth-view .fc-day-today {
+  background-color: #ffffff !important;
+}
+
+.fc-dayGridMonth-view .fc-day-today .fc-daygrid-day-number {
+  background-color: #1a73e8;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Días del mes anterior/siguiente */
+.fc-dayGridMonth-view .fc-day-other .fc-daygrid-day-number {
+  color: #9aa0a6;
+}
+
+/* Estilos para eventos en vista mensual */
+.fc-dayGridMonth-view .fc-daygrid-event {
+  border: none !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 2px 6px !important;
+  margin: 1px 2px !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fc-dayGridMonth-view .fc-daygrid-event:hover {
+  filter: brightness(0.95);
+}
+
+.fc-dayGridMonth-view .fc-event-time {
+  font-weight: 400 !important;
+  font-size: 11px !important;
+}
+
+.fc-dayGridMonth-view .fc-event-title {
+  font-weight: 500 !important;
+  font-size: 12px !important;
+}
+
+/* Estilos para vista semanal */
+.fc-timeGridWeek-view {
+  background-color: #ffffff;
+}
+
+.fc-timeGridWeek-view .fc-scrollgrid {
+  border: 1px solid #e0e0e0;
+}
+
+.fc-timeGridWeek-view .fc-col-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.fc-timeGridWeek-view .fc-col-header-cell {
+  padding: 16px 8px;
+  text-align: center;
+  border-right: 1px solid #e0e0e0;
+}
+
 .fc-timeGridWeek-view .fc-col-header-cell-cushion {
   color: #3c4043;
+  font-size: 14px;
   font-weight: 500;
-  font-size: 13px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
 }
 
-/* Estilo especial para el día actual en vista semanal */
+/* Día actual en vista semanal */
 .fc-timeGridWeek-view .fc-day-today .fc-col-header-cell-cushion {
   color: #1a73e8;
   font-weight: 600;
@@ -103,65 +166,123 @@
   background-color: #e8f0fe;
 }
 
-/* Vista de día */
-.fc-timeGridDay-view .fc-timegrid-slot {
-  border-color: #e0e0e0;
+/* Grid de tiempo */
+.fc-timeGridWeek-view .fc-timegrid-slot {
   height: 48px;
+  border-bottom: 1px solid #f1f3f4;
 }
 
-.fc-timeGridDay-view .fc-timegrid-slot-label {
+.fc-timeGridWeek-view .fc-timegrid-slot-minor {
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.fc-timeGridWeek-view .fc-timegrid-slot-label {
   color: #70757a;
   font-size: 11px;
   font-weight: 400;
+  text-align: right;
+  padding-right: 12px;
+  border-right: 1px solid #e0e0e0;
+  width: 60px;
+}
+
+.fc-timeGridWeek-view .fc-timegrid-col {
+  border-right: 1px solid #e0e0e0;
+}
+
+/* Eventos en vista semanal */
+.fc-timeGridWeek-view .fc-timegrid-event {
+  border: none !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 4px 8px !important;
+  margin: 0 2px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+  cursor: pointer;
+}
+
+.fc-timeGridWeek-view .fc-timegrid-event:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  filter: brightness(0.95);
+}
+
+.fc-timeGridWeek-view .fc-event-time {
+  font-weight: 500 !important;
+  font-size: 11px !important;
+  color: inherit !important;
+}
+
+.fc-timeGridWeek-view .fc-event-title {
+  font-weight: 500 !important;
+  font-size: 12px !important;
+  margin-top: 2px;
+}
+
+/* Estilos para vista diaria */
+.fc-timeGridDay-view {
+  background-color: #ffffff;
+}
+
+.fc-timeGridDay-view .fc-col-header-cell {
+  padding: 20px;
+  text-align: center;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.fc-timeGridDay-view .fc-col-header-cell-cushion {
+  color: #3c4043;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.fc-timeGridDay-view .fc-day-today .fc-col-header-cell-cushion {
+  color: #1a73e8;
+  font-weight: 600;
 }
 
 /* Línea de tiempo actual */
 .fc-timegrid-now-indicator-line {
-  border-color: #ea4335 !important;
-  border-width: 2px !important;
+  border-top: 2px solid #ea4335 !important;
 }
 
 .fc-timegrid-now-indicator-arrow {
   border-color: #ea4335 !important;
 }
 
-/* Horario de trabajo */
-.fc-non-business {
-  background-color: #f8f9fa !important;
-}
-
-/* Selección de fecha */
+/* Estilos de selección */
 .fc-highlight {
   background-color: #e8f0fe !important;
-  opacity: 0.7 !important;
+  opacity: 0.8 !important;
 }
 
-/* Botones de navegación (aunque están ocultos) */
+/* Botones y controles */
 .fc-button {
-  background-color: transparent !important;
+  background-color: #ffffff !important;
   border: 1px solid #dadce0 !important;
   color: #3c4043 !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   font-weight: 500 !important;
-  padding: 8px 16px !important;
   border-radius: 4px !important;
+  padding: 8px 16px !important;
   transition: all 0.2s ease !important;
 }
 
 .fc-button:hover {
   background-color: #f8f9fa !important;
   border-color: #dadce0 !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
 }
 
 .fc-button:focus {
-  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15) !important;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.24) !important;
 }
 
 .fc-button-primary {
   background-color: #1a73e8 !important;
   border-color: #1a73e8 !important;
-  color: white !important;
+  color: #ffffff !important;
 }
 
 .fc-button-primary:hover {
@@ -169,121 +290,135 @@
   border-color: #1557b0 !important;
 }
 
-/* Título del calendario */
-.fc-toolbar-title {
-  color: #3c4043 !important;
-  font-size: 22px !important;
-  font-weight: 400 !important;
-  margin: 0 !important;
-}
-
-/* Días de la semana */
-.fc-col-header-cell-cushion {
-  color: #70757a !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.8px !important;
-  padding: 8px 0 !important;
-}
-
-/* Más eventos */
-.fc-daygrid-more-link {
-  color: #1a73e8 !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  margin: 2px 4px !important;
-  padding: 2px 4px !important;
-  border-radius: 2px !important;
-  transition: background-color 0.2s ease !important;
-}
-
-.fc-daygrid-more-link:hover {
-  background-color: #e8f0fe !important;
-}
-
-/* Eventos de todo el día */
-.fc-daygrid-event.fc-event-start.fc-event-end {
-  margin: 1px 2px !important;
-}
-
-/* Scrollbar personalizado para vista de semana/día */
+/* Scrollbars personalizados */
 .fc-scroller::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 .fc-scroller::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+  background: #f1f3f4;
 }
 
 .fc-scroller::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 10px;
+  background: #dadce0;
+  border-radius: 4px;
 }
 
 .fc-scroller::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #bdc1c6;
 }
 
-/* Responsivo */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .fc-dayGridMonth-view .fc-daygrid-day {
     min-height: 80px;
   }
-  
+
   .fc-dayGridMonth-view .fc-daygrid-day-number {
     font-size: 12px;
-    padding: 4px;
+    width: 24px;
+    height: 24px;
   }
-  
-  .google-calendar-event {
-    font-size: 11px !important;
-    padding: 1px 4px !important;
+
+  .fc-timeGridWeek-view .fc-timegrid-slot {
+    height: 40px;
   }
-  
-  .fc-toolbar-title {
-    font-size: 18px !important;
+
+  .fc-timeGridWeek-view .fc-col-header-cell {
+    padding: 12px 4px;
   }
 }
 
-/* Animaciones suaves */
-.fc-event {
-  transition: all 0.2s ease !important;
+/* Estados de loading */
+.fc-loading {
+  cursor: wait;
 }
 
-.fc-event:hover {
-  z-index: 10 !important;
+/* Tooltips y popovers */
+.fc-popover {
+  background-color: #ffffff !important;
+  border: 1px solid #dadce0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
-/* Colores de estado para eventos médicos */
-.fc-event.event-confirmed {
+.fc-popover-header {
+  background-color: #f8f9fa !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  padding: 12px 16px !important;
+  font-weight: 500 !important;
+  color: #3c4043 !important;
+}
+
+.fc-popover-body {
+  padding: 8px !important;
+}
+
+/* Colores predefinidos para eventos */
+.google-calendar-event-blue {
   background-color: #1a73e8 !important;
-  border-color: #1a73e8 !important;
+  color: #ffffff !important;
 }
 
-.fc-event.event-pending {
-  background-color: #fbbc04 !important;
-  border-color: #fbbc04 !important;
-  color: #202124 !important;
+.google-calendar-event-green {
+  background-color: #137333 !important;
+  color: #ffffff !important;
 }
 
-.fc-event.event-cancelled {
-  background-color: #ea4335 !important;
-  border-color: #ea4335 !important;
+.google-calendar-event-red {
+  background-color: #d93025 !important;
+  color: #ffffff !important;
 }
 
-.fc-event.event-completed {
-  background-color: #34a853 !important;
-  border-color: #34a853 !important;
+.google-calendar-event-orange {
+  background-color: #f9ab00 !important;
+  color: #ffffff !important;
 }
 
-.fc-event.event-in-progress {
-  background-color: #9c27b0 !important;
-  border-color: #9c27b0 !important;
+.google-calendar-event-purple {
+  background-color: #9334e6 !important;
+  color: #ffffff !important;
 }
 
-.fc-event.event-no-show {
-  background-color: #9e9e9e !important;
-  border-color: #9e9e9e !important;
+.google-calendar-event-teal {
+  background-color: #0f766e !important;
+  color: #ffffff !important;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fc-event {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Estados hover para días */
+.fc-daygrid-day:hover {
+  background-color: #f8f9fa !important;
+}
+
+.fc-timegrid-col:hover {
+  background-color: #f8f9fa !important;
+}
+
+/* Estilos para drag and drop */
+.fc-event-dragging {
+  opacity: 0.75 !important;
+  transform: rotate(2deg) !important;
+  z-index: 999 !important;
+}
+
+.fc-event-resizing {
+  opacity: 0.8 !important;
 }

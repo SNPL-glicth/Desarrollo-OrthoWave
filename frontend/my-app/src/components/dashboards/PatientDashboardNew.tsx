@@ -38,11 +38,11 @@ const UserAccountModal: React.FC<UserAccountModalProps> = ({
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 z-40 bg-black bg-opacity-0"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="absolute top-16 right-6 z-50 w-80 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
         {/* Close button */}
@@ -60,8 +60,8 @@ const UserAccountModal: React.FC<UserAccountModalProps> = ({
           {/* User avatar */}
           <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden">
             {currentUser.avatar ? (
-              <img 
-                src={currentUser.avatar} 
+              <img
+                src={currentUser.avatar}
                 alt={currentUser.name}
                 className="w-full h-full object-cover"
               />
@@ -94,7 +94,7 @@ const UserAccountModal: React.FC<UserAccountModalProps> = ({
               </button>
             </div>
           </div>
-          
+
           {/* Sign out button */}
           <button
             onClick={onSignOut}
@@ -118,7 +118,7 @@ const PatientDashboard: React.FC = () => {
     today.setHours(0, 0, 0, 0);
     return today;
   });
-  
+
   // Datos de ejemplo para citas
   const [proximaCita] = useState<Cita>({
     id: 1,
@@ -128,7 +128,7 @@ const PatientDashboard: React.FC = () => {
     estado: 'Confirmada',
     consultorio: 'Consultorio'
   });
-  
+
   const [historialCitas] = useState<Cita[]>([
     {
       id: 2,
@@ -184,7 +184,7 @@ const PatientDashboard: React.FC = () => {
             <img className="h-6 sm:h-8" src="/images/White logo - no background_page-0001.webp" alt="OrtoWhave" />
             <h1 className="text-lg sm:text-2xl font-semibold text-gray-800 truncate">Hola, {user.nombre}</h1>
           </div>
-          
+
           <div className="relative">
             <button
               onClick={handleUserMenuToggle}
@@ -207,7 +207,7 @@ const PatientDashboard: React.FC = () => {
                 </svg>
                 <span className="text-sm lg:text-base">Inicio</span>
               </button>
-              
+
               <button className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap">
                 <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -268,9 +268,9 @@ const PatientDashboard: React.FC = () => {
                 </div>
                 <MiniCalendar
                   currentDate={selectedDate}
-                  onDateSelect={handleDateSelect}
+                  onDateClick={handleDateSelect}
                 />
-                
+
                 {/* Información de la fecha seleccionada */}
                 <div className="p-6 pt-4 border-t border-gray-200">
                   <div className="text-sm text-gray-600">
@@ -302,8 +302,8 @@ const PatientDashboard: React.FC = () => {
                       <div className="text-gray-600">{cita.doctor}</div>
                       <div>
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                          ${cita.estado === 'Completada' 
-                            ? 'bg-green-100 text-green-800' 
+                          ${cita.estado === 'Completada'
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'}`}>
                           {cita.estado}
                         </span>
