@@ -112,7 +112,7 @@ export const authService = {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       console.log('Sesión cerrada exitosamente');
-      window.location.href = '/login';
+      // No redirigir automáticamente a login, dejar que la aplicación maneje la navegación
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }

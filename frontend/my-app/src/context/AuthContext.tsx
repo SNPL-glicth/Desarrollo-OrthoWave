@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/auth.service';
 import { User } from '../types/user';
-import { clearAuthData, isTokenExpired, getStoredToken } from '../utils/auth';
+import { clearAuthData, isTokenExpired, getStoredToken, forceLogout } from '../utils/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -60,7 +60,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           
           setToken(storedToken);
-          const currentUser = await authService.getCurrentUser();
+          // Obtener usuario desde localStorage en lugar de hacer llamada API
+          const currentUser = authService.getCurrentUser();
           if (currentUser) {
             const userWithRole: User = {
               ...currentUser,
@@ -69,14 +70,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             };
             setUser(userWithRole);
             setIsAuthenticated(true);
-            console.log('Usuario autenticado:', {
+            console.log('Usuario autenticado desde localStorage:', {
               id: userWithRole.id,
               email: userWithRole.email,
               nombre: userWithRole.nombre,
               rol: userWithRole.rol
             });
           } else {
-            console.log('No se pudo obtener el usuario actual');
+            console.log('No se pudo obtener el usuario desde localStorage');
             clearAuthData();
             setUser(null);
             setToken(null);
@@ -94,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setIsAuthenticated(false);
         clearAuthData();
-        authService.logout();
+        // No llamar authService.logout() aquí para evitar redirecciones innecesarias
       } finally {
         setLoading(false);
       }

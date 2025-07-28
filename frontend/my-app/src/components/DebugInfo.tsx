@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { forceLogout, clearAuthData } from '../utils/auth';
+import { resetAppState, logDevInfo } from '../utils/devInit';
 // import { sampleDataService } from '../services/sampleDataService';
 
 const DebugInfo: React.FC = () => {
@@ -81,6 +83,30 @@ const DebugInfo: React.FC = () => {
     }
   };
 
+  const handleForceLogout = () => {
+    if (window.confirm('¿Estás seguro de que quieres limpiar toda la sesión? Esto eliminará todos los datos de autenticación.')) {
+      forceLogout();
+      alert('Sesión limpiada completamente. La página se recargará.');
+      setTimeout(() => window.location.reload(), 1000);
+    }
+  };
+
+  const handleClearAuth = () => {
+    clearAuthData();
+    alert('Datos de autenticación limpiados del almacenamiento local.');
+  };
+
+  const handleResetApp = () => {
+    if (window.confirm('¿Estás seguro de que quieres resetear completamente la aplicación? Esto eliminará TODOS los datos almacenados y recargará la página.')) {
+      resetAppState();
+    }
+  };
+
+  const handleLogDevInfo = () => {
+    logDevInfo();
+    alert('Información de desarrollo mostrada en la consola.');
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto mt-8">
       <h2 className="text-2xl font-bold mb-4">Debug Information</h2>
@@ -145,6 +171,38 @@ const DebugInfo: React.FC = () => {
               </button>
             </>
           )}
+          
+          <button
+            onClick={handleLogDevInfo}
+            disabled={loading}
+            className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 disabled:opacity-50"
+          >
+            Log Dev Info
+          </button>
+          
+          <button
+            onClick={handleClearAuth}
+            disabled={loading}
+            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 disabled:opacity-50"
+          >
+            Clear Auth Data
+          </button>
+          
+          <button
+            onClick={handleForceLogout}
+            disabled={loading}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:opacity-50"
+          >
+            Force Logout
+          </button>
+          
+          <button
+            onClick={handleResetApp}
+            disabled={loading}
+            className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 disabled:opacity-50"
+          >
+            Reset App State
+          </button>
         </div>
         
         {loading && (

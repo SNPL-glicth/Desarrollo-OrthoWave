@@ -205,16 +205,16 @@ const PatientDashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-6">
-          <div className="flex items-center space-x-4">
-            <img className="h-8" src="/images/White logo - no background_page-0001.webp" alt="OrtoWhave" />
-            <h1 className="text-2xl font-semibold text-gray-800">Hola, {user.nombre}</h1>
+        <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-4 sm:px-6">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <img className="h-6 sm:h-8" src="/images/White logo - no background_page-0001.webp" alt="OrtoWhave" />
+            <h1 className="text-lg sm:text-2xl font-semibold text-gray-800 truncate">Hola, {user.nombre}</h1>
           </div>
           
           <div className="relative">
             <button
               onClick={handleUserMenuToggle}
-              className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium hover:bg-blue-700 transition-colors"
+              className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium hover:bg-blue-700 transition-colors text-sm sm:text-base"
             >
               {user.nombre?.charAt(0)?.toUpperCase() || 'U'}
             </button>
@@ -222,28 +222,28 @@ const PatientDashboard: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto py-8 px-6">
-        <div className="flex gap-8">
+      <div className="max-w-7xl mx-auto py-4 sm:py-8 px-4 sm:px-6">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Sidebar */}
-          <aside className="w-64 space-y-6">
-            <nav className="space-y-2">
-              <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <aside className="w-full lg:w-64 space-y-4 lg:space-y-6">
+            <nav className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 overflow-x-auto lg:overflow-x-visible">
+              <button className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap">
+                <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                <span>Inicio</span>
+                <span className="text-sm lg:text-base">Inicio</span>
               </button>
               
-              <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap">
+                <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                <span>Mi perfil</span>
+                <span className="text-sm lg:text-base">Mi perfil</span>
               </button>
             </nav>
 
-            {/* Contactar */}
-            <div className="pt-6 border-t border-gray-200">
+            {/* Contactar - Hidden on mobile, visible on desktop */}
+            <div className="hidden lg:block pt-6 border-t border-gray-200">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Contactar</h3>
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex items-center space-x-2">

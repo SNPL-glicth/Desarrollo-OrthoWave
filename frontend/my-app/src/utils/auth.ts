@@ -15,8 +15,48 @@ export const clearAuthData = () => {
     localStorage.removeItem(key);
     sessionStorage.removeItem(key);
   });
+
+  // Limpiar cualquier clave que contenga términos relacionados con autenticación
+  const allKeys = Object.keys(localStorage);
+  allKeys.forEach(key => {
+    if (key.toLowerCase().includes('auth') || 
+        key.toLowerCase().includes('token') || 
+        key.toLowerCase().includes('user') ||
+        key.toLowerCase().includes('session')) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  const allSessionKeys = Object.keys(sessionStorage);
+  allSessionKeys.forEach(key => {
+    if (key.toLowerCase().includes('auth') || 
+        key.toLowerCase().includes('token') || 
+        key.toLowerCase().includes('user') ||
+        key.toLowerCase().includes('session')) {
+      sessionStorage.removeItem(key);
+    }
+  });
   
   console.log('Datos de autenticación limpiados completamente');
+};
+
+// Función para forzar la limpieza de todas las sesiones
+export const forceLogout = () => {
+  clearAuthData();
+  
+  // Limpiar cookies relacionadas con autenticación
+  document.cookie.split(";").forEach(cookie => {
+    const eqPos = cookie.indexOf("=");
+    const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+    if (name.toLowerCase().includes('auth') || 
+        name.toLowerCase().includes('token') || 
+        name.toLowerCase().includes('user')) {
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+    }
+  });
+
+  console.log('Sesión forzosamente cerrada y limpiada');
 };
 
 export const isTokenExpired = (token: string): boolean => {

@@ -32,11 +32,20 @@ api.interceptors.response.use(
     if (error.response) {
       // El servidor respondió con un código de estado fuera del rango 2xx
       if (error.response.status === 401) {
-        // Solo redirigir si no estamos ya en la página de login
-        if (window.location.pathname !== '/login') {
+        // Solo limpiar tokens pero NO redirigir automáticamente
+        // Dejar que cada componente maneje su propia lógica de redirección
+        const publicPaths = ['/', '/login', '/register', '/verification'];
+        const isPublicPath = publicPaths.includes(window.location.pathname);
+        
+        if (!isPublicPath) {
+          // Solo redirigir si estamos en una ruta protegida
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           window.location.href = '/login';
+        } else {
+          // En rutas públicas, solo limpiar tokens sin redirigir
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
         }
       }
       // Mantener la estructura original del error para que auth.service.js pueda manejarlo

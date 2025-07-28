@@ -72,16 +72,22 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
   const fetchExistingAppointments = useCallback(async () => {
     setLoading(true);
     try {
-      // Simulamos citas existentes - después se conectará al backend real
-      const mockAppointments: CitaExistente[] = [
-        { id: 1, fechaHora: '2025-01-27T09:00:00', duracion: 60 },
-        { id: 2, fechaHora: '2025-01-27T14:30:00', duracion: 45 },
-        { id: 3, fechaHora: '2025-01-28T10:00:00', duracion: 60 },
-        { id: 4, fechaHora: '2025-01-29T11:30:00', duracion: 30 },
-      ];
-      setExistingAppointments(mockAppointments);
+      // Obtener citas reales del doctor desde el backend
+      const response = await api.get(`/citas/doctor/${doctor.id}`);
+      const citas = response.data || [];
+      
+      // Convertir al formato esperado
+      const citasFormateadas: CitaExistente[] = citas.map((cita: any) => ({
+        id: cita.id,
+        fechaHora: cita.fechaHora,
+        duracion: cita.duracion || 60
+      }));
+      
+      setExistingAppointments(citasFormateadas);
     } catch (err) {
       console.error('Error al obtener citas existentes:', err);
+      // En caso de error, establecer array vacío
+      setExistingAppointments([]);
     } finally {
       setLoading(false);
     }

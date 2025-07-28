@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { initDevEnvironment } from './utils/devInit';
 import { CartProvider } from './context/CartContext';
 import { CitaProvider } from './contexts/CitasContext';
 import VerificationPage from './pages/VerificationPage';
@@ -33,6 +34,8 @@ const CreateUserPage = () => {
     </div>
   );
 };
+
+initDevEnvironment();
 
 const App: React.FC = () => {
   return (
