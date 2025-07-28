@@ -1,0 +1,289 @@
+/* Estilos personalizados para el calendario estilo Google Calendar */
+
+.google-calendar-event {
+  border-radius: 4px !important;
+  border: none !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 2px 6px !important;
+  margin: 1px 0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+  transition: all 0.2s ease !important;
+}
+
+.google-calendar-event:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px) !important;
+}
+
+.google-calendar-day {
+  border-color: #e0e0e0 !important;
+}
+
+/* Header del calendario */
+.fc-header-toolbar {
+  display: none !important; /* Ocultamos el header por defecto */
+}
+
+/* Vista de mes */
+.fc-dayGridMonth-view .fc-daygrid-day {
+  min-height: 120px;
+  position: relative;
+}
+
+.fc-dayGridMonth-view .fc-daygrid-day-number {
+  color: #3c4043;
+  font-weight: 400;
+  font-size: 13px;
+  padding: 8px;
+  text-align: left;
+  display: block;
+}
+
+.fc-dayGridMonth-view .fc-daygrid-day.fc-day-today {
+  background-color: #e8f0fe !important;
+}
+
+.fc-dayGridMonth-view .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background-color: #1a73e8;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  margin: 4px;
+}
+
+/* Ocultar números duplicados en el header de columna para vista mensual */
+.fc-dayGridMonth-view .fc-col-header-cell-cushion {
+  display: none !important;
+}
+
+/* Vista de semana */
+.fc-timeGridWeek-view .fc-timegrid-slot {
+  border-color: #e0e0e0;
+  height: 48px;
+}
+
+.fc-timeGridWeek-view .fc-timegrid-slot-label {
+  color: #70757a;
+  font-size: 11px;
+  font-weight: 400;
+  text-align: right;
+  padding-right: 8px;
+}
+
+.fc-timeGridWeek-view .fc-col-header-cell {
+  background-color: #f8f9fa;
+  border-color: #e0e0e0;
+  padding: 12px 8px;
+  text-align: center;
+}
+
+.fc-timeGridWeek-view .fc-col-header-cell-cushion {
+  color: #3c4043;
+  font-weight: 500;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Estilo especial para el día actual en vista semanal */
+.fc-timeGridWeek-view .fc-day-today .fc-col-header-cell-cushion {
+  color: #1a73e8;
+  font-weight: 600;
+}
+
+.fc-timeGridWeek-view .fc-day-today .fc-col-header-cell {
+  background-color: #e8f0fe;
+}
+
+/* Vista de día */
+.fc-timeGridDay-view .fc-timegrid-slot {
+  border-color: #e0e0e0;
+  height: 48px;
+}
+
+.fc-timeGridDay-view .fc-timegrid-slot-label {
+  color: #70757a;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* Línea de tiempo actual */
+.fc-timegrid-now-indicator-line {
+  border-color: #ea4335 !important;
+  border-width: 2px !important;
+}
+
+.fc-timegrid-now-indicator-arrow {
+  border-color: #ea4335 !important;
+}
+
+/* Horario de trabajo */
+.fc-non-business {
+  background-color: #f8f9fa !important;
+}
+
+/* Selección de fecha */
+.fc-highlight {
+  background-color: #e8f0fe !important;
+  opacity: 0.7 !important;
+}
+
+/* Botones de navegación (aunque están ocultos) */
+.fc-button {
+  background-color: transparent !important;
+  border: 1px solid #dadce0 !important;
+  color: #3c4043 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+.fc-button:hover {
+  background-color: #f8f9fa !important;
+  border-color: #dadce0 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.fc-button:focus {
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15) !important;
+}
+
+.fc-button-primary {
+  background-color: #1a73e8 !important;
+  border-color: #1a73e8 !important;
+  color: white !important;
+}
+
+.fc-button-primary:hover {
+  background-color: #1557b0 !important;
+  border-color: #1557b0 !important;
+}
+
+/* Título del calendario */
+.fc-toolbar-title {
+  color: #3c4043 !important;
+  font-size: 22px !important;
+  font-weight: 400 !important;
+  margin: 0 !important;
+}
+
+/* Días de la semana */
+.fc-col-header-cell-cushion {
+  color: #70757a !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.8px !important;
+  padding: 8px 0 !important;
+}
+
+/* Más eventos */
+.fc-daygrid-more-link {
+  color: #1a73e8 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  margin: 2px 4px !important;
+  padding: 2px 4px !important;
+  border-radius: 2px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.fc-daygrid-more-link:hover {
+  background-color: #e8f0fe !important;
+}
+
+/* Eventos de todo el día */
+.fc-daygrid-event.fc-event-start.fc-event-end {
+  margin: 1px 2px !important;
+}
+
+/* Scrollbar personalizado para vista de semana/día */
+.fc-scroller::-webkit-scrollbar {
+  width: 8px;
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .fc-dayGridMonth-view .fc-daygrid-day {
+    min-height: 80px;
+  }
+  
+  .fc-dayGridMonth-view .fc-daygrid-day-number {
+    font-size: 12px;
+    padding: 4px;
+  }
+  
+  .google-calendar-event {
+    font-size: 11px !important;
+    padding: 1px 4px !important;
+  }
+  
+  .fc-toolbar-title {
+    font-size: 18px !important;
+  }
+}
+
+/* Animaciones suaves */
+.fc-event {
+  transition: all 0.2s ease !important;
+}
+
+.fc-event:hover {
+  z-index: 10 !important;
+}
+
+/* Colores de estado para eventos médicos */
+.fc-event.event-confirmed {
+  background-color: #1a73e8 !important;
+  border-color: #1a73e8 !important;
+}
+
+.fc-event.event-pending {
+  background-color: #fbbc04 !important;
+  border-color: #fbbc04 !important;
+  color: #202124 !important;
+}
+
+.fc-event.event-cancelled {
+  background-color: #ea4335 !important;
+  border-color: #ea4335 !important;
+}
+
+.fc-event.event-completed {
+  background-color: #34a853 !important;
+  border-color: #34a853 !important;
+}
+
+.fc-event.event-in-progress {
+  background-color: #9c27b0 !important;
+  border-color: #9c27b0 !important;
+}
+
+.fc-event.event-no-show {
+  background-color: #9e9e9e !important;
+  border-color: #9e9e9e !important;
+}

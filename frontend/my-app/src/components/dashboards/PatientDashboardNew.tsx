@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import MiniCalendar from '../calendar/MiniCalendar';
 
 // Interfaz para citas
 interface Cita {
@@ -111,8 +112,12 @@ const PatientDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(15); // Día seleccionado en el calendario
+  // Usar una sola fecha para simplificar la lógica
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  });
   
   // Datos de ejemplo para citas
   const [proximaCita] = useState<Cita>({
@@ -154,44 +159,13 @@ const PatientDashboard: React.FC = () => {
     navigate('/dashboard/patient/agendar');
   };
 
-  const renderCalendar = () => {
-    const startOfCurrentMonth = startOfMonth(currentDate);
-    const endOfCurrentMonth = endOfMonth(currentDate);
-    const days = eachDayOfInterval({ start: startOfCurrentMonth, end: endOfCurrentMonth });
-
-    // Días de la semana
-    const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-
-    return (
-      <div className="space-y-2">
-        {/* Header de días de la semana */}
-        <div className="grid grid-cols-7 gap-1 mb-2">
-          {weekDays.map((day, index) => (
-            <div key={index} className="text-center text-sm font-medium text-gray-500 py-2">
-              {day}
-            </div>
-          ))}
-        </div>
-        
-        {/* Días del mes */}
-        <div className="grid grid-cols-7 gap-1">
-          {days.map((day, index) => (
-            <button
-              key={index}
-              onClick={() => setSelectedDate(day.getDate())}
-              className={`w-8 h-8 flex items-center justify-center rounded text-sm
-                ${isSameMonth(day, currentDate) ? 'text-black' : 'text-gray-400'}
-                ${day.getDate() === selectedDate ? 'bg-blue-600 text-white rounded-full' : ''}
-                ${isToday(day) ? 'border border-blue-600' : ''}
-                hover:bg-gray-100`}
-            >
-              {format(day, 'd')}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
+  // Manejar selección de fecha en el mini calendario
+  const handleDateSelect = (date: Date) => {
+    const normalizedDate = new Date(date);
+    normalizedDate.setHours(0, 0, 0, 0);
+    setSelectedDate(normalizedDate);
   };
+
 
   if (!user) {
     return (
@@ -288,29 +262,29 @@ const PatientDashboard: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Calendario */}
-              <section className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <button 
-                    onClick={() => setCurrentDate(subMonths(currentDate, 1))} 
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    {format(currentDate, 'MMMM \'de\' yyyy', { locale: es })}
-                  </h2>
-                  <button 
-                    onClick={() => setCurrentDate(addMonths(currentDate, 1))} 
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
+              <section className="bg-white rounded-lg shadow-sm">
+                <div className="p-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">Calendario</h2>
                 </div>
-                {renderCalendar()}
+                <MiniCalendar
+                  currentDate={selectedDate}
+                  onDateSelect={handleDateSelect}
+                />
+                
+                {/* Información de la fecha seleccionada */}
+                <div className="p-6 pt-4 border-t border-gray-200">
+                  <div className="text-sm text-gray-600">
+                    <div className="font-medium text-gray-900 mb-2">
+                      {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                        <span>No hay citas programadas</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </section>
 
               {/* Historial de citas */}

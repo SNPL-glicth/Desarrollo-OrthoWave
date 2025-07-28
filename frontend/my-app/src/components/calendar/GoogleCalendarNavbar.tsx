@@ -31,8 +31,31 @@ const GoogleCalendarNavbar: React.FC<GoogleCalendarNavbarProps> = ({
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const formatMonthYear = (date: Date) => {
-    return format(date, 'MMMM \'de\' yyyy', { locale: es });
+  const formatDateTitle = (date: Date, view: string) => {
+    switch (view) {
+      case 'dayGridMonth':
+        return format(date, 'MMMM \'de\' yyyy', { locale: es });
+      case 'timeGridWeek':
+        // Para vista semanal, mostrar rango de fechas
+        const startOfWeek = new Date(date);
+        // Calcular el lunes de la semana
+        const dayOfWeek = startOfWeek.getDay();
+        const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Si es domingo (0), restar 6 días
+        startOfWeek.setDate(date.getDate() - daysToSubtract);
+        
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // Domingo
+        
+        if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
+          return `${startOfWeek.getDate()}-${endOfWeek.getDate()} de ${format(startOfWeek, 'MMMM yyyy', { locale: es })}`;
+        } else {
+          return `${format(startOfWeek, 'd MMM', { locale: es })} - ${format(endOfWeek, 'd MMM yyyy', { locale: es })}`;
+        }
+      case 'timeGridDay':
+        return format(date, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es });
+      default:
+        return format(date, 'MMMM \'de\' yyyy', { locale: es });
+    }
   };
 
   return (
@@ -93,7 +116,7 @@ const GoogleCalendarNavbar: React.FC<GoogleCalendarNavbarProps> = ({
 
           {/* Month/Year display */}
           <h2 className="text-xl font-normal text-gray-800 min-w-0">
-            {formatMonthYear(currentDate)}
+            {formatDateTitle(currentDate, currentView)}
           </h2>
         </div>
 

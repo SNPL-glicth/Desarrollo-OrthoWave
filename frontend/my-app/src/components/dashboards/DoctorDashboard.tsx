@@ -91,6 +91,17 @@ const DoctorDashboard: React.FC = () => {
                 </span>
               </div>
               
+              {/* Botón de calendario */}
+              <button
+                onClick={() => navigate('/calendar')}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Mi Calendario
+              </button>
+              
               {/* Botón de perfil */}
               <button
                 onClick={() => setShowOffcanvas(true)}

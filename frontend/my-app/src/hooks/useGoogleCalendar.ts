@@ -15,6 +15,7 @@ import { useAuth } from '../context/AuthContext';
 
 const defaultConfig: CalendarConfig = {
   view: 'dayGridMonth' as CalendarView,
+  initialDate: new Date(),
   businessHours: {
     start: '08:00',
     end: '18:00',
@@ -35,7 +36,7 @@ const defaultConfig: CalendarConfig = {
 export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): CalendarHookReturn => {
   const { user } = useAuth();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [currentView, setCurrentView] = useState<CalendarView>('month');
+  const [currentView, setCurrentView] = useState<CalendarView>('dayGridMonth');
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [config, setConfig] = useState<CalendarConfig>({
     ...defaultConfig,
@@ -43,6 +44,16 @@ export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): Cale
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Sincronizar la fecha actual con la configuración
+  useEffect(() => {
+    setConfig(prev => ({ ...prev, initialDate: currentDate }));
+  }, [currentDate]);
+
+  // Asegurar que la vista esté sincronizada
+  useEffect(() => {
+    setConfig(prev => ({ ...prev, view: currentView }));
+  }, [currentView]);
 
   // Función para obtener eventos desde el backend
   const fetchEvents = useCallback(async () => {

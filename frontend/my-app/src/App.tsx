@@ -105,6 +105,14 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/calendar"
+                element={
+                  <ProtectedRoute role="doctor">
+                    <GoogleCalendarPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/dashboard" element={<AutoRedirect />} />
               <Route path="/debug" element={<DebugInfo />} />
             </Routes>

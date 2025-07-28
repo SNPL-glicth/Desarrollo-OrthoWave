@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GoogleCalendarNavbar from './GoogleCalendarNavbar';
 import GoogleStyleCalendar from './GoogleStyleCalendar';
+import MiniCalendar from './MiniCalendar';
 import UserAccountModal from './UserAccountModal';
+import DebugCalendarSync from './DebugCalendarSync';
 import { useGoogleCalendar } from '../../hooks/useGoogleCalendar';
 import { useAuth } from '../../context/AuthContext';
+import { CalendarView } from '../../types/calendar';
+import '../../styles/GoogleCalendar.css';
 
 const GoogleCalendarPage: React.FC = () => {
   const navigate = useNavigate();
@@ -52,7 +56,7 @@ const GoogleCalendarPage: React.FC = () => {
   };
 
   const handleViewChange = (view: string) => {
-    setCurrentView(view as any);
+    setCurrentView(view as CalendarView);
   };
 
   if (!user) {
@@ -97,27 +101,10 @@ const GoogleCalendarPage: React.FC = () => {
 
           {/* Mini calendario */}
           <div className="px-6 pb-6">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">
-              {currentDate.toLocaleDateString('es', { month: 'long', year: 'numeric' })}
-            </h3>
-            <div className="grid grid-cols-7 gap-1 text-xs">
-              {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((day) => (
-                <div key={day} className="text-center text-gray-500 font-medium py-1">
-                  {day}
-                </div>
-              ))}
-              {/* Aquí puedes generar los días del mes */}
-              {Array.from({ length: 31 }, (_, i) => (
-                <button
-                  key={i + 1}
-                  className={`text-center py-1 text-sm hover:bg-blue-100 rounded ${
-                    i + 1 === new Date().getDate() ? 'bg-blue-600 text-white rounded-full' : 'text-gray-700'
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
+          <MiniCalendar
+            currentDate={currentDate}
+            onDateSelect={setCurrentDate}
+          />
           </div>
 
           {/* Buscar personas */}
@@ -231,6 +218,12 @@ const GoogleCalendarPage: React.FC = () => {
         }}
         onSignOut={handleSignOut}
         onNavigateToPatients={handleNavigateToPatients}
+      />
+
+      {/* Debug component para desarrollo */}
+      <DebugCalendarSync 
+        currentDate={currentDate}
+        currentView={currentView}
       />
     </div>
   );

@@ -1,5 +1,5 @@
-// Tipos para el nuevo sistema de calendario
-export type CalendarView = 'month' | 'week' | 'day' | 'agenda';
+// Tipos para el nuevo sistema de calendario - Compatibles con FullCalendar
+export type CalendarView = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
 
 export type EventType = 'appointment' | 'request' | 'blocked' | 'available';
 
@@ -39,6 +39,7 @@ export interface CalendarEvent {
 
 export interface CalendarConfig {
   view: CalendarView;
+  initialDate?: Date;
   businessHours: {
     start: string;
     end: string;

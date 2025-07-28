@@ -38,13 +38,13 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 }) => {
   const getDateTitle = () => {
     switch (currentView) {
-      case 'day':
+      case 'timeGridDay':
         return format(currentDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es });
-      case 'week':
+      case 'timeGridWeek':
         return format(currentDate, "MMM yyyy", { locale: es });
-      case 'month':
+      case 'dayGridMonth':
         return format(currentDate, "MMMM yyyy", { locale: es });
-      case 'agenda':
+      case 'listWeek':
         return 'Agenda';
       default:
         return format(currentDate, "MMMM yyyy", { locale: es });
@@ -52,10 +52,10 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   };
 
   const viewButtons = [
-    { key: 'day' as CalendarView, label: 'Día' },
-    { key: 'week' as CalendarView, label: 'Semana' },
-    { key: 'month' as CalendarView, label: 'Mes' },
-    { key: 'agenda' as CalendarView, label: 'Agenda' },
+    { key: 'timeGridDay' as CalendarView, label: 'Día' },
+    { key: 'timeGridWeek' as CalendarView, label: 'Semana' },
+    { key: 'dayGridMonth' as CalendarView, label: 'Mes' },
+    { key: 'listWeek' as CalendarView, label: 'Agenda' },
   ];
 
   return (

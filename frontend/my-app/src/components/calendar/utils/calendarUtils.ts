@@ -65,11 +65,12 @@ export const navigateDate = (currentDate: Date, view: CalendarView, direction: '
   const multiplier = direction === 'next' ? 1 : -1;
   
   switch (view) {
-    case 'day':
+    case 'timeGridDay':
       return addDays(currentDate, multiplier);
-    case 'week':
+    case 'timeGridWeek':
+    case 'listWeek':
       return addWeeks(currentDate, multiplier);
-    case 'month':
+    case 'dayGridMonth':
       return addMonths(currentDate, multiplier);
     default:
       return currentDate;
