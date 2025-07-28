@@ -23,6 +23,18 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Función para verificar si hay eventos en una fecha específica
+  const hasEventsOnDate = (date: Date, events: CalendarEvent[]): boolean => {
+    return events.some(event => {
+      const eventDate = new Date(event.startTime);
+      return (
+        eventDate.getFullYear() === date.getFullYear() &&
+        eventDate.getMonth() === date.getMonth() &&
+        eventDate.getDate() === date.getDate()
+      );
+    });
+  };
+
   // Generar días del mes
   const monthDays = useMemo(() => {
     const year = displayDate.getFullYear();
@@ -84,18 +96,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
     }
 
     return days;
-  }, [displayDate, selectedDate, events, today]);
-
-  const hasEventsOnDate = (date: Date, events: CalendarEvent[]): boolean => {
-    return events.some(event => {
-      const eventDate = new Date(event.startTime);
-      return (
-        eventDate.getFullYear() === date.getFullYear() &&
-        eventDate.getMonth() === date.getMonth() &&
-        eventDate.getDate() === date.getDate()
-      );
-    });
-  };
+  }, [displayDate, selectedDate, events, today, hasEventsOnDate]);
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     setDisplayDate(prev => {
