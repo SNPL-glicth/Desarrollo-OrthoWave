@@ -23,7 +23,7 @@ export const mapServiceUserToLocalUser = (serviceUser: ServiceUser): LocalUser =
     subespecialidades: serviceUser.specialization ? [serviceUser.specialization] : [],
     aceptaNuevosPacientes: serviceUser.role === 'doctor' ? true : undefined,
     tarifaConsulta: serviceUser.role === 'doctor' ? 50000 : undefined,
-    duracionConsultaDefault: serviceUser.role === 'doctor' ? 30 : undefined,
+    duracionConsultaDefault: serviceUser.role === 'doctor' ? 20 : undefined,
   };
 };
 

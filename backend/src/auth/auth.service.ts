@@ -49,7 +49,8 @@ export class AuthService {
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (isPasswordValid) {
-        this.logger.log(`Validación exitosa para usuario: ${email} con rol: ${user.rol.nombre}`);
+        const roleName = user.rol?.nombre || 'Sin rol asignado';
+        this.logger.log(`Validación exitosa para usuario: ${email} con rol: ${roleName}`);
         const { password, ...result } = user;
         return result;
       } else {
@@ -67,10 +68,19 @@ export class AuthService {
     this.logger.log(`Generando token JWT para usuario: ${user.email} (ID: ${user.id})`);
 
     try {
+      // Validar que el usuario tenga un rol asignado
+      if (!user.rol || !user.rol.nombre) {
+        this.logger.error(`Usuario ${user.email} no tiene rol asignado`);
+        throw new UnauthorizedException('El usuario no tiene un rol asignado. Contacta al administrador.');
+      }
+
+      const roleName = user.rol.nombre;
+      this.logger.log(`Usuario ${user.email} tiene rol: ${roleName}`);
+
       const payload = {
         email: user.email,
         sub: user.id,
-        rol: user.rol.nombre,
+        rol: roleName,
       };
 
       const token = this.jwtService.sign(payload);
@@ -83,9 +93,9 @@ export class AuthService {
           email: user.email,
           nombre: user.nombre,
           apellido: user.apellido,
-          rol: user.rol.nombre,
+          rol: roleName,
         },
-        redirect: this.getRedirectPath(user.rol.nombre),
+        redirect: this.getRedirectPath(roleName),
       };
     } catch (error) {
       this.logger.error(`Error generando token JWT para usuario: ${user.email}`, error.message);

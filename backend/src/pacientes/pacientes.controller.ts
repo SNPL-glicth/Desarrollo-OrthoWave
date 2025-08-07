@@ -33,17 +33,30 @@ export class PacientesController {
   @Get('mi-perfil')
   async obtenerMiPerfil(@Request() req) {
     const usuario = req.user;
+    
+    console.log('=== OBTENER MI PERFIL ===');
+    console.log('Usuario:', {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      rol: usuario.rol?.nombre
+    });
 
     if (usuario.rol.nombre !== 'paciente') {
+      console.log('Error: Usuario no es paciente');
       throw new HttpException('Solo los pacientes tienen perfil de paciente', HttpStatus.BAD_REQUEST);
     }
 
     try {
-      return await this.pacientesService.obtenerPorUsuarioId(usuario.id);
+      console.log('Intentando obtener perfil completo...');
+      const perfil = await this.pacientesService.obtenerPacienteCompleto(usuario.id);
+      console.log('Perfil obtenido exitosamente:', perfil);
+      return perfil;
     } catch (error) {
+      console.log('Error al obtener perfil:', error.message);
       if (error instanceof NotFoundException) {
+        console.log('Perfil no encontrado, devolviendo estructura básica');
         // Si no existe perfil de paciente, devolver estructura básica
-        return {
+        const perfilBasico = {
           usuarioId: usuario.id,
           usuario: {
             id: usuario.id,
@@ -53,7 +66,10 @@ export class PacientesController {
             telefono: usuario.telefono
           }
         };
+        console.log('Perfil básico:', perfilBasico);
+        return perfilBasico;
       }
+      console.log('Error no controlado, relanzando:', error);
       throw error;
     }
   }
@@ -120,9 +136,18 @@ export class PacientesController {
   async actualizarMiPerfil(@Body() actualizarData: any, @Request() req) {
     const usuario = req.user;
 
+    console.log('=== ACTUALIZAR MI PERFIL ===');
+    console.log('Usuario ID:', usuario.id);
+    console.log('Datos recibidos:', JSON.stringify(actualizarData, null, 2));
+
     if (usuario.rol.nombre !== 'paciente') {
       throw new HttpException('Solo los pacientes pueden actualizar su perfil', HttpStatus.BAD_REQUEST);
     }
+
+    // Separar datos de usuario y datos de paciente
+    const { usuario: datosUsuario, ...datosPaciente } = actualizarData;
+    console.log('Datos usuario:', datosUsuario);
+    console.log('Datos paciente:', datosPaciente);
 
     // Verificar si existe perfil de paciente, si no, crearlo
     const existe = await this.pacientesService.verificarPacienteExiste(usuario.id);
@@ -130,12 +155,23 @@ export class PacientesController {
     if (!existe) {
       const datosBasicos = {
         usuarioId: usuario.id,
-        ...actualizarData
+        ...datosPaciente
       };
-      return await this.pacientesService.crearPaciente(datosBasicos);
+      await this.pacientesService.crearPaciente(datosBasicos);
+    } else {
+      // Actualizar datos del paciente
+      if (Object.keys(datosPaciente).length > 0) {
+        await this.pacientesService.actualizarPaciente(usuario.id, datosPaciente);
+      }
     }
 
-    return await this.pacientesService.actualizarPaciente(usuario.id, actualizarData);
+    // Actualizar datos del usuario si se proporcionaron
+    if (datosUsuario && Object.keys(datosUsuario).length > 0) {
+      await this.pacientesService.actualizarDatosUsuario(usuario.id, datosUsuario);
+    }
+
+    // Retornar el perfil actualizado
+    return await this.pacientesService.obtenerPacienteCompleto(usuario.id);
   }
 
   @Patch('usuario/:id')

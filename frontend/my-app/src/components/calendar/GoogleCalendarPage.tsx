@@ -5,6 +5,9 @@ import GoogleStyleCalendar from './GoogleStyleCalendar';
 import MiniCalendar from './MiniCalendar';
 import UserAccountModal from './UserAccountModal';
 import DebugCalendarSync from './DebugCalendarSync';
+import ColombiaTimeWidget from './ColombiaTimeWidget';
+import TimeDebugComponent from './TimeDebugComponent';
+import AppointmentRequestsOffcanvas from '../doctor/AppointmentRequestsOffcanvas';
 import { useGoogleCalendar } from '../../hooks/useGoogleCalendar';
 import { useAuth } from '../../context/AuthContext';
 import { CalendarView } from '../../types/calendar';
@@ -16,6 +19,7 @@ const GoogleCalendarPage: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [showNotificationsOffcanvas, setShowNotificationsOffcanvas] = useState(false);
 
   const {
     currentDate,
@@ -58,17 +62,14 @@ const GoogleCalendarPage: React.FC = () => {
   };
 
   const handleMiniCalendarDateClick = (date: Date) => {
+    // Siempre cambiar a la vista de día específico cuando se hace clic en una fecha del mini calendario
     setCurrentDate(date);
-    if (currentView === 'dayGridMonth') {
-      // Si estamos en vista mensual, ir al mes de esa fecha
-      setCurrentDate(new Date(date.getFullYear(), date.getMonth(), 1));
-    } else if (currentView === 'timeGridWeek') {
-      // Si estamos en vista semanal, ir a esa semana
-      setCurrentDate(date);
-    } else if (currentView === 'timeGridDay') {
-      // Si estamos en vista diaria, ir a ese día específico
-      setCurrentDate(date);
-    }
+    setCurrentView('timeGridDay');
+  };
+
+  const handleMiniCalendarMonthChange = (date: Date) => {
+    // Actualizar la fecha del calendario principal cuando se navega en el mini calendario
+    setCurrentDate(date);
   };
 
   const handleCreateEvent = () => {
@@ -100,6 +101,10 @@ const GoogleCalendarPage: React.FC = () => {
         onViewChange={handleViewChange}
         currentView={currentView}
         onUserMenuToggle={handleUserMenuToggle}
+        onHamburgerClick={() => {
+          console.log('Hamburger clickeado, abriendo offcanvas...');
+          setShowNotificationsOffcanvas(true);
+        }}
         userInfo={{
           name: user.nombre || user.email,
           email: user.email,
@@ -124,11 +129,17 @@ const GoogleCalendarPage: React.FC = () => {
             </button>
           </div>
 
+          {/* Widget de Hora Colombia */}
+          <div className="px-6 pb-4">
+            <ColombiaTimeWidget size="sm" />
+          </div>
+
           {/* Mini Calendar */}
           <div className="px-6 pb-6">
             <MiniCalendar
               currentDate={currentDate}
               onDateClick={handleMiniCalendarDateClick}
+              onMonthChange={handleMiniCalendarMonthChange}
               events={events}
               selectedDate={currentDate}
             />
@@ -292,6 +303,23 @@ const GoogleCalendarPage: React.FC = () => {
           currentView={currentView}
         />
       )}
+      
+      {/* Debug de tiempo - temporal */}
+      {process.env.NODE_ENV === 'development' && (
+        <TimeDebugComponent />
+      )}
+      
+      {/* Offcanvas de solicitudes de citas */}
+      <AppointmentRequestsOffcanvas
+        isOpen={showNotificationsOffcanvas}
+        onClose={() => setShowNotificationsOffcanvas(false)}
+        onNavigateToCalendar={(date) => {
+          // Navegar al calendario con la fecha específica
+          setCurrentDate(date);
+          setCurrentView('timeGridDay');
+          setShowNotificationsOffcanvas(false);
+        }}
+      />
     </div>
   );
 };

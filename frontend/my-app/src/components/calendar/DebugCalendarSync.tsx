@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 interface DebugCalendarSyncProps {
   currentDate: Date;
   currentView: string;
+  onForceToday?: () => void;
 }
 
 const DebugCalendarSync: React.FC<DebugCalendarSyncProps> = ({ currentDate, currentView }) => {
@@ -38,9 +39,22 @@ const DebugCalendarSync: React.FC<DebugCalendarSyncProps> = ({ currentDate, curr
       </div>
       
       <div className="text-xs space-y-1">
-        <div><strong>Current Date:</strong> {currentDate.toLocaleDateString()}</div>
+        <div><strong>System Date:</strong> {new Date().toLocaleDateString('es')}</div>
+        <div><strong>System Time:</strong> {new Date().toLocaleTimeString('es')}</div>
+        <div><strong>System ISO:</strong> {new Date().toISOString()}</div>
+        <div><strong>Calendar Date:</strong> {currentDate.toLocaleDateString('es')}</div>
+        <div><strong>Calendar Time:</strong> {currentDate.toLocaleTimeString('es')}</div>
+        <div><strong>Calendar ISO:</strong> {currentDate.toISOString()}</div>
         <div><strong>Current View:</strong> {currentView}</div>
-        <div><strong>ISO String:</strong> {currentDate.toISOString()}</div>
+        <div><strong>System TZ:</strong> {Intl.DateTimeFormat().resolvedOptions().timeZone}</div>
+        <div><strong>App TZ:</strong> America/Bogota</div>
+        <div><strong>Bogotá Time:</strong> {new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</div>
+        <div className={`${new Date().toDateString() === currentDate.toDateString() ? 'text-green-600' : 'text-red-600'}`}>
+          <strong>Date Match:</strong> {new Date().toDateString() === currentDate.toDateString() ? '✓ YES' : '✗ NO'}
+        </div>
+        <div className={`${Math.abs(new Date().getTime() - currentDate.getTime()) < 60000 ? 'text-green-600' : 'text-yellow-600'}`}>
+          <strong>Time Diff:</strong> {Math.round((new Date().getTime() - currentDate.getTime()) / 1000)}s
+        </div>
       </div>
 
       <div className="mt-3">

@@ -21,13 +21,12 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       const currentUser = authService.getCurrentUser();
       if (currentUser) {
-        // No cargar automáticamente si es administrador
-        if (currentUser.rol?.toLowerCase() !== 'admin') {
-          setUser(currentUser);
-        } else {
-          // Limpiar sesión del administrador
-          authService.logout();
-        }
+        console.log('Usuario encontrado en localStorage:', {
+          id: currentUser.id,
+          email: currentUser.email,
+          rol: currentUser.rol
+        });
+        setUser(currentUser);
       }
       setLoading(false);
     };

@@ -1,5 +1,7 @@
 import React from 'react';
 import { CalendarView } from '../../types/calendar';
+import NotificationBell from '../NotificationBell';
+import { useAppointmentRequests } from '../../hooks/useAppointmentRequests';
 
 interface UserInfo {
   name: string;
@@ -17,6 +19,8 @@ interface GoogleCalendarNavbarProps {
   onToday: () => void;
   onViewChange: (view: string) => void;
   onUserMenuToggle: () => void;
+  onHamburgerClick?: () => void;
+  notificationCount?: number;
 }
 
 const GoogleCalendarNavbar: React.FC<GoogleCalendarNavbarProps> = ({
@@ -29,7 +33,11 @@ const GoogleCalendarNavbar: React.FC<GoogleCalendarNavbarProps> = ({
   onToday,
   onViewChange,
   onUserMenuToggle,
+  onHamburgerClick,
 }) => {
+  // Hook para obtener el contador de notificaciones
+  const { contadorPendientes } = useAppointmentRequests();
+
   // Formatear la fecha según la vista actual
   const formatDateDisplay = () => {
     const options: Intl.DateTimeFormatOptions = {
@@ -80,12 +88,23 @@ const GoogleCalendarNavbar: React.FC<GoogleCalendarNavbarProps> = ({
       <div className="flex items-center justify-between">
         {/* Lado izquierdo - Logo, hamburger y navegación */}
         <div className="flex items-center space-x-6">
-          {/* Menú hamburger */}
-          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+          {/* Menú hamburger con badge */}
+          <div className="relative">
+            <button 
+              onClick={onHamburgerClick}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              title={`Solicitudes de citas${contadorPendientes > 0 ? ` (${contadorPendientes})` : ''}`}
+            >
+              <svg className={`w-5 h-5 ${contadorPendientes > 0 ? 'text-blue-600' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            {contadorPendientes > 0 && (
+              <span className="absolute -top-1 -right-1 inline-flex items-center justify-center text-xs font-bold leading-none text-white bg-red-500 rounded-full min-w-[16px] h-[16px] shadow-md border-2 border-white animate-pulse">
+                {contadorPendientes > 9 ? '9+' : contadorPendientes}
+              </span>
+            )}
+          </div>
 
           {/* Logo y título */}
           <div className="flex items-center space-x-3">
@@ -172,13 +191,8 @@ const GoogleCalendarNavbar: React.FC<GoogleCalendarNavbarProps> = ({
               </svg>
             </button>
 
-            {/* Configuraciones */}
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors" title="Configuraciones">
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </button>
+            {/* Solicitudes de Citas */}
+            <NotificationBell onClick={onHamburgerClick} />
 
             {/* Usuario */}
             <button

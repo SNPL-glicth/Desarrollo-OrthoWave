@@ -36,7 +36,7 @@ export class DoctorSchedule {
   @Column({ type: 'time', nullable: true })
   break_end: string; // Hora de fin de descanso/almuerzo
 
-  @Column({ default: 30 })
+  @Column({ default: 20 })
   slot_duration: number; // Duración de cada slot en minutos
 
   @Column({ default: 0 })

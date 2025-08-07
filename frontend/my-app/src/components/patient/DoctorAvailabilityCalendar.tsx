@@ -4,6 +4,7 @@ import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks,
          isToday, isSameDay, isWeekend, addMonths, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import api from '../../services/api';
+import { getCurrentColombiaDate } from '../../utils/dateUtils';
 
 interface Doctor {
   id: number;
@@ -25,12 +26,13 @@ interface DoctorAvailabilityCalendarProps {
   onClose: () => void;
 }
 
-// Horarios de trabajo (8:00 AM - 5:00 PM en intervalos de 30 minutos)
+// Horarios de trabajo (8:00 AM - 5:00 PM en intervalos de 20 minutos)
 const generateTimeSlots = () => {
   const slots = [];
   for (let hour = 8; hour < 17; hour++) {
     slots.push(`${hour.toString().padStart(2, '0')}:00`);
-    slots.push(`${hour.toString().padStart(2, '0')}:30`);
+    slots.push(`${hour.toString().padStart(2, '0')}:20`);
+    slots.push(`${hour.toString().padStart(2, '0')}:40`);
   }
   return slots;
 };
@@ -54,7 +56,7 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
   onClose
 }) => {
   const { user } = useAuth();
-  const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [currentWeek, setCurrentWeek] = useState(getCurrentColombiaDate());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [view, setView] = useState<'week' | 'month'>('week');
@@ -68,34 +70,70 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Obtener citas existentes del doctor
-  const fetchExistingAppointments = useCallback(async () => {
+  // Obtener días de la semana
+  const getWeekDays = () => {
+    const start = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Lunes = 1
+    const end = endOfWeek(currentWeek, { weekStartsOn: 1 });
+    return eachDayOfInterval({ start, end });
+  };
+
+  // Obtener disponibilidad del doctor para la semana actual
+  const fetchDoctorAvailability = useCallback(async () => {
     setLoading(true);
     try {
-      // Obtener citas reales del doctor desde el backend
-      const response = await api.get(`/citas/doctor/${doctor.id}`);
-      const citas = response.data || [];
+      // Obtener los días de la semana actual
+      const weekDays = getWeekDays();
+      const ocupiedSlots: CitaExistente[] = [];
       
-      // Convertir al formato esperado
-      const citasFormateadas: CitaExistente[] = citas.map((cita: any) => ({
-        id: cita.id,
-        fechaHora: cita.fechaHora,
-        duracion: cita.duracion || 60
-      }));
+      // Para cada día de la semana, verificar disponibilidad
+      for (const day of weekDays) {
+        const dateString = format(day, 'yyyy-MM-dd');
+        try {
+          const disponibilidad = await api.get('/citas/disponibilidad', {
+            params: {
+              doctorId: doctor.id,
+              fecha: dateString,
+              duracion: formData.duracion
+            }
+          });
+          
+          const horariosDisponibles = disponibilidad.data || [];
+          
+          // Crear slots ocupados basados en lo que NO está disponible
+          TIME_SLOTS.forEach(time => {
+            if (!horariosDisponibles.includes(time)) {
+              ocupiedSlots.push({
+                id: Math.random(), // ID temporal para el slot ocupado
+                fechaHora: new Date(`${dateString}T${time}:00`).toISOString(),
+                duracion: formData.duracion
+              });
+            }
+          });
+        } catch (err) {
+          console.log(`No se pudo obtener disponibilidad para ${dateString}:`, err);
+          // Si hay error, asumir que todos los slots están ocupados para este día
+          TIME_SLOTS.forEach(time => {
+            ocupiedSlots.push({
+              id: Math.random(),
+              fechaHora: new Date(`${dateString}T${time}:00`).toISOString(),
+              duracion: formData.duracion
+            });
+          });
+        }
+      }
       
-      setExistingAppointments(citasFormateadas);
+      setExistingAppointments(ocupiedSlots);
     } catch (err) {
-      console.error('Error al obtener citas existentes:', err);
-      // En caso de error, establecer array vacío
+      console.error('Error al obtener disponibilidad:', err);
       setExistingAppointments([]);
     } finally {
       setLoading(false);
     }
-  }, [doctor.id]);
+  }, [doctor.id, currentWeek, formData.duracion]);
 
   useEffect(() => {
-    fetchExistingAppointments();
-  }, [fetchExistingAppointments]);
+    fetchDoctorAvailability();
+  }, [fetchDoctorAvailability]);
 
   // Verificar si es día laboral
   const isDiaLaboral = (date: Date): boolean => {
@@ -113,20 +151,13 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
     });
   };
 
-  // Obtener días de la semana
-  const getWeekDays = () => {
-    const start = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Lunes = 1
-    const end = endOfWeek(currentWeek, { weekStartsOn: 1 });
-    return eachDayOfInterval({ start, end });
-  };
-
   // Navegación de semanas
   const goToPreviousWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));
   const goToNextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
   const goToPreviousMonth = () => setCurrentWeek(subMonths(currentWeek, 1));
   const goToNextMonth = () => setCurrentWeek(addMonths(currentWeek, 1));
   const goToToday = () => {
-    setCurrentWeek(new Date());
+    setCurrentWeek(getCurrentColombiaDate());
     setSelectedDate(null);
     setSelectedTime('');
   };
@@ -140,6 +171,17 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
 
     if (!formData.motivoConsulta.trim()) {
       alert('Por favor ingresa el motivo de la consulta');
+      return;
+    }
+
+    // Validación adicional para evitar citas en horarios pasados
+    const now = getCurrentColombiaDate();
+    const appointmentDateTime = new Date(selectedDate);
+    const [hours, minutes] = selectedTime.split(':').map(Number);
+    appointmentDateTime.setHours(hours, minutes, 0, 0);
+    
+    if (appointmentDateTime < now) {
+      alert('No puedes agendar una cita en una fecha y hora pasada. Por favor selecciona un horario futuro.');
       return;
     }
 
@@ -325,7 +367,15 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
                         const isLaboral = isDiaLaboral(day);
                         const isOccupied = isTimeSlotOccupied(day, time);
                         const isSelected = selectedDate && isSameDay(day, selectedDate) && selectedTime === time;
-                        const canSelect = isLaboral && !isOccupied;
+                        
+                        // Validar que no sea una fecha/hora pasada usando zona horaria de Colombia
+                        const now = getCurrentColombiaDate();
+                        const slotDateTime = new Date(day);
+                        const [hours, minutes] = time.split(':').map(Number);
+                        slotDateTime.setHours(hours, minutes, 0, 0);
+                        const isInPast = slotDateTime < now;
+                        
+                        const canSelect = isLaboral && !isOccupied && !isInPast;
 
                         return (
                           <div
@@ -333,6 +383,8 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
                             className={`p-2 text-center border-r border-gray-100 last:border-r-0 transition-colors ${
                               !isLaboral 
                                 ? 'bg-red-50 text-red-400 cursor-not-allowed' :
+                              isInPast 
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
                               isOccupied 
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' :
                               isSelected 
@@ -458,16 +510,16 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Duración Estimada
                 </label>
-                <select
-                  value={formData.duracion}
-                  onChange={(e) => setFormData({ ...formData, duracion: Number(e.target.value) })}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value={30}>30 minutos</option>
-                  <option value={45}>45 minutos</option>
-                  <option value={60}>60 minutos</option>
-                  <option value={90}>90 minutos</option>
-                </select>
+                  <select
+                    value={formData.duracion}
+                    onChange={(e) => setFormData({ ...formData, duracion: Number(e.target.value) })}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value={20}>20 minutos</option>
+                    <option value={40}>40 minutos</option>
+                    <option value={60}>60 minutos</option>
+                    <option value={80}>80 minutos</option>
+                  </select>
               </div>
 
               <div>

@@ -37,7 +37,7 @@ export class PerfilMedico {
   @Column({ name: 'tarifa_consulta', type: 'decimal', precision: 10, scale: 2, nullable: true })
   tarifaConsulta: number;
 
-  @Column({ name: 'duracion_consulta_default', default: 60 }) // en minutos
+  @Column({ name: 'duracion_consulta_default', default: 20 }) // en minutos
   duracionConsultaDefault: number;
 
   // Datos adicionales de contacto

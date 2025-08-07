@@ -128,6 +128,17 @@ export class CitasService {
     });
   }
 
+  async obtenerSolicitudesPendientesDoctor(doctorId: number): Promise<Cita[]> {
+    return await this.citasRepository.find({
+      where: { 
+        doctorId,
+        estado: 'pendiente' 
+      },
+      relations: ['paciente', 'doctor', 'paciente.rol', 'doctor.rol'],
+      order: { fechaCreacion: 'ASC' }
+    });
+  }
+
   async actualizarEstadoCita(id: number, actualizarEstadoDto: ActualizarEstadoCitaDto): Promise<Cita> {
     const cita = await this.citasRepository.findOne({
       where: { id },
@@ -176,20 +187,19 @@ export class CitasService {
       throw new NotFoundException('Perfil médico no encontrado');
     }
 
-    // Obtener citas del doctor para esa fecha
+    // Obtener citas del doctor para esa fecha (EXCLUYENDO las canceladas)
     const fechaInicio = new Date(fecha + 'T00:00:00');
     const fechaFin = new Date(fecha + 'T23:59:59');
 
     const citasExistentes = await this.citasRepository.find({
       where: {
         doctorId,
-        fechaHora: Between(fechaInicio, fechaFin),
-        estado: 'cancelada' // Excluir citas canceladas
+        fechaHora: Between(fechaInicio, fechaFin)
       },
       order: { fechaHora: 'ASC' }
     });
 
-    // Filtrar citas no canceladas
+    // Filtrar citas no canceladas (estas son las que ocupan horarios)
     const citasOcupadas = citasExistentes.filter(cita => cita.estado !== 'cancelada');
 
     // Generar horarios disponibles
@@ -241,7 +251,7 @@ export class CitasService {
     // Valores por defecto si no están configurados
     const horaInicio = perfilMedico.horaInicio || '08:00';
     const horaFin = perfilMedico.horaFin || '18:00';
-    const intervalos = duracion; // minutos
+    const intervalos = 20; // minutos - intervalos de 20 minutos
 
     let horaActual = this.parseHora(horaInicio);
     const horaLimite = this.parseHora(horaFin);

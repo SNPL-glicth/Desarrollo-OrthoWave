@@ -22,8 +22,8 @@ const developmentMySQLConfig: TypeOrmModuleOptions = {
   password: process.env.DB_PASSWORD || 'Root1234a',
   database: process.env.DB_DATABASE || 'orto_whave_db',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: false, // No sincronizar automáticamente
-  logging: true, // Mostrar queries para desarrollo
+  synchronize: true, // Habilitado temporalmente para actualizar schema
+  logging: ['error', 'warn'], // Solo mostrar errores y warnings
   migrationsRun: false, // No ejecutar migraciones automáticamente
   charset: 'utf8mb4',
   extra: {

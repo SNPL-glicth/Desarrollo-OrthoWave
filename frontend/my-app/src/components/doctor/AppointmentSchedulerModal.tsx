@@ -5,6 +5,7 @@ import { getAllPatients } from '../../services/patientService';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, 
          isToday, isSameDay, isWeekend, addMonths, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { getCurrentColombiaDate } from '../../utils/dateUtils';
 
 interface Paciente {
   id: number;
@@ -22,12 +23,13 @@ interface AppointmentSchedulerModalProps {
   selectedDate?: Date | null;
 }
 
-// Horarios de trabajo (8:00 AM - 5:00 PM en intervalos de 30 minutos)
+// Horarios de trabajo con detalles de notificaciones
 const generateTimeSlots = () => {
   const slots = [];
   for (let hour = 8; hour < 17; hour++) {
     slots.push(`${hour.toString().padStart(2, '0')}:00`);
-    slots.push(`${hour.toString().padStart(2, '0')}:30`);
+    slots.push(`${hour.toString().padStart(2, '0')}:20`);
+    slots.push(`${hour.toString().padStart(2, '0')}:40`);
   }
   return slots;
 };
@@ -53,7 +55,7 @@ const AppointmentSchedulerModal: React.FC<AppointmentSchedulerModalProps> = ({
   selectedDate: propSelectedDate
 }) => {
   const { user } = useAuth();
-  const [currentWeek, setCurrentWeek] = useState(() => propSelectedDate || new Date());
+  const [currentWeek, setCurrentWeek] = useState(() => propSelectedDate || getCurrentColombiaDate());
   const [selectedDate, setSelectedDate] = useState<Date | null>(propSelectedDate || null);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [view, setView] = useState<'week' | 'month' | 'day'>('day');
@@ -264,7 +266,7 @@ const AppointmentSchedulerModal: React.FC<AppointmentSchedulerModalProps> = ({
   const goToPreviousMonth = () => setCurrentWeek(subMonths(currentWeek, 1));
   const goToNextMonth = () => setCurrentWeek(addMonths(currentWeek, 1));
   const goToToday = () => {
-    setCurrentWeek(new Date());
+    setCurrentWeek(getCurrentColombiaDate());
     setSelectedDate(null);
     setSelectedTime('');
   };
@@ -281,14 +283,22 @@ const AppointmentSchedulerModal: React.FC<AppointmentSchedulerModalProps> = ({
       return;
     }
 
-    // Verificar que no se pueda agendar en fechas pasadas
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time for comparison
-    const selectedDateOnly = new Date(selectedDate);
-    selectedDateOnly.setHours(0, 0, 0, 0);
+    // Verificar que no se pueda agendar en fechas/horas pasadas usando hora de Colombia
+    const [hours, minutes] = selectedTime.split(':').map(Number);
+    const selectedDateTime = new Date(selectedDate);
+    selectedDateTime.setHours(hours, minutes, 0, 0);
+    const nowColombia = getCurrentColombiaDate();
     
-    if (selectedDateOnly < today) {
-      setError('No se pueden agendar citas en días pasados');
+    if (selectedDateTime <= nowColombia) {
+      const currentTimeStr = nowColombia.toLocaleTimeString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Bogota'
+      });
+      const currentDateStr = nowColombia.toLocaleDateString('es-CO', {
+        timeZone: 'America/Bogota'
+      });
+      setError(`No se puede agendar una cita en el pasado. Hora actual de Colombia: ${currentDateStr} ${currentTimeStr}`);
       return;
     }
 
@@ -564,7 +574,8 @@ const AppointmentSchedulerModal: React.FC<AppointmentSchedulerModalProps> = ({
                                   }
                                 }}
                               >
-                                {/* Hora */}
+{/* Modal con campana de notificaciones */}
+                        
                                 <div className="w-20 flex-shrink-0">
                                   <div className={`text-sm font-medium ${
                                     isPastDay || isPastTime ? 'text-gray-400' :

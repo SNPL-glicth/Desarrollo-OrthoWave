@@ -13,6 +13,20 @@ export class PacientesService {
     private usersRepository: Repository<User>,
   ) {}
 
+  // Método privado para calcular la edad
+  private calcularEdad(fechaNacimiento: Date): number {
+    const today = new Date();
+    const birthDate = new Date(fechaNacimiento);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  }
+
   async crearPaciente(pacienteData: Partial<Paciente>): Promise<Paciente> {
     const paciente = this.pacientesRepository.create(pacienteData);
     return await this.pacientesRepository.save(paciente);
@@ -31,10 +45,56 @@ export class PacientesService {
     return paciente;
   }
 
+  async obtenerPacienteCompleto(usuarioId: number): Promise<Paciente & { edad?: number }> {
+    const paciente = await this.obtenerPorUsuarioId(usuarioId);
+    
+    // Calcular edad si existe fecha de nacimiento
+    const pacienteCompleto = { ...paciente } as Paciente & { edad?: number };
+    if (paciente.fechaNacimiento) {
+      pacienteCompleto.edad = this.calcularEdad(paciente.fechaNacimiento);
+    }
+
+    return pacienteCompleto;
+  }
+
   async actualizarPaciente(usuarioId: number, actualizarData: Partial<Paciente>): Promise<Paciente> {
     const paciente = await this.obtenerPorUsuarioId(usuarioId);
     Object.assign(paciente, actualizarData);
     return await this.pacientesRepository.save(paciente);
+  }
+
+  async actualizarDatosUsuario(usuarioId: number, datosUsuario: Partial<User>): Promise<User> {
+    console.log('=== ACTUALIZAR DATOS USUARIO ===');
+    console.log('Usuario ID:', usuarioId);
+    console.log('Datos a actualizar:', datosUsuario);
+    
+    const usuario = await this.usersRepository.findOne({ where: { id: usuarioId } });
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    
+    console.log('Usuario encontrado:', {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      telefono: usuario.telefono
+    });
+    
+    Object.assign(usuario, datosUsuario);
+    
+    console.log('Usuario después de assign:', {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      telefono: usuario.telefono
+    });
+    
+    const resultado = await this.usersRepository.save(usuario);
+    console.log('Usuario guardado:', {
+      id: resultado.id,
+      nombre: resultado.nombre,
+      telefono: resultado.telefono
+    });
+    
+    return resultado;
   }
 
   async obtenerTodosLosPacientes(): Promise<any[]> {
@@ -59,18 +119,49 @@ export class PacientesService {
     });
   }
 
-  async obtenerPacientesPorDoctor(doctorId: number): Promise<User[]> {
+  async obtenerPacientesPorDoctor(doctorId: number): Promise<any[]> {
     // Obtener pacientes que han tenido citas con este doctor
-    const query = this.usersRepository
+    const pacientesUsuarios = await this.usersRepository
       .createQueryBuilder('usuario')
       .innerJoin('usuario.rol', 'rol')
       .leftJoin('citas', 'cita', 'cita.pacienteId = usuario.id')
       .where('rol.nombre = :rol', { rol: 'paciente' })
       .andWhere('cita.doctorId = :doctorId', { doctorId })
       .groupBy('usuario.id')
-      .select(['usuario.id', 'usuario.nombre', 'usuario.apellido', 'usuario.email', 'usuario.telefono']);
+      .select(['usuario.id', 'usuario.nombre', 'usuario.apellido', 'usuario.email', 'usuario.telefono'])
+      .getMany();
 
-    return await query.getMany();
+    // Para cada paciente, obtener información adicional del perfil de paciente
+    const pacientesCompletos = [];
+    for (const usuario of pacientesUsuarios) {
+      try {
+        const perfilPaciente = await this.pacientesRepository.findOne({
+          where: { usuarioId: usuario.id },
+          select: ['fechaNacimiento', 'eps', 'tipoAfiliacion']
+        });
+
+        const pacienteCompleto = {
+          ...usuario,
+          fechaNacimiento: perfilPaciente?.fechaNacimiento,
+          edad: perfilPaciente?.fechaNacimiento ? this.calcularEdad(perfilPaciente.fechaNacimiento) : null,
+          eps: perfilPaciente?.eps,
+          tipoAfiliacion: perfilPaciente?.tipoAfiliacion
+        };
+
+        pacientesCompletos.push(pacienteCompleto);
+      } catch (error) {
+        // Si no tiene perfil de paciente, agregar solo la información básica
+        pacientesCompletos.push({
+          ...usuario,
+          fechaNacimiento: null,
+          edad: null,
+          eps: null,
+          tipoAfiliacion: null
+        });
+      }
+    }
+
+    return pacientesCompletos;
   }
 
   async verificarPacienteExiste(usuarioId: number): Promise<boolean> {

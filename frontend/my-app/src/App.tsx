@@ -90,6 +90,14 @@ const App: React.FC = () => {
                 }
               />
               <Route
+                path="/dashboard/patient/perfil"
+                element={
+                  <ProtectedRoute role="paciente">
+                    <PatientDashboardRouter />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/usuarios/crear"
                 element={
                   <ProtectedRoute role="admin">

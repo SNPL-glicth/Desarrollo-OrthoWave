@@ -91,9 +91,74 @@ export class CitasController {
     return await this.citasService.obtenerCitasPendientesAprobacion();
   }
 
+  @Get('doctor/:id/solicitudes-pendientes')
+  async obtenerSolicitudesPendientesDoctor(@Param('id', ParseIntPipe) doctorId: number, @Request() req) {
+    const usuario = req.user;
+
+    // Los doctores solo pueden ver sus propias solicitudes, admins pueden ver todas
+    if (usuario.rol.nombre === 'doctor' && doctorId !== usuario.id) {
+      throw new HttpException('No tienes permisos para ver las solicitudes de otro doctor', HttpStatus.FORBIDDEN);
+    }
+
+    return await this.citasService.obtenerSolicitudesPendientesDoctor(doctorId);
+  }
+
+  @Get('mis-solicitudes-pendientes')
+  async obtenerMisSolicitudesPendientes(@Request() req) {
+    const usuario = req.user;
+
+    if (usuario.rol.nombre !== 'doctor') {
+      throw new HttpException('Solo los doctores pueden ver solicitudes pendientes', HttpStatus.FORBIDDEN);
+    }
+
+    return await this.citasService.obtenerSolicitudesPendientesDoctor(usuario.id);
+  }
+
+  @Patch(':id/aprobar')
+  async aprobarSolicitudCita(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    const usuario = req.user;
+    const cita = await this.citasService.obtenerCitaPorId(id);
+
+    // Verificar permisos: doctor solo puede aprobar sus propias citas, admin cualquiera
+    if (usuario.rol.nombre === 'doctor' && cita.doctorId !== usuario.id) {
+      throw new HttpException('No tienes permisos para aprobar esta cita', HttpStatus.FORBIDDEN);
+    } else if (usuario.rol.nombre !== 'doctor' && usuario.rol.nombre !== 'admin') {
+      throw new HttpException('No tienes permisos para aprobar citas', HttpStatus.FORBIDDEN);
+    }
+
+    return await this.citasService.actualizarEstadoCita(id, {
+      estado: 'aprobada',
+      aprobadaPor: usuario.id
+    });
+  }
+
+  @Patch(':id/rechazar')
+  async rechazarSolicitudCita(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() body: { razonRechazo?: string },
+    @Request() req
+  ) {
+    const usuario = req.user;
+    const cita = await this.citasService.obtenerCitaPorId(id);
+
+    // Verificar permisos: doctor solo puede rechazar sus propias citas, admin cualquiera
+    if (usuario.rol.nombre === 'doctor' && cita.doctorId !== usuario.id) {
+      throw new HttpException('No tienes permisos para rechazar esta cita', HttpStatus.FORBIDDEN);
+    } else if (usuario.rol.nombre !== 'doctor' && usuario.rol.nombre !== 'admin') {
+      throw new HttpException('No tienes permisos para rechazar citas', HttpStatus.FORBIDDEN);
+    }
+
+    return await this.citasService.actualizarEstadoCita(id, {
+      estado: 'rechazada',
+      aprobadaPor: usuario.id,
+      razonRechazo: body.razonRechazo || 'Sin razón especificada'
+    });
+  }
+
   @Get('disponibilidad')
   async buscarDisponibilidad(@Query() buscarDisponibilidadDto: BuscarDisponibilidadDto) {
-    return await this.citasService.buscarDisponibilidad(buscarDisponibilidadDto);
+    const horariosDisponibles = await this.citasService.buscarDisponibilidad(buscarDisponibilidadDto);
+    return horariosDisponibles;
   }
 
   @Get(':id')

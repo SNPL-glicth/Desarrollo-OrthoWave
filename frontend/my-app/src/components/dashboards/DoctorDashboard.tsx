@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { getPatientsByDoctor } from '../../services/patientService';
 import OffcanvasDoctor from '../doctor/OffcanvasDoctor';
 import PatientDetailsModal from '../doctor/PatientDetailsModal';
+import NotificationBell from '../NotificationBell';
+import AppointmentRequestsOffcanvas from '../doctor/AppointmentRequestsOffcanvas';
 
 // Interfaz simple para los datos del paciente
 interface Paciente {
@@ -12,6 +14,10 @@ interface Paciente {
   apellido: string;
   email: string;
   telefono: string;
+  fechaNacimiento?: string;
+  edad?: number;
+  eps?: string;
+  tipoAfiliacion?: string;
 }
 
 const DoctorDashboard: React.FC = () => {
@@ -23,6 +29,7 @@ const DoctorDashboard: React.FC = () => {
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
+  const [showNotificationsOffcanvas, setShowNotificationsOffcanvas] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -91,9 +98,15 @@ const DoctorDashboard: React.FC = () => {
                 </span>
               </div>
               
+              {/* Campana de Notificaciones */}
+              <NotificationBell onClick={() => {
+                console.log('Campana clickeada, abriendo offcanvas...');
+                setShowNotificationsOffcanvas(true);
+              }} />
+              
               {/* Botón de calendario */}
               <button
-                onClick={() => navigate('/calendar')}
+                onClick={() => navigate('/dashboard/doctor')}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,6 +291,16 @@ const DoctorDashboard: React.FC = () => {
           paciente={selectedPaciente}
         />
       )}
+      
+      {/* Offcanvas de solicitudes de citas */}
+      <AppointmentRequestsOffcanvas
+        isOpen={showNotificationsOffcanvas}
+        onClose={() => setShowNotificationsOffcanvas(false)}
+        onNavigateToCalendar={(date) => {
+          // Navegar al calendario con la fecha específica
+          navigate('/dashboard/doctor', { state: { selectedDate: date } });
+        }}
+      />
     </div>
   );
 };

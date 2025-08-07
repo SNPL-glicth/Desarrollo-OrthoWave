@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import citasService, { CrearCitaDto } from '../../services/citasService';
 import { getPatientsByDoctor } from '../../services/patientService';
 import api from '../../services/api';
+import { getCurrentColombiaDate } from '../../utils/dateUtils';
 
 interface AgendarCitaProps {
   doctorId?: number;
@@ -162,12 +163,12 @@ const AgendarCita: React.FC<AgendarCitaProps> = ({
   };
 
   const obtenerFechaMinima = () => {
-    const hoy = new Date();
+    const hoy = getCurrentColombiaDate();
     return hoy.toISOString().split('T')[0];
   };
 
   const obtenerFechaMaxima = () => {
-    const hoy = new Date();
+    const hoy = getCurrentColombiaDate();
     const fechaMaxima = new Date(hoy);
     fechaMaxima.setMonth(hoy.getMonth() + 3); // 3 meses adelante
     return fechaMaxima.toISOString().split('T')[0];

@@ -12,10 +12,12 @@ import {
 } from '../components/calendar/utils/calendarUtils';
 import { citasService } from '../services/citasService';
 import { useAuth } from '../context/AuthContext';
+import { getCurrentDate } from '../utils/dateUtils';
 
-const defaultConfig: CalendarConfig = {
+// Función para obtener la configuración por defecto con fecha actual
+const getDefaultConfig = (): CalendarConfig => ({
   view: 'dayGridMonth' as CalendarView,
-  initialDate: new Date(),
+  initialDate: getCurrentDate(), // Usar getCurrentDate() en lugar de new Date()
   businessHours: {
     start: '08:00',
     end: '18:00',
@@ -23,7 +25,7 @@ const defaultConfig: CalendarConfig = {
   },
   timeSlotDuration: 30,
   locale: 'es',
-  timezone: 'America/Bogota',
+  timezone: 'America/Bogota', // Zona horaria fija para Colombia
   theme: 'light',
   features: {
     dragAndDrop: true,
@@ -31,29 +33,43 @@ const defaultConfig: CalendarConfig = {
     selection: true,
     weekends: true,
   },
-};
+});
 
 export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): CalendarHookReturn => {
   const { user } = useAuth();
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  
+  // Usar la fecha actual siempre - crear nueva instancia cada vez
+  const [currentDate, setCurrentDate] = useState<Date>(() => getCurrentDate());
   const [currentView, setCurrentView] = useState<CalendarView>('dayGridMonth');
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [config, setConfig] = useState<CalendarConfig>({
-    ...defaultConfig,
+  const [config, setConfig] = useState<CalendarConfig>(() => ({
+    ...getDefaultConfig(),
     ...initialConfig,
-  });
+    initialDate: getCurrentDate(), // Siempre usar fecha actual
+    view: 'dayGridMonth'
+  }));
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Sincronizar la fecha actual con la configuración
+  // Asegurar que el calendario siempre comience en la fecha actual al montar
   useEffect(() => {
-    setConfig(prev => ({ ...prev, initialDate: currentDate }));
-  }, [currentDate]);
+    const today = getCurrentDate();
+    setCurrentDate(today);
+    setConfig(prev => ({ 
+      ...prev, 
+      initialDate: today,
+      view: currentView 
+    }));
+  }, []); // Solo ejecutar una vez al montar
 
-  // Asegurar que la vista esté sincronizada
+  // Sincronizar configuración cuando cambie currentDate o currentView
   useEffect(() => {
-    setConfig(prev => ({ ...prev, view: currentView }));
-  }, [currentView]);
+    setConfig(prev => ({ 
+      ...prev, 
+      initialDate: currentDate,
+      view: currentView 
+    }));
+  }, [currentDate, currentView]);
 
   // Función para obtener eventos desde el backend
   const fetchEvents = useCallback(async () => {
@@ -105,7 +121,7 @@ export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): Cale
   }, [currentView]);
 
   const goToToday = useCallback(() => {
-    setCurrentDate(new Date());
+    setCurrentDate(getCurrentDate());
   }, []);
 
   // CRUD de eventos
@@ -195,11 +211,10 @@ export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): Cale
     setConfig(prev => ({ ...prev, ...newConfig }));
   }, []);
 
-  // Cambiar vista y actualizar configuración
+  // Cambiar vista (la configuración se actualiza automáticamente en useEffect)
   const changeView = useCallback((view: CalendarView) => {
     setCurrentView(view);
-    updateConfig({ view });
-  }, [updateConfig]);
+  }, []);
 
   return {
     currentDate,

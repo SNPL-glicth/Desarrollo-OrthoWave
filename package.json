@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.18",
+    "@fullcalendar/interaction": "^6.1.18",
+    "@fullcalendar/react": "^6.1.18",
+    "@fullcalendar/timegrid": "^6.1.18",
     "axios": "^1.10.0",
     "sqlite3": "^5.1.7"
   }

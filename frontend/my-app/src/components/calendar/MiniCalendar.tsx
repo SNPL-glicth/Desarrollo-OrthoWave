@@ -1,9 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { CalendarEvent } from '../../types/calendar';
+import { getCurrentColombiaDate, getTodayColombia } from '../../utils/dateUtils';
 
 interface MiniCalendarProps {
   currentDate: Date;
   onDateClick: (date: Date) => void;
+  onMonthChange?: (date: Date) => void; // Nuevo prop para cuando cambien el mes
   events?: CalendarEvent[];
   selectedDate?: Date;
   className?: string;
@@ -12,6 +14,7 @@ interface MiniCalendarProps {
 const MiniCalendar: React.FC<MiniCalendarProps> = ({
   currentDate,
   onDateClick,
+  onMonthChange,
   events = [],
   selectedDate,
   className = '',
@@ -20,12 +23,21 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
     new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
   );
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Sincronizar displayDate cuando currentDate cambie
+  useEffect(() => {
+    const newDisplayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    if (newDisplayDate.getTime() !== displayDate.getTime()) {
+      setDisplayDate(newDisplayDate);
+    }
+  }, [currentDate]); // Removemos displayDate de las dependencias para evitar bucle infinito
+
+  const today = useMemo(() => {
+    return getTodayColombia();
+  }, []);
 
   // Función para verificar si hay eventos en una fecha específica
-  const hasEventsOnDate = (date: Date, events: CalendarEvent[]): boolean => {
-    return events.some(event => {
+  const hasEventsOnDate = useCallback((date: Date, eventsList: CalendarEvent[]): boolean => {
+    return eventsList.some(event => {
       const eventDate = new Date(event.startTime);
       return (
         eventDate.getFullYear() === date.getFullYear() &&
@@ -33,7 +45,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
         eventDate.getDate() === date.getDate()
       );
     });
-  };
+  }, []);
 
   // Generar días del mes
   const monthDays = useMemo(() => {
@@ -106,6 +118,12 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
       } else {
         newDate.setMonth(prev.getMonth() + 1);
       }
+      
+      // Notificar el cambio de mes al componente padre
+      if (onMonthChange) {
+        onMonthChange(new Date(newDate.getFullYear(), newDate.getMonth(), 1));
+      }
+      
       return newDate;
     });
   };
@@ -152,9 +170,9 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
 
       {/* Nombres de los días */}
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {dayNames.map((day) => (
+        {dayNames.map((day, index) => (
           <div
-            key={day}
+            key={`day-${index}`}
             className="text-xs font-medium text-gray-500 text-center py-1"
           >
             {day}
@@ -202,9 +220,9 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
       <div className="mt-4 pt-3 border-t border-gray-200">
         <button
           onClick={() => {
-            const today = new Date();
-            setDisplayDate(new Date(today.getFullYear(), today.getMonth(), 1));
-            onDateClick(today);
+            const todayColombia = getCurrentColombiaDate();
+            setDisplayDate(new Date(todayColombia.getFullYear(), todayColombia.getMonth(), 1));
+            onDateClick(todayColombia);
           }}
           className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
         >

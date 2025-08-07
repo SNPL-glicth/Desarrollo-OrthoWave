@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import { EventClickArg, DateSelectArg, EventDropArg, EventContentArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { formatDate } from '@fullcalendar/core';
 import esLocale from '@fullcalendar/core/locales/es';
-import { CalendarEvent, CalendarConfig, CalendarProps } from '../../types/calendar';
+import { CalendarProps } from '../../types/calendar';
+import { getCurrentDate, getCurrentTimeString, TIMEZONE } from '../../utils/dateUtils';
+import CustomNowIndicator from './CustomNowIndicator';
 
 const GoogleStyleCalendar: React.FC<CalendarProps> = ({
   events,
@@ -19,6 +20,26 @@ const GoogleStyleCalendar: React.FC<CalendarProps> = ({
   className = '',
 }) => {
   const calendarRef = React.useRef<any>(null);
+  
+  // Crear la fecha "ahora" en zona horaria de Colombia para FullCalendar
+  const createColombiaTime = (): string => {
+    // Obtener la fecha y hora actual en Colombia
+    const now = new Date();
+    const colombiaFormatter = new Intl.DateTimeFormat('sv-SE', {
+      timeZone: TIMEZONE,
+      year: 'numeric',
+      month: '2-digit', 
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    
+    const colombiaDateTime = colombiaFormatter.format(now);
+    console.log('🇨🇴 Hora Colombia para FullCalendar:', colombiaDateTime);
+    
+    return colombiaDateTime;
+  };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const eventData = events.find(event => event.id === clickInfo.event.id);
@@ -30,12 +51,6 @@ const GoogleStyleCalendar: React.FC<CalendarProps> = ({
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     if (onDateSelect) {
       onDateSelect(selectInfo.start, selectInfo.end);
-    }
-  };
-
-  const handleDateChange = (arg: any) => {
-    if (onDateChange) {
-      onDateChange(arg.start);
     }
   };
 
@@ -91,51 +106,33 @@ const GoogleStyleCalendar: React.FC<CalendarProps> = ({
     }
   }, [config.view, config.initialDate]);
 
-  // Manejar cambios internos del calendario y sincronizar con el estado externo
+  // Manejar cambios internos del calendario - SIMPLIFICADO
   const handleDatesSet = useCallback((arg: any) => {
-    // Solo actualizar si la fecha realmente cambió para evitar loops
+    // Simplemente usar el primer día del rango visible
     const newDate = new Date(arg.start);
     
-    // Ajustar la fecha basada en la vista
-    if (config.view === 'dayGridMonth') {
-      // Para vista mensual, obtener el primer día visible del mes
-      const firstDay = new Date(arg.start);
-      // Buscar el primer día que esté en el mes actual
-      const endDay = new Date(arg.end);
-      let targetDate = new Date(firstDay);
-      
-      // Si el primer día visible no está en el mes actual, buscar el primer día del mes actual
-      while (targetDate < endDay) {
-        if (targetDate.getDate() >= 1 && targetDate.getDate() <= 15) {
-          break;
-        }
-        targetDate.setDate(targetDate.getDate() + 1);
-      }
-      
-      // Usar el día 15 del mes visible para representar el mes
-      targetDate.setDate(15);
-      newDate.setTime(targetDate.getTime());
-    } else if (config.view === 'timeGridWeek') {
-      // Para vista semanal, usar el lunes de esa semana
-      const monday = new Date(arg.start);
-      const dayOfWeek = monday.getDay();
-      const daysToAdd = dayOfWeek === 0 ? 1 : (1 - dayOfWeek + 7) % 7;
-      monday.setDate(monday.getDate() + daysToAdd);
-      newDate.setTime(monday.getTime());
-    }
+    console.log('GoogleStyleCalendar - handleDatesSet llamado con:', {
+      start: arg.start,
+      newDate: newDate.toLocaleDateString('es'),
+      view: arg.view?.type
+    });
     
     if (onDateChange) {
+      console.log('GoogleStyleCalendar - Llamando onDateChange con:', newDate.toLocaleDateString('es'));
       onDateChange(newDate);
     }
-  }, [config.view, onDateChange]);
+  }, [onDateChange]);
 
   return (
-    <div className="h-full">
+    <div className="h-full relative">
       <FullCalendar
+        key={`calendar-${config.initialDate?.toISOString()}-${config.view}`}
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView={config.view}
+        initialDate={config.initialDate}
         locale={esLocale}
+        timeZone={config.timezone}
         events={fullCalendarEvents}
         weekends={config.features.weekends}
         editable={config.features.dragAndDrop}
@@ -153,21 +150,20 @@ const GoogleStyleCalendar: React.FC<CalendarProps> = ({
         eventContent={renderEventContent}
         eventClick={handleEventClick}
         eventDrop={handleEventDrop}
-        datesSet={handleDatesSet}
+        // datesSet={handleDatesSet} // Temporalmente desactivado para debug
         // Configuración adicional para mejor apariencia
         aspectRatio={1.35}
         expandRows={true}
         stickyHeaderDates={false}
         // Formato personalizado para encabezados de día
         dayHeaderFormat={{
-          weekday: 'short',
-          day: 'numeric',
+          weekday: 'long',
           omitCommas: true
         }}
         // Configuración de horarios
         slotMinTime="06:00:00"
         slotMaxTime="22:00:00"
-        slotDuration="00:30:00"
+        slotDuration="00:20:00"
         slotLabelInterval="01:00:00"
         slotLabelFormat={{
           hour: 'numeric',
@@ -177,7 +173,8 @@ const GoogleStyleCalendar: React.FC<CalendarProps> = ({
           hour12: false
         }}
         allDaySlot={false}
-        nowIndicator={true}
+        nowIndicator={true} // Reactivamos el indicador nativo
+        now={createColombiaTime()} // Pasamos la hora de Colombia
         scrollTime="08:00:00"
         // Estilos personalizados para que se vea más como Google Calendar
         eventClassNames="google-calendar-event"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { citasService, CrearCitaDto } from '../../services/citasService';
 import { useAuth } from '../../context/AuthContext';
+import { getCurrentColombiaDate } from '../../utils/dateUtils';
 
 interface Doctor {
   id: number;
@@ -99,6 +100,23 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
       return;
     }
 
+    // Validación adicional: evitar agendar en fechas/horas pasadas usando hora de Colombia
+    const selectedDateTime = new Date(`${formData.fecha}T${formData.hora}:00`);
+    const nowColombia = getCurrentColombiaDate();
+    
+    if (selectedDateTime <= nowColombia) {
+      const currentTimeStr = nowColombia.toLocaleTimeString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Bogota'
+      });
+      const currentDateStr = nowColombia.toLocaleDateString('es-CO', {
+        timeZone: 'America/Bogota'
+      });
+      setError(`No se puede agendar una cita en el pasado. Hora actual de Colombia: ${currentDateStr} ${currentTimeStr}`);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -151,14 +169,14 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     }
   };
 
-  // Obtener fecha mínima (hoy)
+  // Obtener fecha mínima (hoy) en Colombia
   const getFechaMinima = () => {
-    return new Date().toISOString().split('T')[0];
+    return getCurrentColombiaDate().toISOString().split('T')[0];
   };
 
-  // Obtener fecha máxima (3 meses adelante)
+  // Obtener fecha máxima (3 meses adelante) en Colombia
   const getFechaMaxima = () => {
-    const fecha = new Date();
+    const fecha = getCurrentColombiaDate();
     fecha.setMonth(fecha.getMonth() + 3);
     return fecha.toISOString().split('T')[0];
   };

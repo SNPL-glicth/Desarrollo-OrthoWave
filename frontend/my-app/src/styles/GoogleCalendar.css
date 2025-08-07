@@ -154,6 +154,7 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  text-transform: uppercase;
 }
 
 /* Día actual en vista semanal */
@@ -235,6 +236,7 @@
   color: #3c4043;
   font-size: 16px;
   font-weight: 500;
+  text-transform: uppercase;
 }
 
 .fc-timeGridDay-view .fc-day-today .fc-col-header-cell-cushion {
@@ -421,4 +423,64 @@
 
 .fc-event-resizing {
   opacity: 0.8 !important;
+}
+
+/* Estilos para nuestro indicador personalizado de tiempo actual */
+.custom-now-indicator {
+  position: absolute;
+  left: 60px; /* Ajustar para no solaparse con las etiquetas de tiempo */
+  right: 20px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.custom-now-indicator-line {
+  height: 2px;
+  background-color: #ea4335;
+  box-shadow: 0 1px 3px rgba(234, 67, 53, 0.3);
+  position: relative;
+}
+
+.custom-now-indicator-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #ea4335;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(234, 67, 53, 0.3);
+  position: absolute;
+  left: -4px;
+  top: -3px;
+}
+
+.custom-now-indicator-tooltip {
+  background-color: #ea4335;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  position: absolute;
+  left: 10px;
+  top: -24px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+}
+
+/* Asegurar que el indicador sea visible en las vistas de tiempo */
+.fc-timegrid-body {
+  position: relative;
+}
+
+/* Animación suave para el indicador */
+@keyframes nowIndicatorPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.custom-now-indicator {
+  animation: nowIndicatorPulse 2s ease-in-out infinite;
 }

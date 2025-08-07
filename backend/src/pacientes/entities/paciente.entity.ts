@@ -14,7 +14,7 @@ export class Paciente {
   usuario: User;
 
   // Datos de identificación
-  @Column({ name: 'numero_identificacion', unique: true })
+  @Column({ name: 'numero_identificacion', nullable: true })
   numeroIdentificacion: string;
 
   @Column({
@@ -25,7 +25,7 @@ export class Paciente {
   })
   tipoIdentificacion: string;
 
-  @Column({ name: 'fecha_nacimiento', type: 'date' })
+  @Column({ name: 'fecha_nacimiento', type: 'date', nullable: true })
   fechaNacimiento: Date;
 
   @Column({
@@ -35,18 +35,7 @@ export class Paciente {
   })
   genero: string;
 
-  @Column({ name: 'estado_civil', nullable: true })
-  estadoCivil: string; // soltero, casado, viudo, etc.
-
-  @Column({ nullable: true })
-  ocupacion: string;
-
-  // Datos de contacto adicionales
-  @Column({ name: 'ciudad_residencia', nullable: true })
-  ciudadResidencia: string;
-
-  @Column({ name: 'barrio', nullable: true })
-  barrio: string;
+  // Campos adicionales eliminados por requerimientos del sistema
 
   // Información de salud básica
   @Column({ nullable: true })
@@ -56,7 +45,7 @@ export class Paciente {
   numeroAfiliacion: string;
 
   @Column({ name: 'tipo_afiliacion', nullable: true })
-  tipoAfiliacion: string; // contributivo, subsidiado, particular
+  tipoAfiliacion: string; // EPS, Particular
 
   // Contacto de emergencia
   @Column({ name: 'contacto_emergencia_nombre', nullable: true })
@@ -68,31 +57,7 @@ export class Paciente {
   @Column({ name: 'contacto_emergencia_parentesco', nullable: true })
   contactoEmergenciaParentesco: string;
 
-  // Antecedentes médicos generales
-  @Column({ type: 'text', nullable: true })
-  antecedentesMedicos: string;
-
-  @Column({ type: 'text', nullable: true })
-  antecedentesQuirurgicos: string;
-
-  @Column({ type: 'text', nullable: true })
-  antecedentesFamiliares: string;
-
-  @Column({ type: 'text', nullable: true })
-  alergias: string;
-
-  @Column({ type: 'text', nullable: true })
-  medicamentosActuales: string;
-
-  // Datos antropométricos
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
-  peso: number; // en kg
-
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
-  estatura: number; // en metros
-
-  @Column({ name: 'grupo_sanguineo', nullable: true })
-  grupoSanguineo: string; // A+, B-, O+, etc.
+  // Campos médicos eliminados por requerimientos del sistema
 
   // Configuraciones y preferencias
   @Column({ name: 'acepta_comunicaciones', default: true })

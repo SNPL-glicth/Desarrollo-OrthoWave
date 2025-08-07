@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, addDays, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { getCurrentColombiaDate } from '../../../../utils/dateUtils';
 
 interface DateTimeSelectionProps {
   selectedDateTime?: Date;
@@ -22,7 +23,7 @@ const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
   onNext,
   onPrevious
 }) => {
-  const [selectedDate, setSelectedDate] = useState<Date>(selectedDateTime || new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(selectedDateTime || getCurrentColombiaDate());
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedTime, setSelectedTime] = useState<string>('');
 
@@ -52,16 +53,24 @@ const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
   };
 
   const handleTimeSelect = (time: string) => {
-    setSelectedTime(time);
     const [hours, minutes] = time.split(':').map(Number);
     const dateTime = new Date(selectedDate);
     dateTime.setHours(hours, minutes, 0, 0);
+    
+    // Validación: evitar seleccionar fechas/horas pasadas usando hora de Colombia
+    const nowColombia = getCurrentColombiaDate();
+    if (dateTime <= nowColombia) {
+      alert(`No se puede seleccionar una fecha y hora en el pasado. Hora actual de Colombia: ${nowColombia.toLocaleString('es-CO', { timeZone: 'America/Bogota' })}`);
+      return;
+    }
+    
+    setSelectedTime(time);
     onDateTimeSelect(dateTime);
   };
 
   const generateDateOptions = () => {
     const dates = [];
-    const today = new Date();
+    const today = getCurrentColombiaDate();
     
     for (let i = 0; i < 14; i++) {
       const date = addDays(today, i);

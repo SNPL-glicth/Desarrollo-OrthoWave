@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import ScalableDoctorCalendar from '../patient/ScalableDoctorCalendar';
+import citasService from '../../services/citasService';
 
 // Interfaz para los datos del doctor
 interface Doctor {
@@ -46,6 +48,7 @@ const SpecialistsView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
   
   // Función para refrescar la lista de doctores
   const refreshDoctores = useCallback(async () => {
@@ -415,7 +418,10 @@ const SpecialistsView: React.FC = () => {
                   {/* Action Buttons */}
                   <div className="flex space-x-3">
                     <button
-                      onClick={() => setSelectedDoctor(doctor)}
+                      onClick={() => {
+                        setSelectedDoctor(doctor);
+                        setShowCalendarModal(true);
+                      }}
                       className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                     >
                       Agendar Cita
@@ -436,6 +442,47 @@ const SpecialistsView: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Modal de calendario escalable del doctor */}
+      {selectedDoctor && showCalendarModal && (
+        <ScalableDoctorCalendar
+          doctor={{
+            id: selectedDoctor.usuarioId,
+            nombre: selectedDoctor.usuario.nombre,
+            apellido: selectedDoctor.usuario.apellido,
+            email: selectedDoctor.usuario.email,
+            especialidad: selectedDoctor.especialidad
+          }}
+          onRequestAppointment={async (appointmentData) => {
+            try {
+              // Crear la solicitud de cita usando el sistema escalable
+              await citasService.crearCita({
+                pacienteId: Number(user?.id),
+                doctorId: appointmentData.doctorId,
+                fechaHora: appointmentData.fechaHora,
+                duracion: appointmentData.duracion || 60,
+                tipoConsulta: appointmentData.tipoConsulta || 'primera_vez',
+                motivoConsulta: appointmentData.motivoConsulta,
+                notasPaciente: appointmentData.notasPaciente || '',
+                costo: selectedDoctor.tarifaConsulta || 0
+              });
+              
+              setShowCalendarModal(false);
+              setSelectedDoctor(null);
+              
+              // Mostrar mensaje de éxito
+              alert('¡Solicitud de cita enviada correctamente! El doctor recibirá una notificación para aprobar tu solicitud.');
+            } catch (error: any) {
+              console.error('Error al solicitar cita:', error);
+              alert('Error al enviar la solicitud de cita. Por favor, inténtalo de nuevo.');
+            }
+          }}
+          onClose={() => {
+            setShowCalendarModal(false);
+            setSelectedDoctor(null);
+          }}
+        />
+      )}
     </div>
   );
 };

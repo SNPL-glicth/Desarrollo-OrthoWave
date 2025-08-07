@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCitas } from '../../contexts/CitasContext';
 import { useAuth } from '../../context/AuthContext';
 import { useAvailableSlotsForDoctor } from '../../hooks/useAvailableSlotsOptimized';
+import { getCurrentColombiaDate } from '../../utils/dateUtils';
 
 interface PatientAppointmentSchedulerProps {
   doctorId?: number;
@@ -42,6 +43,23 @@ const PatientAppointmentScheduler: React.FC<PatientAppointmentSchedulerProps> = 
       return;
     }
 
+    // Validación adicional: evitar agendar en fechas/horas pasadas usando hora de Colombia
+    const selectedDateTime = new Date(`${selectedDate.toISOString().split('T')[0]}T${selectedSlot}:00`);
+    const nowColombia = getCurrentColombiaDate();
+    
+    if (selectedDateTime <= nowColombia) {
+      const currentTimeStr = nowColombia.toLocaleTimeString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Bogota'
+      });
+      const currentDateStr = nowColombia.toLocaleDateString('es-CO', {
+        timeZone: 'America/Bogota'
+      });
+      setError(`No se puede agendar una cita en el pasado. Hora actual de Colombia: ${currentDateStr} ${currentTimeStr}`);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -68,9 +86,9 @@ const PatientAppointmentScheduler: React.FC<PatientAppointmentSchedulerProps> = 
     return date.toISOString().split('T')[0];
   };
 
-  // Generar días de la semana actual
+  // Generar días de la semana actual usando hora de Colombia
   const generateWeekDays = () => {
-    const today = new Date();
+    const today = getCurrentColombiaDate();
     const currentDay = today.getDay(); // 0 = domingo, 1 = lunes, etc.
     const startOfWeek = new Date(today);
     
@@ -88,8 +106,8 @@ const PatientAppointmentScheduler: React.FC<PatientAppointmentSchedulerProps> = 
     return weekDays;
   };
 
-  const today = new Date();
-  const maxDate = new Date();
+  const today = getCurrentColombiaDate();
+  const maxDate = getCurrentColombiaDate();
   maxDate.setMonth(today.getMonth() + 3); // Máximo 3 meses en el futuro
 
   const selectedDoctor = state.doctors.find(d => d.id === selectedDoctorId);

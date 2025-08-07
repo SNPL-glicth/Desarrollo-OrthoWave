@@ -119,32 +119,7 @@ const PatientDashboard: React.FC = () => {
     return today;
   });
 
-  // Datos de ejemplo para citas
-  const [proximaCita] = useState<Cita>({
-    id: 1,
-    fecha: '28 de junio de 2025',
-    hora: '10:00 AM',
-    doctor: 'Dr. García',
-    estado: 'Confirmada',
-    consultorio: 'Consultorio'
-  });
-
-  const [historialCitas] = useState<Cita[]>([
-    {
-      id: 2,
-      fecha: '14 de junio de 2025',
-      hora: '',
-      doctor: 'Dr. García',
-      estado: 'Completada'
-    },
-    {
-      id: 3,
-      fecha: '30 de mayo de 2025',
-      hora: '',
-      doctor: 'Dr. García',
-      estado: 'Cancelada'
-    }
-  ]);
+  // Sin datos hardcodeados - todo se obtendrá de la base de datos
 
   const handleLogout = () => {
     logout();
@@ -208,7 +183,10 @@ const PatientDashboard: React.FC = () => {
                 <span className="text-sm lg:text-base">Inicio</span>
               </button>
 
-              <button className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap">
+              <button 
+                onClick={() => navigate('/dashboard/patient/perfil')}
+                className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap"
+              >
                 <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
@@ -238,19 +216,7 @@ const PatientDashboard: React.FC = () => {
 
           {/* Main Content */}
           <main className="flex-1 space-y-6">
-            {/* Próxima cita */}
-            <section className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Próxima cita</h2>
-              <div className="space-y-2">
-                <p className="text-2xl font-semibold text-gray-900">{proximaCita.fecha}</p>
-                <p className="text-lg text-gray-600">{proximaCita.hora}</p>
-                <p className="text-gray-600">{proximaCita.doctor}</p>
-                <p className="text-gray-600">{proximaCita.consultorio}</p>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                  {proximaCita.estado}
-                </span>
-              </div>
-            </section>
+            {/* Sección eliminada - sin próxima cita hasta verificar datos en BD */}
 
             {/* Botón Agendar nueva cita */}
             <button
@@ -287,29 +253,12 @@ const PatientDashboard: React.FC = () => {
                 </div>
               </section>
 
-              {/* Historial de citas */}
+              {/* Historial de citas - Datos reales se cargarán desde la BD */}
               <section className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Historial de citas</h2>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4 text-sm font-medium text-gray-500 border-b border-gray-200 pb-2">
-                    <div>Fecha</div>
-                    <div>Doctor</div>
-                    <div>Estado</div>
-                  </div>
-                  {historialCitas.map((cita) => (
-                    <div key={cita.id} className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="text-gray-900">{cita.fecha}</div>
-                      <div className="text-gray-600">{cita.doctor}</div>
-                      <div>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                          ${cita.estado === 'Completada'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'}`}>
-                          {cita.estado}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center py-8 text-gray-500">
+                  <p>No hay citas en el historial.</p>
+                  <p className="text-sm mt-2">Las citas aparecerán aquí una vez que se sincronicen con la base de datos.</p>
                 </div>
               </section>
             </div>
