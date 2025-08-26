@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import { EventClickArg, DateSelectArg, EventDropArg, EventContentArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -6,8 +6,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
 import { CalendarProps } from '../../types/calendar';
-import { getCurrentDate, getCurrentTimeString, TIMEZONE } from '../../utils/dateUtils';
-import CustomNowIndicator from './CustomNowIndicator';
+import { TIMEZONE } from '../../utils/dateUtils';
 
 const GoogleStyleCalendar: React.FC<CalendarProps> = ({
   events,
@@ -106,22 +105,6 @@ const GoogleStyleCalendar: React.FC<CalendarProps> = ({
     }
   }, [config.view, config.initialDate]);
 
-  // Manejar cambios internos del calendario - SIMPLIFICADO
-  const handleDatesSet = useCallback((arg: any) => {
-    // Simplemente usar el primer día del rango visible
-    const newDate = new Date(arg.start);
-    
-    console.log('GoogleStyleCalendar - handleDatesSet llamado con:', {
-      start: arg.start,
-      newDate: newDate.toLocaleDateString('es'),
-      view: arg.view?.type
-    });
-    
-    if (onDateChange) {
-      console.log('GoogleStyleCalendar - Llamando onDateChange con:', newDate.toLocaleDateString('es'));
-      onDateChange(newDate);
-    }
-  }, [onDateChange]);
 
   return (
     <div className="h-full relative">
@@ -160,7 +143,7 @@ const GoogleStyleCalendar: React.FC<CalendarProps> = ({
           weekday: 'long',
           omitCommas: true
         }}
-        // Configuración de horarios
+        // Configuración de horarios - slots de 20 minutos independientes
         slotMinTime="06:00:00"
         slotMaxTime="22:00:00"
         slotDuration="00:20:00"

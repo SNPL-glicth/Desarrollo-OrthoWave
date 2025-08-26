@@ -10,6 +10,7 @@ import { User } from '../users/entities/user.entity';
 import { WebSocketModule } from '../websocket/websocket.module';
 import { CacheModule } from '../cache/cache.module';
 import { MailModule } from '../mail/mail.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { CitasSchedulerService } from './citas-scheduler.service';
 
 @Module({
@@ -18,6 +19,7 @@ import { CitasSchedulerService } from './citas-scheduler.service';
     WebSocketModule,
     CacheModule,
     MailModule, // Para envío de correos
+    NotificationsModule, // Para notificaciones de pacientes
   ],
   controllers: [CitasController, DashboardCitasController],
   providers: [CitasService, DashboardCitasService, CitasSchedulerService], // Agregado CitasSchedulerService

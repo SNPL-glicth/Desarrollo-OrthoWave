@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { CalendarEvent } from '../../types/calendar';
-import { getCurrentColombiaDate, getTodayColombia } from '../../utils/dateUtils';
+import { getTodayColombia } from '../../utils/dateUtils';
 
 interface MiniCalendarProps {
   currentDate: Date;
@@ -29,7 +29,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
     if (newDisplayDate.getTime() !== displayDate.getTime()) {
       setDisplayDate(newDisplayDate);
     }
-  }, [currentDate]); // Removemos displayDate de las dependencias para evitar bucle infinito
+  }, [currentDate, displayDate]);
 
   const today = useMemo(() => {
     return getTodayColombia();
@@ -216,19 +216,6 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
         ))}
       </div>
 
-      {/* Botón para ir al día de hoy */}
-      <div className="mt-4 pt-3 border-t border-gray-200">
-        <button
-          onClick={() => {
-            const todayColombia = getCurrentColombiaDate();
-            setDisplayDate(new Date(todayColombia.getFullYear(), todayColombia.getMonth(), 1));
-            onDateClick(todayColombia);
-          }}
-          className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
-        >
-          Ir a hoy
-        </button>
-      </div>
     </div>
   );
 };

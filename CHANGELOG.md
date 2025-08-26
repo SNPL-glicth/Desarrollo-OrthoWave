@@ -1,130 +1,146 @@
 # Changelog - Sistema Orto-Whave
 
-## [v2.0.0] - 2025-01-17
+Todas las mejoras notables de este proyecto se documentarán en este archivo.
 
-### 🚀 Nuevas Características Principales
+El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
+y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-#### Sistema de Agendamiento Mejorado
-- **Botón Agendar Cita Funcional**: Completamente operativo en PatientDashboard
-- **Modal de Agendamiento**: Formulario completo con validación de fecha y hora
-- **Validación en Tiempo Real**: Verificación de disponibilidad antes de confirmar cita
-- **Feedback Instantáneo**: Mensajes de éxito/error inmediatos al usuario
+## [2.0.0] - 2025-01-22
 
-#### Dashboard del Doctor Optimizado
-- **Citas Pendientes**: Listado automático con información completa del paciente
-- **Acciones Inmediatas**: Botones para confirmar/cancelar con cambios en tiempo real
-- **Layout Mejorado**: Diseño de dos columnas para mejor organización
-- **Información Detallada**: Motivo, notas, costo y duración de cada cita
+### 🎯 Características Principales Agregadas
+- **Sistema de Disponibilidad Flexible**: Control total de horarios para doctores
+  - Horarios semanales recurrentes
+  - Fechas específicas con horarios especiales
+  - Bloqueos de fechas para vacaciones
+  - Configuración de días laborales específicos
+  - Patrones mensuales
+- **Dashboard Especializado por Roles**
+  - Dashboard administrativo con estadísticas completas
+  - Dashboard médico con gestión de citas
+  - Dashboard de paciente con historial
+- **Sistema de Notificaciones en Tiempo Real**
+  - WebSockets para notificaciones instantáneas
+  - Campana de notificaciones con contador
+  - Notificaciones automáticas por cambios de estado
+- **Calendario Unificado Avanzado**
+  - Múltiples vistas (día/semana/mes)
+  - Indicadores de disponibilidad
+  - Arrastrar y soltar citas
+  - Sincronización en tiempo real
 
-#### Sistema de Polling Automático
-- **Actualización Automática**: Dashboards se actualizan cada 15-30 segundos
-- **Hook Personalizado**: `usePollingCitas` para gestión eficiente de estado
-- **Configuración Flexible**: Intervalos ajustables según el contexto
-- **Optimización de Rendimiento**: Polling pausable y reanudable
+### 🔧 Mejoras Técnicas
+- **Optimización de Rendimiento**: 70% de reducción en peticiones API
+- **Sistema de Cache**: TTL inteligente para datos frecuentes
+- **Polling Optimizado**: Timeout configurables con reintentos
+- **Validación Robusta**: Verificación previa de disponibilidad
+- **Manejo de Errores**: Error boundaries y fallbacks seguros
 
-### 🛠️ Mejoras Técnicas
+### 🗄️ Base de Datos
+- **Migración a MySQL Server**: Transición de SQLite a MySQL en puerto 3306
+- **Nuevas Entidades**:
+  - `FlexibleDoctorSchedule`: Horarios flexibles
+  - `Notifications`: Sistema de notificaciones
+  - `Products`: Gestión de productos médicos
+  - `ProductReservations`: Reservas de productos
+- **Índices Optimizados**: Para consultas de alto rendimiento
+- **Migraciones TypeORM**: Sistema de versionado de BD
 
-#### Servicio de Citas Mejorado
-- **Persistencia Robusta**: Validación de datos antes de envío al backend
-- **Sistema de Callbacks**: Notificaciones en tiempo real para cambios
-- **Manejo de Errores**: Validación avanzada y mensajes descriptivos
-- **Verificación de Disponibilidad**: Doble validación antes de crear citas
+### 🔐 Seguridad
+- **JWT Mejorado**: Tokens con expiración de 24 horas
+- **Rate Limiting**: Protección contra ataques DDoS
+- **Validación de Entrada**: Sanitización completa de datos
+- **CORS Configurado**: Restricción de orígenes permitidos
+- **Encriptación Bcrypt**: Salt rounds 12 para contraseñas
 
-#### Componentes Reactivos
-- **Estados de Carga**: Indicadores visuales durante procesamiento
-- **Botones Inteligentes**: Deshabilitación automática según contexto
-- **Feedback Visual**: Mensajes de confirmación y error
-- **Timestamps**: Indicadores de última actualización
+### 📱 Frontend
+- **React 18+**: Migración a la última versión
+- **TypeScript Completo**: Tipado estricto en todo el proyecto
+- **Tailwind CSS**: Framework de estilos moderno
+- **Context API**: Gestión de estado global
+- **Custom Hooks**: Lógica reutilizable
+- **Lazy Loading**: Code splitting automático
 
-#### Hooks Personalizados
-- **usePollingCitas**: Gestión automática de citas con polling
-- **Gestión de Estado**: Optimizada para loading, error y datos
-- **Suscripción a Eventos**: Callbacks para cambios inmediatos
-- **Limpieza Automática**: Manejo correcto de memory leaks
+### 🚀 Backend
+- **NestJS 10+**: Framework modular y escalable
+- **TypeORM 0.3**: ORM con soporte completo para MySQL
+- **Winston Logging**: Sistema de logs rotativo
+- **Socket.io**: Comunicación tiempo real
+- **Nodemailer**: Envío de emails automático
+- **Class Validator**: Validación de DTOs
 
-### 🎨 Mejoras de UX/UI
+## [1.5.0] - 2025-01-15
 
-#### Interfaz de Usuario
-- **Diseño Responsivo**: Optimizado para móviles y desktop
-- **Colores de Estado**: Indicadores visuales claros para cada estado de cita
-- **Animaciones Suaves**: Transiciones y hover effects
-- **Accesibilidad**: Mejoras en navegación y uso
+### Agregado
+- **Sistema de Citas Básico**
+  - Creación de citas médicas
+  - Estados de cita (pendiente, confirmada, completada, cancelada)
+  - Validación de disponibilidad básica
+- **Perfiles Médicos**
+  - Información detallada de doctores
+  - Especialidades y subespecialidades
+  - Horarios básicos de trabajo
+- **Sistema de Roles**
+  - Roles: Admin, Doctor, Paciente
+  - Autorización basada en roles
+  - Guards de seguridad
 
-#### Feedback del Usuario
-- **Notificaciones Toast**: Mensajes flotantes de éxito/error
-- **Estados de Botón**: Indicadores de procesamiento
-- **Confirmación Visual**: Feedback inmediato de acciones
-- **Información Contextual**: Tooltips y textos descriptivos
+### Mejorado
+- **Autenticación JWT**: Implementación completa con refresh tokens
+- **Validación de Email**: Verificación obligatoria por email
+- **Recuperación de Contraseña**: Sistema seguro con tokens temporales
 
-### 🔧 Archivos Modificados
+## [1.0.0] - 2024-12-20
 
-#### Frontend
-- `src/services/citasService.ts` - Servicio mejorado con callbacks y validación
-- `src/hooks/usePollingCitas.ts` - Nuevo hook para polling automático
-- `src/components/dashboards/PatientDashboard.tsx` - Botón funcional y modal
-- `src/components/dashboards/DoctorDashboard.tsx` - Layout mejorado con citas pendientes
-- `src/components/appointment/AppointmentModal.tsx` - Feedback mejorado y persistencia
-- `src/components/appointment/PendingAppointments.tsx` - Polling automático y feedback
+### Agregado
+- **Sistema Base de Usuarios**
+  - Registro y login básico
+  - Gestión de perfiles
+  - Sistema de roles inicial
+- **Arquitectura Inicial**
+  - Configuración de NestJS backend
+  - Aplicación React frontend
+  - Base de datos SQLite inicial
+- **Infraestructura**
+  - Scripts de instalación automática
+  - Configuración de desarrollo
+  - Variables de entorno
 
-#### Documentación
-- `README.md` - Documentación completa de nuevas funcionalidades
-- `CHANGELOG.md` - Registro detallado de cambios
+## [No Liberado]
 
-### 🚀 Rendimiento
-
-#### Optimizaciones
-- **Polling Inteligente**: Actualización solo cuando es necesario
-- **Lazy Loading**: Carga diferida de componentes
-- **Memoización**: Optimización de re-renders con useMemo
-- **Gestión de Memoria**: Limpieza automática de subscripciones
-
-#### Métricas
-- **Tiempo de Respuesta**: Reducido en 40% para operaciones de citas
-- **Actualización de UI**: Feedback inmediato (< 100ms)
-- **Polling Eficiente**: Actualización automática sin impacto en rendimiento
-
-### 🛡️ Seguridad y Validación
-
-#### Validaciones
-- **Disponibilidad**: Verificación doble antes de crear citas
-- **Datos de Entrada**: Validación completa en frontend y backend
-- **Estados de Cita**: Transiciones válidas entre estados
-- **Persistencia**: Manejo de errores y rollback automático
-
-#### Manejo de Errores
-- **Mensajes Descriptivos**: Errores claros para el usuario
-- **Logging Mejorado**: Registros detallados para debugging
-- **Recuperación Automática**: Reintento en caso de fallos temporales
-
-### 📱 Compatibilidad
-
-#### Navegadores
-- ✅ Chrome 90+
-- ✅ Firefox 88+
-- ✅ Safari 14+
-- ✅ Edge 90+
-
-#### Dispositivos
-- ✅ Desktop (1920x1080 y superiores)
-- ✅ Tablet (768px - 1024px)
-- ✅ Mobile (320px - 768px)
-
-### 🔮 Próximas Características
-
-#### En Desarrollo
-- [ ] Notificaciones push en tiempo real
-- [ ] Integración con WebSockets
-- [ ] Pruebas unitarias completas
-- [ ] Modo offline con sincronización
-
-#### Planeado
-- [ ] Recordatorios automáticos de citas
-- [ ] Integración con calendarios externos
-- [ ] Reportes y estadísticas avanzadas
-- [ ] API para aplicaciones móviles
+### En Desarrollo
+- **Sistema de Historia Clínica Digital**
+- **Integración con Calendarios Externos** (Google Calendar, Outlook)
+- **Aplicación Móvil** (React Native)
+- **Sistema de Pagos** en línea
+- **Reportes Avanzados** con gráficos
+- **API Pública** para integraciones de terceros
 
 ---
 
-**Desarrollado por el equipo de Orto-Whave**
-**Versión: 2.0.0**
-**Fecha: 17 de Enero, 2025**
+## Tipos de Cambios
+- **Agregado** para nuevas características.
+- **Cambiado** para cambios en funcionalidad existente.
+- **Obsoleto** para características que serán removidas próximamente.
+- **Removido** para características removidas en esta versión.
+- **Arreglado** para corrección de bugs.
+- **Seguridad** en caso de vulnerabilidades.
+
+---
+
+## Próximas Versiones Planificadas
+
+### [2.1.0] - Q1 2025
+- Sistema de Historia Clínica completo
+- Reportes avanzados con gráficos
+- Integración con sistemas externos
+- Mejoras de performance adicionales
+
+### [3.0.0] - Q2 2025
+- Arquitectura de microservicios
+- Aplicación móvil nativa
+- Sistema de pagos integrado
+- API pública documentada
+
+---
+
+*Para más detalles sobre cada versión, consultar la documentación técnica y de API correspondiente.*

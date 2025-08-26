@@ -18,10 +18,26 @@ const VerificationPage = () => {
     setIsLoading(true);
 
     try {
-      if (!email.trim() || !verificationCode.trim()) {
+      // Validar y limpiar los datos de entrada
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanCode = verificationCode.trim();
+      
+      if (!cleanEmail || !cleanCode) {
         throw new Error('Por favor ingresa tu correo y el código de verificación');
       }
-      const response = await authService.verifyCode(email, verificationCode);
+      
+      // Validar que el código sea exactamente de 6 dígitos
+      if (!/^\d{6}$/.test(cleanCode)) {
+        throw new Error('El código de verificación debe ser de exactamente 6 dígitos');
+      }
+      
+      console.log('Enviando código de verificación:', {
+        email: cleanEmail,
+        codeLength: cleanCode.length,
+        code: cleanCode
+      });
+      
+      const response = await authService.verifyCode(cleanEmail, cleanCode);
       
       if (response.requiresApproval) {
         // Redirigir a página de registro pendiente
@@ -141,7 +157,9 @@ const VerificationPage = () => {
               placeholder="Ingresa el código de 6 dígitos"
               value={verificationCode}
               onChange={(e) => {
-                setVerificationCode(e.target.value.replace(/[^0-9]/g, ''));
+                // Solo permitir dígitos y limitar a 6 caracteres
+                const cleanedValue = e.target.value.replace(/[^0-9]/g, '').slice(0, 6);
+                setVerificationCode(cleanedValue);
                 setError('');
               }}
               disabled={isLoading}

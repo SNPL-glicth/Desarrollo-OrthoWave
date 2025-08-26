@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/auth.service';
+import { authService, RegisterData, RegisterResponse } from '../services/auth.service';
 import { User } from '../types/user';
-import { clearAuthData, isTokenExpired, getStoredToken, forceLogout } from '../utils/auth';
+import { clearAuthData, isTokenExpired, getStoredToken } from '../utils/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<any>;
+  register: (userData: RegisterData) => Promise<RegisterResponse>;
   logout: () => void;
   isAuthenticated: boolean;
   verifyCode: (email: string, code: string) => Promise<any>;
@@ -146,6 +147,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('Sesión cerrada correctamente');
   };
 
+  const register = async (userData: RegisterData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await authService.register(userData);
+      return response;
+    } catch (err) {
+      console.error('Error en registro:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const verifyCode = async (email: string, code: string) => {
     try {
       setLoading(true);
@@ -167,6 +183,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     error,
     login,
+    register,
     logout,
     isAuthenticated,
     verifyCode

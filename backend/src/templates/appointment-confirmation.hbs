@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cita Confirmada - Orto-Whave</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: #fff;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .success-icon {
+            background-color: #2ecc71;
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+        .appointment-details {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+        .detail-icon {
+            background-color: #3498db;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .detail-content {
+            flex: 1;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #34495e;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .detail-value {
+            color: #666;
+            font-size: 16px;
+        }
+        .highlight {
+            background-color: #3498db;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .important-notes {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        .important-notes h3 {
+            color: #856404;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .important-notes ul {
+            color: #856404;
+            margin: 0;
+            padding-left: 20px;
+        }
+        .important-notes li {
+            margin-bottom: 8px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #34495e;
+            color: #fff !important;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #2c3e50;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+        .contact-info {
+            background-color: #e8f5e8;
+            border-left: 4px solid #2ecc71;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: left;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 5px;
+            }
+            .content {
+                padding: 20px 15px;
+            }
+            .appointment-details {
+                padding: 15px;
+            }
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+            .detail-icon {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦷 Orto-Whave</h1>
+            <p>¡Tu cita ha sido confirmada!</p>
+        </div>
+        
+        <div class="content">
+            <div class="success-icon">
+                ✓
+            </div>
+            
+            <h2>¡Excelente, {{patientName}}!</h2>
+            <p>Tu cita ha sido <span class="highlight">confirmada exitosamente</span>. A continuación encontrarás todos los detalles:</p>
+            
+            <div class="appointment-details">
+                <div class="detail-row">
+                    <div class="detail-icon">👨‍⚕️</div>
+                    <div class="detail-content">
+                        <span class="detail-label">Doctor:</span>
+                        <span class="detail-value">{{doctorName}}</span>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-icon">📅</div>
+                    <div class="detail-content">
+                        <span class="detail-label">Fecha:</span>
+                        <span class="detail-value">{{appointmentDate}}</span>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-icon">⏰</div>
+                    <div class="detail-content">
+                        <span class="detail-label">Hora:</span>
+                        <span class="detail-value">{{appointmentTime}}</span>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-icon">🏥</div>
+                    <div class="detail-content">
+                        <span class="detail-label">Tipo de consulta:</span>
+                        <span class="detail-value">{{consultationType}}</span>
+                    </div>
+                </div>
+                
+                {{#if consultationReason}}
+                <div class="detail-row">
+                    <div class="detail-icon">📝</div>
+                    <div class="detail-content">
+                        <span class="detail-label">Motivo:</span>
+                        <span class="detail-value">{{consultationReason}}</span>
+                    </div>
+                </div>
+                {{/if}}
+                
+                {{#if duration}}
+                <div class="detail-row">
+                    <div class="detail-icon">⏱️</div>
+                    <div class="detail-content">
+                        <span class="detail-label">Duración estimada:</span>
+                        <span class="detail-value">{{duration}} minutos</span>
+                    </div>
+                </div>
+                {{/if}}
+            </div>
+            
+            <div class="important-notes">
+                <h3>📌 Información importante:</h3>
+                <ul>
+                    <li><strong>Llega 15 minutos antes</strong> de tu cita para el proceso de registro</li>
+                    <li>Trae tu <strong>documento de identidad</strong> y <strong>carnet de salud</strong> (si aplica)</li>
+                    <li>Si necesitas <strong>cancelar o reprogramar</strong>, hazlo con al menos 24 horas de antelación</li>
+                    <li>Recuerda mantener las <strong>medidas de bioseguridad</strong> durante tu visita</li>
+                </ul>
+            </div>
+            
+            <div class="contact-info">
+                <h3>📞 ¿Necesitas contactarnos?</h3>
+                <p><strong>Teléfono:</strong> {{clinicPhone}}</p>
+                <p><strong>Email:</strong> {{clinicEmail}}</p>
+                <p><strong>Dirección:</strong> {{clinicAddress}}</p>
+            </div>
+            
+            <p>Esperamos verte pronto. ¡Gracias por confiar en Orto-Whave para el cuidado de tu salud oral!</p>
+        </div>
+        
+        <div class="footer">
+            <p>Este correo fue enviado automáticamente desde Orto-Whave</p>
+            <p>Si tienes alguna pregunta, no dudes en contactarnos</p>
+            <p>© 2025 Orto-Whave. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

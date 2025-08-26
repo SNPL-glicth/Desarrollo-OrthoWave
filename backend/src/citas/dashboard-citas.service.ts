@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { DashboardDisponibilidadDto } from './dto/dashboard-disponibilidad.dto';
 import { RealtimeWebSocketGateway } from '../websocket/websocket.gateway';
 import { CacheService } from '../cache/cache.service';
+import { getCurrentColombiaDateTime, getStartOfToday, getEndOfToday, parseColombiaDateTime } from '../utils/timezone.utils';
 
 export interface DoctorDisponibilidad {
   id: number;
@@ -181,12 +182,14 @@ export class DashboardCitasService {
       };
     }
 
-    // Calcular estadísticas
-    const ahora = new Date();
-    const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
-    const inicioSemana = new Date(hoy);
+    // Calcular estadísticas usando timezone de Colombia
+    const ahora = getCurrentColombiaDateTime();
+    const hoy = getStartOfToday();
+    const inicioSemana = getCurrentColombiaDateTime();
+    inicioSemana.setTime(hoy.getTime());
     inicioSemana.setDate(hoy.getDate() - hoy.getDay());
-    const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+    const inicioMes = getCurrentColombiaDateTime();
+    inicioMes.setFullYear(ahora.getFullYear(), ahora.getMonth(), 1);
 
     const estadisticas: EstadisticasCitas = {
       totalCitas: todasLasCitas.length,
@@ -197,15 +200,17 @@ export class DashboardCitasService {
       citasCanceladas: todasLasCitas.filter(c => c.estado === 'cancelada').length,
       citasNoAsistio: todasLasCitas.filter(c => c.estado === 'no_asistio').length,
       citasHoy: todasLasCitas.filter(c => {
-        const fechaCita = new Date(c.fechaHora);
-        return fechaCita >= hoy && fechaCita < new Date(hoy.getTime() + 24 * 60 * 60 * 1000);
+        const fechaCita = parseColombiaDateTime(c.fechaHora.toISOString());
+        const finHoy = getCurrentColombiaDateTime();
+        finHoy.setTime(hoy.getTime() + 24 * 60 * 60 * 1000);
+        return fechaCita >= hoy && fechaCita < finHoy;
       }).length,
       citasEstaSemana: todasLasCitas.filter(c => {
-        const fechaCita = new Date(c.fechaHora);
+        const fechaCita = parseColombiaDateTime(c.fechaHora.toISOString());
         return fechaCita >= inicioSemana && fechaCita <= ahora;
       }).length,
       citasEsteMes: todasLasCitas.filter(c => {
-        const fechaCita = new Date(c.fechaHora);
+        const fechaCita = parseColombiaDateTime(c.fechaHora.toISOString());
         return fechaCita >= inicioMes && fechaCita <= ahora;
       }).length,
       promedioConsultasPorDia: 0,
@@ -219,8 +224,9 @@ export class DashboardCitasService {
 
     // Calcular promedio de consultas por día solo si hay datos
     if (todasLasCitas.length > 0) {
-      const fechasPrimera = todasLasCitas.map(c => new Date(c.fechaHora));
-      const fechaMasAntigua = new Date(Math.min(...fechasPrimera.map(f => f.getTime())));
+      const fechasPrimera = todasLasCitas.map(c => parseColombiaDateTime(c.fechaHora.toISOString()));
+      const fechaMasAntigua = getCurrentColombiaDateTime();
+      fechaMasAntigua.setTime(Math.min(...fechasPrimera.map(f => f.getTime())));
       const diasTranscurridos = Math.ceil((ahora.getTime() - fechaMasAntigua.getTime()) / (1000 * 60 * 60 * 24));
       estadisticas.promedioConsultasPorDia = diasTranscurridos > 0 ? Math.round((todasLasCitas.length / diasTranscurridos) * 100) / 100 : 0;
     }
@@ -275,12 +281,13 @@ export class DashboardCitasService {
       throw new NotFoundException('Perfil médico no encontrado');
     }
 
-    const hoy = new Date();
+    const hoy = getCurrentColombiaDateTime();
     const disponibilidadSemanal = [];
 
     // Generar disponibilidad para los próximos 7 días
     for (let i = 0; i < 7; i++) {
-      const fecha = new Date(hoy);
+      const fecha = getCurrentColombiaDateTime();
+      fecha.setTime(hoy.getTime());
       fecha.setDate(hoy.getDate() + i);
       const fechaString = fecha.toISOString().split('T')[0];
 
@@ -328,8 +335,8 @@ export class DashboardCitasService {
     }
 
     const resultado = [];
-    const fechaActual = new Date(fechaInicio);
-    const fechaFinal = new Date(fechaFin);
+    const fechaActual = parseColombiaDateTime(fechaInicio + 'T00:00:00');
+    const fechaFinal = parseColombiaDateTime(fechaFin + 'T23:59:59');
 
     while (fechaActual <= fechaFinal) {
       const fechaString = fechaActual.toISOString().split('T')[0];
@@ -347,8 +354,8 @@ export class DashboardCitasService {
       }
 
       // Obtener citas ocupadas para este día
-      const fechaInicioDia = new Date(fechaString + 'T00:00:00');
-      const fechaFinDia = new Date(fechaString + 'T23:59:59');
+      const fechaInicioDia = parseColombiaDateTime(fechaString + 'T00:00:00');
+      const fechaFinDia = parseColombiaDateTime(fechaString + 'T23:59:59');
 
       const citasOcupadas = await this.citasRepository.find({
         where: {
@@ -394,7 +401,7 @@ export class DashboardCitasService {
 
     while (horaActual < horaLimite) {
       const horaString = this.formatearHora(horaActual);
-      const fechaHoraCompleta = new Date(fecha + 'T' + horaString + ':00');
+      const fechaHoraCompleta = parseColombiaDateTime(fecha + 'T' + horaString + ':00');
 
       // Verificar si está en horario de almuerzo
       if (this.estaEnHorarioAlmuerzo(horaString, perfilMedico)) {
@@ -404,9 +411,11 @@ export class DashboardCitasService {
 
       // Verificar si hay conflicto con citas existentes
       const hayConflicto = citasOcupadas.some(cita => {
-        const inicioCita = new Date(cita.fechaHora);
-        const finCita = new Date(inicioCita.getTime() + cita.duracion * 60000);
-        const finConsulta = new Date(fechaHoraCompleta.getTime() + duracion * 60000);
+        const inicioCita = parseColombiaDateTime(cita.fechaHora.toISOString());
+        const finCita = getCurrentColombiaDateTime();
+        finCita.setTime(inicioCita.getTime() + cita.duracion * 60000);
+        const finConsulta = getCurrentColombiaDateTime();
+        finConsulta.setTime(fechaHoraCompleta.getTime() + duracion * 60000);
 
         return (fechaHoraCompleta < finCita && finConsulta > inicioCita);
       });
@@ -463,14 +472,15 @@ export class DashboardCitasService {
       order: { fechaHora: 'DESC' }
     });
 
+    const ahora = getCurrentColombiaDateTime();
     const proximasCitas = citas.filter(c => {
-      const fechaCita = new Date(c.fechaHora);
-      return fechaCita > new Date() && c.estado !== 'cancelada';
+      const fechaCita = parseColombiaDateTime(c.fechaHora.toISOString());
+      return fechaCita > ahora && c.estado !== 'cancelada';
     });
 
     const historialCitas = citas.filter(c => {
-      const fechaCita = new Date(c.fechaHora);
-      return fechaCita <= new Date() || c.estado === 'completada';
+      const fechaCita = parseColombiaDateTime(c.fechaHora.toISOString());
+      return fechaCita <= ahora || c.estado === 'completada';
     });
 
     const doctoresVisitados = [...new Set(historialCitas.map(c => c.doctorId))].length;
@@ -505,10 +515,12 @@ export class DashboardCitasService {
       return cachedData;
     }
 
-    const hoy = new Date();
-    const inicioSemana = new Date(hoy);
+    const hoy = getCurrentColombiaDateTime();
+    const inicioSemana = getCurrentColombiaDateTime();
+    inicioSemana.setTime(hoy.getTime());
     inicioSemana.setDate(hoy.getDate() - hoy.getDay());
-    const finSemana = new Date(inicioSemana);
+    const finSemana = getCurrentColombiaDateTime();
+    finSemana.setTime(inicioSemana.getTime());
     finSemana.setDate(inicioSemana.getDate() + 6);
 
     try {
@@ -521,8 +533,14 @@ export class DashboardCitasService {
         order: { fechaHora: 'ASC' }
       });
 
-      const citasHoy = citas.filter(c => new Date(c.fechaHora).toDateString() === hoy.toDateString());
-      const proximasCitas = citas.filter(c => new Date(c.fechaHora) > hoy && c.estado !== 'cancelada');
+      const citasHoy = citas.filter(c => {
+        const fechaCita = parseColombiaDateTime(c.fechaHora.toISOString());
+        return fechaCita.toDateString() === hoy.toDateString();
+      });
+      const proximasCitas = citas.filter(c => {
+        const fechaCita = parseColombiaDateTime(c.fechaHora.toISOString());
+        return fechaCita > hoy && c.estado !== 'cancelada';
+      });
 
       const resultado = {
         citasHoy,
@@ -562,7 +580,7 @@ export class DashboardCitasService {
   }
 
   async validarDisponibilidadEspecifica(doctorId: number, fechaHora: string, duracion: number): Promise<any> {
-    const fecha = new Date(fechaHora);
+    const fecha = parseColombiaDateTime(fechaHora);
     const fechaString = fecha.toISOString().split('T')[0];
     const horaString = fecha.toTimeString().substring(0, 5);
 
@@ -606,15 +624,24 @@ export class DashboardCitasService {
     }
 
     // Verificar conflictos con citas existentes
-    const fechaInicio = new Date(fechaHora);
-    const fechaFin = new Date(fechaInicio.getTime() + duracion * 60000);
+    const fechaInicio = parseColombiaDateTime(fechaHora);
+    const fechaFinValidacion = getCurrentColombiaDateTime();
+    fechaFinValidacion.setTime(fechaInicio.getTime() + duracion * 60000);
 
     const citaConflicto = await this.citasRepository.findOne({
       where: {
         doctorId,
         fechaHora: Between(
-          new Date(fechaInicio.getTime() - 59 * 60000),
-          new Date(fechaFin.getTime() + 59 * 60000)
+          (() => {
+            const inicio = getCurrentColombiaDateTime();
+            inicio.setTime(fechaInicio.getTime() - 59 * 60000);
+            return inicio;
+          })(),
+          (() => {
+            const fin = getCurrentColombiaDateTime();
+            fin.setTime(fechaFinValidacion.getTime() + 59 * 60000);
+            return fin;
+          })()
         )
       }
     });
@@ -723,8 +750,9 @@ export class DashboardCitasService {
     const estadisticasCitas = await this.obtenerEstadisticasCitas(doctorId, 'doctor');
 
     // Obtener citas próximas (siguientes 7 días)
-    const ahora = new Date();
-    const enUnaSemana = new Date(ahora.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const ahora = getCurrentColombiaDateTime();
+    const enUnaSemana = getCurrentColombiaDateTime();
+    enUnaSemana.setTime(ahora.getTime() + 7 * 24 * 60 * 60 * 1000);
     
     const citasProximas = await this.citasRepository.find({
       where: {

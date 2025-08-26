@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Plus, Trash2, Save, Check, X } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Calendar, Clock, Plus, Save, Check, Trash2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 interface TimeSlot {
@@ -19,6 +19,16 @@ interface DoctorAvailabilityManagerProps {
   onSave?: (availability: DayAvailability[]) => void;
 }
 
+const daysOfWeek = [
+  { id: 0, name: 'Domingo', short: 'Dom' },
+  { id: 1, name: 'Lunes', short: 'Lun' },
+  { id: 2, name: 'Martes', short: 'Mar' },
+  { id: 3, name: 'Miércoles', short: 'Mié' },
+  { id: 4, name: 'Jueves', short: 'Jue' },
+  { id: 5, name: 'Viernes', short: 'Vie' },
+  { id: 6, name: 'Sábado', short: 'Sab' }
+];
+
 const DoctorAvailabilityManager: React.FC<DoctorAvailabilityManagerProps> = ({
   doctorId,
   onSave
@@ -26,33 +36,8 @@ const DoctorAvailabilityManager: React.FC<DoctorAvailabilityManagerProps> = ({
   const [availability, setAvailability] = useState<DayAvailability[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [editingDay, setEditingDay] = useState<number | null>(null);
 
-  const daysOfWeek = [
-    { id: 0, name: 'Domingo', short: 'Dom' },
-    { id: 1, name: 'Lunes', short: 'Lun' },
-    { id: 2, name: 'Martes', short: 'Mar' },
-    { id: 3, name: 'Miércoles', short: 'Mié' },
-    { id: 4, name: 'Jueves', short: 'Jue' },
-    { id: 5, name: 'Viernes', short: 'Vie' },
-    { id: 6, name: 'Sábado', short: 'Sab' }
-  ];
-
-  // Inicializar disponibilidad vacía
-  useEffect(() => {
-    const initialAvailability = daysOfWeek.map(day => ({
-      dayOfWeek: day.id,
-      isActive: false,
-      timeSlots: []
-    }));
-    setAvailability(initialAvailability);
-    
-    if (doctorId) {
-      loadDoctorAvailability();
-    }
-  }, [doctorId]);
-
-  const loadDoctorAvailability = async () => {
+  const loadDoctorAvailability = useCallback(async () => {
     if (!doctorId) return;
     
     setLoading(true);
@@ -83,7 +68,21 @@ const DoctorAvailabilityManager: React.FC<DoctorAvailabilityManagerProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [doctorId]);
+
+  // Inicializar disponibilidad vacía
+  useEffect(() => {
+    const initialAvailability = daysOfWeek.map(day => ({
+      dayOfWeek: day.id,
+      isActive: false,
+      timeSlots: []
+    }));
+    setAvailability(initialAvailability);
+    
+    if (doctorId) {
+      loadDoctorAvailability();
+    }
+  }, [doctorId, loadDoctorAvailability]);
 
   const toggleDayActive = (dayOfWeek: number) => {
     setAvailability(prev => prev.map(day => 

@@ -4,16 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import MiniCalendar from '../calendar/MiniCalendar';
-
-// Interfaz para citas
-interface Cita {
-  id: number;
-  fecha: string;
-  hora: string;
-  doctor: string;
-  estado: 'Confirmada' | 'Completada' | 'Cancelada' | 'Pendiente';
-  consultorio?: string;
-}
+import { usePatientAppointments } from '../../hooks/usePatientAppointments';
+import { Cita } from '../../services/citasService';
+import NotificationBell from '../notifications/NotificationBell';
+import AppointmentConfirmationModal from '../patient/AppointmentConfirmationModal';
+import { useAppointmentConfirmation } from '../../hooks/useAppointmentConfirmation';
 
 // Component para el User Account Modal (sin botón "mis pacientes")
 interface UserAccountModalProps {
@@ -66,7 +61,7 @@ const UserAccountModal: React.FC<UserAccountModalProps> = ({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white text-2xl font-medium">
+              <div className="w-full h-full bg-primary flex items-center justify-center text-white text-2xl font-medium">
                 {currentUser.name?.charAt(0)?.toUpperCase() || 'U'}
               </div>
             )}
@@ -119,7 +114,25 @@ const PatientDashboard: React.FC = () => {
     return today;
   });
 
-  // Sin datos hardcodeados - todo se obtendrá de la base de datos
+  // Obtener datos reales de citas
+  const { pastAppointments, upcomingAppointments, loading } = usePatientAppointments();
+  
+  // Hook para manejo de confirmación de citas
+  const {
+    isModalOpen,
+    appointmentToConfirm,
+    confirmationLoading,
+    // openConfirmationModal, // Comentado para futuro uso
+    closeConfirmationModal,
+    confirmAppointment
+  } = useAppointmentConfirmation();
+  
+  // Log para verificar que tenemos las próximas citas disponibles
+  React.useEffect(() => {
+    if (upcomingAppointments.length > 0) {
+      console.log('Próximas citas disponibles:', upcomingAppointments.length);
+    }
+  }, [upcomingAppointments]);
 
   const handleLogout = () => {
     logout();
@@ -152,31 +165,38 @@ const PatientDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-4 sm:px-6">
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <img className="h-6 sm:h-8" src="/images/White logo - no background_page-0001.webp" alt="OrtoWhave" />
-            <h1 className="text-lg sm:text-2xl font-semibold text-gray-800 truncate">Hola, {user.nombre}</h1>
+      {/* Header - optimizado para móviles */}
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto flex justify-between items-center py-3 sm:py-4 px-2 sm:px-6">
+          <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+            <img className="h-6 sm:h-8 flex-shrink-0" src="/images/White logo - no background_page-0001.webp" alt="OrtoWhave" />
+            <h1 className="text-base sm:text-lg lg:text-2xl font-semibold text-gray-800 truncate">Hola, {user.nombre}</h1>
           </div>
 
-          <div className="relative">
-            <button
-              onClick={handleUserMenuToggle}
-              className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium hover:bg-blue-700 transition-colors text-sm sm:text-base"
-            >
-              {user.nombre?.charAt(0)?.toUpperCase() || 'U'}
-            </button>
+          <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+            {/* Campana de notificaciones */}
+            <NotificationBell />
+            
+            {/* Botón de perfil - optimizado para touch */}
+            <div className="relative">
+              <button
+                onClick={handleUserMenuToggle}
+                className="w-10 h-10 sm:w-10 sm:h-10 bg-primary rounded-full flex items-center justify-center text-white font-medium hover:bg-primary-dark transition-colors text-sm sm:text-base touch-manipulation"
+                aria-label="Menú de usuario"
+              >
+                {user.nombre?.charAt(0)?.toUpperCase() || 'U'}
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto py-4 sm:py-8 px-4 sm:px-6">
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 space-y-4 lg:space-y-6">
-            <nav className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 overflow-x-auto lg:overflow-x-visible">
-              <button className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap">
+      <div className="max-w-7xl mx-auto py-2 sm:py-4 lg:py-8 px-2 sm:px-4 lg:px-6">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:gap-8">
+          {/* Sidebar - optimizado para móviles */}
+          <aside className="w-full lg:w-64 space-y-3 sm:space-y-4 lg:space-y-6">
+            <nav className="flex flex-row lg:flex-col gap-2 lg:gap-0 lg:space-y-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
+              <button className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap touch-manipulation min-h-[44px]">
                 <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
@@ -185,12 +205,32 @@ const PatientDashboard: React.FC = () => {
 
               <button 
                 onClick={() => navigate('/dashboard/patient/perfil')}
-                className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap"
+                className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap touch-manipulation min-h-[44px]"
               >
                 <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 <span className="text-sm lg:text-base">Mi perfil</span>
+              </button>
+              
+              <button 
+                onClick={() => navigate('/dashboard/patient/estados-citas')}
+                className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap touch-manipulation min-h-[44px]"
+              >
+                <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm lg:text-base">Estados de citas</span>
+              </button>
+              
+              <button 
+                onClick={() => navigate('/dashboard/patient/documentos')}
+                className="flex-shrink-0 lg:w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap touch-manipulation min-h-[44px]"
+              >
+                <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="text-sm lg:text-base">Mis Documentos</span>
               </button>
             </nav>
 
@@ -218,12 +258,12 @@ const PatientDashboard: React.FC = () => {
           <main className="flex-1 space-y-6">
             {/* Sección eliminada - sin próxima cita hasta verificar datos en BD */}
 
-            {/* Botón Agendar nueva cita */}
+            {/* Botón Agendar nueva cita - optimizado para móviles */}
             <button
               onClick={handleNavigateToAgendar}
-              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
+              className="w-full bg-primary text-white py-4 sm:py-3 px-6 rounded-lg font-medium hover:bg-primary-dark transition-colors shadow-sm text-base sm:text-sm touch-manipulation min-h-[48px]"
             >
-              Agendar nueva cita
+              📅 Agendar nueva cita
             </button>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -245,7 +285,7 @@ const PatientDashboard: React.FC = () => {
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
                         <span>No hay citas programadas</span>
                       </div>
                     </div>
@@ -253,13 +293,60 @@ const PatientDashboard: React.FC = () => {
                 </div>
               </section>
 
-              {/* Historial de citas - Datos reales se cargarán desde la BD */}
+              {/* Historial de citas - Datos reales */}
               <section className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Historial de citas</h2>
-                <div className="text-center py-8 text-gray-500">
-                  <p>No hay citas en el historial.</p>
-                  <p className="text-sm mt-2">Las citas aparecerán aquí una vez que se sincronicen con la base de datos.</p>
-                </div>
+                {loading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                    <p className="text-gray-600">Cargando historial...</p>
+                  </div>
+                ) : pastAppointments.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p>No hay citas en el historial.</p>
+                    <p className="text-sm mt-2">Las citas completadas aparecerán aquí.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {pastAppointments.slice(0, 3).map((appointment: Cita) => (
+                      <div key={appointment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {format(new Date(appointment.fechaHora), "d 'de' MMM yyyy", { locale: es })}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Dr. {appointment.doctor?.nombre || 'No disponible'} - {appointment.tipoConsulta || 'Consulta'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          appointment.estado === 'completada' 
+                            ? 'bg-green-100 text-green-800'
+                            : appointment.estado === 'cancelada'
+                            ? 'bg-red-100 text-red-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {appointment.estado}
+                        </span>
+                      </div>
+                    ))}
+                    {pastAppointments.length > 3 && (
+                      <button 
+                        onClick={() => navigate('/dashboard/patient/citas')}
+                        className="w-full text-center py-2 text-sm text-primary hover:text-primary-dark font-medium"
+                      >
+                        Ver todas las citas ({pastAppointments.length})
+                      </button>
+                    )}
+                  </div>
+                )}
               </section>
             </div>
           </main>
@@ -276,6 +363,15 @@ const PatientDashboard: React.FC = () => {
           avatar: undefined,
         }}
         onSignOut={handleLogout}
+      />
+      
+      {/* Appointment Confirmation Modal */}
+      <AppointmentConfirmationModal
+        isOpen={isModalOpen}
+        onClose={closeConfirmationModal}
+        onConfirm={confirmAppointment}
+        appointmentData={appointmentToConfirm}
+        loading={confirmationLoading}
       />
     </div>
   );

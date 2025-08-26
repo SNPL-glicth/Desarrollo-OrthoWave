@@ -3,12 +3,18 @@ import axios from 'axios';
 // Crear una instancia de axios con la configuración base
 const api = axios.create({
   baseURL: 'http://localhost:4000', // URL base del backend actualizada
-  timeout: 5000, // timeout de 5 segundos
+  timeout: 10000, // timeout aumentado a 10 segundos
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  withCredentials: true
+  withCredentials: true,
+  // Configuraciones adicionales para mejorar confiabilidad
+  maxRedirects: 0, // No seguir redirects automáticamente
+  validateStatus: function (status) {
+    // Considerar exitoso cualquier status 2xx
+    return status >= 200 && status < 300;
+  }
 });
 
 // Interceptor para agregar el token a las peticiones
@@ -34,7 +40,7 @@ api.interceptors.response.use(
       if (error.response.status === 401) {
         // Solo limpiar tokens pero NO redirigir automáticamente
         // Dejar que cada componente maneje su propia lógica de redirección
-        const publicPaths = ['/', '/login', '/register', '/verification'];
+        const publicPaths = ['/', '/login', '/register', '/verification', '/verify-email'];
         const isPublicPath = publicPaths.includes(window.location.pathname);
         
         if (!isPublicPath) {

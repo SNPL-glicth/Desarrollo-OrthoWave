@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { citasService } from '../../services/citasService';
+import { documentService, PatientDocument } from '../../services/documentService';
 
 interface Paciente {
   id: number;
@@ -40,6 +41,11 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
   const [citas, setCitas] = useState<Cita[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Estados para documentos
+  const [documents, setDocuments] = useState<PatientDocument[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [documentsError, setDocumentsError] = useState<string | null>(null);
 
   const fetchPatientAppointments = useCallback(async () => {
     setLoading(true);
@@ -55,11 +61,26 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
     }
   }, [paciente.id]);
 
+  const fetchPatientDocuments = useCallback(async () => {
+    setDocumentsLoading(true);
+    setDocumentsError(null);
+    try {
+      const patientDocuments = await documentService.getDocumentsByPatientId(paciente.id);
+      setDocuments(patientDocuments.sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()));
+    } catch (err: any) {
+      console.error('Error al obtener documentos del paciente:', err);
+      setDocumentsError('Error al cargar los documentos del paciente');
+    } finally {
+      setDocumentsLoading(false);
+    }
+  }, [paciente.id]);
+
   useEffect(() => {
     if (isOpen && paciente.id) {
       fetchPatientAppointments();
+      fetchPatientDocuments();
     }
-  }, [isOpen, paciente.id, fetchPatientAppointments]);
+  }, [isOpen, paciente.id, fetchPatientAppointments, fetchPatientDocuments]);
 
   // Obtener color por estado
   const getEstadoColor = (estado: string) => {
@@ -87,6 +108,29 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
     const pendientes = citas.filter(c => ['pendiente', 'confirmada'].includes(c.estado)).length;
     
     return { total, completadas, canceladas, pendientes };
+  };
+
+  const handleViewDocument = (document: PatientDocument) => {
+    const url = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000'}/api/patient-documents/${document.id}/view`;
+    window.open(url, '_blank');
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   if (!isOpen) return null;
@@ -297,6 +341,87 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Documentos del paciente */}
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <svg className="h-5 w-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Documentos del Paciente
+              </h3>
+              <button
+                onClick={fetchPatientDocuments}
+                disabled={documentsLoading}
+                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                {documentsLoading ? 'Actualizando...' : 'Actualizar'}
+              </button>
+            </div>
+
+            {documentsLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                <p className="mt-2 text-gray-600">Cargando documentos...</p>
+              </div>
+            ) : documentsError ? (
+              <div className="text-center py-8 text-red-600">
+                {documentsError}
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="text-center py-8">
+                <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="text-gray-600">El paciente no ha subido documentos</p>
+                <p className="text-sm text-gray-500 mt-2">Los documentos PDF aparecerán aquí cuando el paciente los suba.</p>
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {documents.map((document) => (
+                    <div key={document.id} className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          <svg className="h-8 w-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-900 truncate" title={document.originalName}>
+                            {document.originalName}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {formatFileSize(document.size)} • {formatDate(document.uploadDate)}
+                          </p>
+                          <div className="mt-3 flex space-x-2">
+                            <button
+                              onClick={() => handleViewDocument(document)}
+                              className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors"
+                            >
+                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                              Ver
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {documents.length > 6 && (
+                  <div className="text-center mt-4">
+                    <p className="text-sm text-gray-600">
+                      Mostrando todos los {documents.length} documentos
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>

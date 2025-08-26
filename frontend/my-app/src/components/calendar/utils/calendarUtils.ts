@@ -128,8 +128,37 @@ export const getEventDuration = (event: CalendarEvent): number => {
 };
 
 export const createEventFromAppointment = (appointment: any): CalendarEvent => {
+  console.log('🔧 createEventFromAppointment - Datos de entrada:', {
+    id: appointment.id,
+    fechaHora: appointment.fechaHora,
+    fechaHoraType: typeof appointment.fechaHora,
+    fechaHoraString: appointment.fechaHora?.toString(),
+    duracion: appointment.duracion
+  });
+
+  // SOLUCIÓN MUY SIMPLIFICADA:
+  // Las fechas del backend ya vienen correctas. Solo parseamos sin conversiones.
   const startTime = new Date(appointment.fechaHora);
+  
+  console.log('📅 Fecha procesada:', {
+    original: appointment.fechaHora,
+    startTime: startTime.toString(),
+    startTimeISO: startTime.toISOString(),
+    horaLocal: startTime.toLocaleString(),
+    horaColombia: startTime.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+    offsetMinutos: startTime.getTimezoneOffset()
+  });
+  
   const endTime = new Date(startTime.getTime() + (appointment.duracion || 60) * 60000);
+  
+  console.log('✅ createEventFromAppointment - Resultado:', {
+    startTime: startTime.toISOString(),
+    endTime: endTime.toISOString(),
+    startTimeLocal: startTime.toString(),
+    endTimeLocal: endTime.toString(),
+    startTimeColombia: startTime.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+    endTimeColombia: endTime.toLocaleString('es-CO', { timeZone: 'America/Bogota' })
+  });
   
   return {
     id: `appointment-${appointment.id}`,
@@ -148,6 +177,9 @@ export const createEventFromAppointment = (appointment: any): CalendarEvent => {
       notes: appointment.motivoConsulta,
       phone: appointment.paciente?.telefono,
       email: appointment.paciente?.email,
+      // Información adicional para debugging
+      originalFechaHora: appointment.fechaHora,
+      parsedCorrectly: true
     },
   };
 };

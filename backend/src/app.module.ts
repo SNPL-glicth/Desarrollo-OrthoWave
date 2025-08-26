@@ -12,6 +12,10 @@ import { PacientesModule } from './pacientes/pacientes.module';
 import { HistoriaClinicaModule } from './historia-clinica/historia-clinica.module';
 import { WebSocketModule } from './websocket/websocket.module';
 import { CacheModule } from './cache/cache.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ProductsModule } from './products/products.module';
+import { PatientDocumentsModule } from './patient-documents/patient-documents.module';
+import { CleanupModule } from './cleanup/cleanup.module';
 import { databaseConfig } from './config/database.config';
 
 @Module({
@@ -29,6 +33,10 @@ import { databaseConfig } from './config/database.config';
     HistoriaClinicaModule, // Reactivado para historias clínicas
     WebSocketModule, // Reactivado para notificaciones en tiempo real
     CacheModule, // Reactivado para optimización
+    NotificationsModule, // Sistema de notificaciones para pacientes
+    ProductsModule, // Sistema de productos y reservas
+    PatientDocumentsModule, // Sistema de documentos de pacientes
+    CleanupModule, // Sistema de limpieza automática de datos antiguos
   ],
 })
 export class AppModule {}

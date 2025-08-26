@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código de Verificación - Orto-Whave</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: #fff;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .verification-code {
+            background-color: #f8f9fa;
+            border: 2px dashed #34495e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            color: #34495e;
+            font-family: 'Courier New', monospace;
+        }
+        .instructions {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #34495e;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #2c3e50;
+        }
+        .warning {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦷 Orto-Whave</h1>
+            <p>Verificación de cuenta</p>
+        </div>
+        
+        <div class="content">
+            <h2>¡Hola {{name}}!</h2>
+            <p>Gracias por registrarte en Orto-Whave. Para completar tu registro, por favor usa el siguiente código de verificación:</p>
+            
+            <div class="verification-code">
+                {{verificationCode}}
+            </div>
+            
+            <div class="instructions">
+                <h3>📋 Instrucciones:</h3>
+                <ol>
+                    <li>Copia el código de verificación mostrado arriba</li>
+                    <li>Regresa a la página de registro en Orto-Whave</li>
+                    <li>Ingresa el código en el campo correspondiente</li>
+                    <li>Haz clic en "Verificar código"</li>
+                </ol>
+            </div>
+            
+            <p>Una vez verificada tu cuenta, podrás acceder a todas las funcionalidades de la plataforma.</p>
+            
+            <div class="warning">
+                ⚠️ <strong>Importante:</strong> Este código expira en 30 minutos por seguridad.<br>
+                Si no solicitaste este registro, puedes ignorar este correo.
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Este correo fue enviado automáticamente desde Orto-Whave</p>
+            <p>Si tienes problemas, contacta nuestro soporte: <strong>{{email}}</strong></p>
+            <p>© 2025 Orto-Whave. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

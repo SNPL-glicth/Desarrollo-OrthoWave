@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { format, startOfDay, endOfDay } from 'date-fns';
+import { format } from 'date-fns';
 import api from '../services/api';
 
 interface TimeSlot {
@@ -120,13 +120,21 @@ export const useDoctorAvailability = ({
       // Generar timeSlots con estado
       const slotsWithStatus: TimeSlot[] = timeSlots.map(time => {
         const occupied = occupiedSlots.get(time);
+        const isOccupied = !!occupied;
         return {
           time,
-          isAvailable: !occupied,
-          isOccupied: !!occupied,
+          isAvailable: !isOccupied,
+          isOccupied,
           citaId: occupied?.id,
           estado: occupied?.estado
         };
+      });
+      
+      console.log(`📅 Slots generados para ${dateString}:`, {
+        totalSlots: slotsWithStatus.length,
+        availableSlots: slotsWithStatus.filter(s => s.isAvailable).length,
+        occupiedSlots: slotsWithStatus.filter(s => s.isOccupied).length,
+        appointments: appointments.length
       });
 
       return {

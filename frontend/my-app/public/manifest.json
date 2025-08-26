@@ -1,6 +1,7 @@
 {
   "short_name": "OrthoWave",
-  "name": "OrthoWave Colombia",
+  "name": "OrthoWave Colombia - Citas Médicas",
+  "description": "Sistema de gestión de citas médicas para OrthoWave Colombia",
   "icons": [
     {
       "src": "images/logo_pequeño.ico",
@@ -10,16 +11,22 @@
     {
       "src": "images/logo_pequeño.ico",
       "type": "image/x-icon",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "images/logo_pequeño.ico",
       "type": "image/x-icon",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait-primary",
+  "theme_color": "#34495e",
+  "background_color": "#ffffff",
+  "categories": ["medical", "health", "productivity"],
+  "lang": "es",
+  "scope": "/"
 }

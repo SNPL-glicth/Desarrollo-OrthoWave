@@ -118,6 +118,39 @@ class AppointmentRequestsService {
       return 0;
     }
   }
+
+  // Obtener conteo directo de solicitudes pendientes (optimizado)
+  async getConteoSolicitudesPendientes(): Promise<number> {
+    try {
+      const response = await api.get('/citas/mi-conteo-solicitudes-pendientes');
+      return response.data.count || 0;
+    } catch (error: any) {
+      console.error('Error al obtener conteo de solicitudes pendientes:', error);
+      
+      const status = error.response?.status;
+      
+      // Si es 404, probablemente significa que no hay endpoint implementado
+      if (status === 404) {
+        console.log('Endpoint de conteo no encontrado, retornando 0');
+        return 0;
+      }
+      
+      // Si es 400 o 403, probablemente el usuario no es doctor
+      if (status === 400 || status === 403) {
+        console.log('Usuario no autorizado para ver conteo de solicitudes (no es doctor), retornando 0');
+        return 0;
+      }
+      
+      // Si es 401, problemas de autenticación
+      if (status === 401) {
+        console.log('Usuario no autenticado, retornando 0');
+        return 0;
+      }
+      
+      return 0;
+    }
+  }
 }
 
-export default new AppointmentRequestsService();
+export const appointmentRequestsService = new AppointmentRequestsService();
+export default appointmentRequestsService;

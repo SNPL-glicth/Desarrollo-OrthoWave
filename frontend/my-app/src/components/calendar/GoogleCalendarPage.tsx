@@ -4,13 +4,13 @@ import GoogleCalendarNavbar from './GoogleCalendarNavbar';
 import GoogleStyleCalendar from './GoogleStyleCalendar';
 import MiniCalendar from './MiniCalendar';
 import UserAccountModal from './UserAccountModal';
-import DebugCalendarSync from './DebugCalendarSync';
 import ColombiaTimeWidget from './ColombiaTimeWidget';
-import TimeDebugComponent from './TimeDebugComponent';
 import AppointmentRequestsOffcanvas from '../doctor/AppointmentRequestsOffcanvas';
+import DoctorAppointmentModal from '../doctor/DoctorAppointmentModal';
+import AppointmentDetailsModal from '../doctor/AppointmentDetailsModal';
 import { useGoogleCalendar } from '../../hooks/useGoogleCalendar';
 import { useAuth } from '../../context/AuthContext';
-import { CalendarView } from '../../types/calendar';
+import { CalendarView, CalendarEvent } from '../../types/calendar';
 import '../../styles/GoogleCalendar.css';
 
 const GoogleCalendarPage: React.FC = () => {
@@ -19,7 +19,12 @@ const GoogleCalendarPage: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string>('');
   const [showNotificationsOffcanvas, setShowNotificationsOffcanvas] = useState(false);
+  
+  // Estado para el modal de detalles de cita
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   const {
     currentDate,
@@ -51,13 +56,161 @@ const GoogleCalendarPage: React.FC = () => {
   };
 
   const handleEventClick = (event: any) => {
-    console.log('Event clicked:', event);
-    // Aquí puedes abrir un modal con los detalles de la cita
+    console.log('🎯 Event clicked:', event);
+    
+    // Buscar el evento completo en la lista de eventos
+    const fullEvent = events.find(e => e.id === event.id);
+    
+    if (fullEvent) {
+      console.log('📋 Evento completo encontrado:', {
+        id: fullEvent.id,
+        title: fullEvent.title,
+        startTime: fullEvent.startTime,
+        endTime: fullEvent.endTime,
+        status: fullEvent.status,
+        extendedProps: fullEvent.extendedProps
+      });
+      
+      setSelectedEvent(fullEvent);
+      setShowDetailsModal(true);
+    } else {
+      console.warn('⚠️ No se pudo encontrar el evento completo para:', event.id);
+      // Crear un evento temporal con los datos disponibles
+      const tempEvent: CalendarEvent = {
+        id: event.id,
+        title: event.title,
+        startTime: new Date(event.start),
+        endTime: new Date(event.end || event.start),
+        type: 'appointment',
+        status: 'confirmed',
+        description: '',
+        backgroundColor: event.backgroundColor || '#3B82F6',
+        textColor: '#ffffff',
+        extendedProps: event.extendedProps || {}
+      };
+      
+      setSelectedEvent(tempEvent);
+      setShowDetailsModal(true);
+    }
+  };
+  
+  const handleEditEvent = (event: CalendarEvent) => {
+    console.log('✏️ Editar evento:', event.id);
+    setShowDetailsModal(false);
+    // TODO: Implementar edición de citas
+    alert('Función de edición en desarrollo');
+  };
+  
+  const handleCancelEvent = (event: CalendarEvent) => {
+    console.log('❌ Cancelar evento:', event.id);
+    setShowDetailsModal(false);
+    // TODO: Implementar cancelación de citas
+    alert('Función de cancelación en desarrollo');
   };
 
   const handleDateSelect = (start: Date, end: Date) => {
-    console.log('Date selected:', start, end);
+    console.log('🔥🔥🔥 ============ DEBUGGING PROFUNDO ============');
+    console.log('🎯 GoogleCalendarPage - Date selected:', start, end);
+    console.log('🎯 GoogleCalendarPage - Current view:', currentView);
+    console.log('🎯 GoogleCalendarPage - Start date ISO:', start.toISOString());
+    console.log('🎯 GoogleCalendarPage - Start date local:', start.toString());
+    console.log('🎯 GoogleCalendarPage - Start date getTime():', start.getTime());
+    console.log('🎯 GoogleCalendarPage - Start date components:', {
+      fullYear: start.getFullYear(),
+      month: start.getMonth(),
+      date: start.getDate(),
+      hours: start.getHours(),
+      minutes: start.getMinutes(),
+      seconds: start.getSeconds(),
+      timezoneOffset: start.getTimezoneOffset()
+    });
+    
+    // También verificar la fecha actual para contexto
+    const now = new Date();
+    console.log('🎯 GoogleCalendarPage - Fecha actual del navegador:', {
+      now: now.toISOString(),
+      nowLocal: now.toString(),
+      nowComponents: {
+        fullYear: now.getFullYear(),
+        month: now.getMonth(),
+        date: now.getDate(),
+        hours: now.getHours(),
+        minutes: now.getMinutes(),
+        timezoneOffset: now.getTimezoneOffset()
+      }
+    });
+    
+    // NUEVO COMPORTAMIENTO: Si estamos en vista mes, redirigir a vista día
+    if (currentView === 'dayGridMonth') {
+      console.log('🎯 GoogleCalendarPage - Vista mes detectada, redirigiendo a vista día');
+      
+      // ⚠️ MULTIPLE ESTRATEGIAS DE CORRECCIÓN
+      
+      // Estrategia 1: Fecha "limpia" basada en componentes
+      const correctedDate1 = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 12, 0, 0, 0);
+      
+      // Estrategia 2: Ajustar por timezone offset
+      const correctedDate2 = new Date(start.getTime() + (start.getTimezoneOffset() * 60000));
+      
+      // Estrategia 3: Usar solo la parte de fecha ISO
+      const isoDateOnly = start.toISOString().split('T')[0]; // "2025-08-08"
+      const correctedDate3 = new Date(isoDateOnly + 'T12:00:00.000');
+      
+      console.log('🎯 GoogleCalendarPage - ESTRATEGIAS DE CORRECCIÓN:');
+      console.log('📅 Estrategia 1 (componentes):', {
+        date: correctedDate1,
+        iso: correctedDate1.toISOString(),
+        local: correctedDate1.toString(),
+        day: correctedDate1.getDate()
+      });
+      
+      console.log('📅 Estrategia 2 (timezone offset):', {
+        date: correctedDate2,
+        iso: correctedDate2.toISOString(),
+        local: correctedDate2.toString(),
+        day: correctedDate2.getDate()
+      });
+      
+      console.log('📅 Estrategia 3 (ISO date only):', {
+        isoDateOnly,
+        date: correctedDate3,
+        iso: correctedDate3.toISOString(),
+        local: correctedDate3.toString(),
+        day: correctedDate3.getDate()
+      });
+      
+      // Usar la estrategia 3 que debería ser más confiable
+      const finalCorrectedDate = correctedDate3;
+      
+      console.log('🚀 GoogleCalendarPage - FECHA FINAL SELECCIONADA:');
+      console.log('📅 Fecha final:', {
+        date: finalCorrectedDate,
+        iso: finalCorrectedDate.toISOString(),
+        local: finalCorrectedDate.toString(),
+        day: finalCorrectedDate.getDate(),
+        month: finalCorrectedDate.getMonth(),
+        year: finalCorrectedDate.getFullYear()
+      });
+      
+      setCurrentDate(finalCorrectedDate);
+      setCurrentView('timeGridDay');
+      console.log('🔥🔥🔥 ============ FIN DEBUGGING ============');
+      return; // No abrir modal, solo cambiar vista
+    }
+    
+    // COMPORTAMIENTO ORIGINAL: En vista día/semana, abrir modal para crear cita
+    
+    // Extraer la hora directamente de la fecha local sin conversión de zona horaria
+    const hours = start.getHours().toString().padStart(2, '0');
+    const minutes = start.getMinutes().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+    
+    console.log('🎯 GoogleCalendarPage - Hora calculada directamente:', timeString);
+    console.log('🎯 GoogleCalendarPage - Fecha para modal:', start);
+    console.log('🎯 GoogleCalendarPage - ABRIENDO DoctorAppointmentModal con estos datos');
+    
     setSelectedDate(start);
+    setSelectedTime(timeString);
     setShowCreateModal(true);
   };
 
@@ -74,6 +227,7 @@ const GoogleCalendarPage: React.FC = () => {
 
   const handleCreateEvent = () => {
     setSelectedDate(new Date());
+    setSelectedTime(''); // Limpiar hora cuando se crea desde el botón
     setShowCreateModal(true);
   };
 
@@ -135,7 +289,7 @@ const GoogleCalendarPage: React.FC = () => {
           </div>
 
           {/* Mini Calendar */}
-          <div className="px-6 pb-6">
+          <div className="px-6 pb-6 flex-1">
             <MiniCalendar
               currentDate={currentDate}
               onDateClick={handleMiniCalendarDateClick}
@@ -143,74 +297,6 @@ const GoogleCalendarPage: React.FC = () => {
               events={events}
               selectedDate={currentDate}
             />
-          </div>
-
-          {/* Sección Mis calendarios */}
-          <div className="px-6 pb-4 flex-1">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Mis calendarios</h3>
-            <div className="space-y-2">
-              <label className="flex items-center space-x-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <div className="w-3 h-3 bg-blue-600 rounded-sm"></div>
-                <span className="text-sm text-gray-700 group-hover:text-gray-900">
-                  Dr. {user.nombre} {user.apellido}
-                </span>
-              </label>
-
-              <label className="flex items-center space-x-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                />
-                <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
-                <span className="text-sm text-gray-700 group-hover:text-gray-900">
-                  Citas Médicas
-                </span>
-              </label>
-
-              <label className="flex items-center space-x-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                />
-                <div className="w-3 h-3 bg-orange-600 rounded-sm"></div>
-                <span className="text-sm text-gray-700 group-hover:text-gray-900">
-                  Disponibilidad
-                </span>
-              </label>
-            </div>
-          </div>
-
-          {/* Enlaces rápidos */}
-          <div className="px-6 pb-6 border-t border-gray-200 pt-4">
-            <div className="space-y-2">
-              <button
-                onClick={handleNavigateToPatients}
-                className="flex items-center space-x-3 w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                </svg>
-                Mis Pacientes
-              </button>
-
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="flex items-center space-x-3 w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4" />
-                </svg>
-                Dashboard
-              </button>
-            </div>
           </div>
         </div>
 
@@ -263,51 +349,35 @@ const GoogleCalendarPage: React.FC = () => {
         />
       )}
 
-      {/* Modal de crear evento - placeholder */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Crear nueva cita</h3>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="text-sm text-gray-600 mb-4">
-              {selectedDate && `Fecha seleccionada: ${selectedDate.toLocaleDateString()}`}
-            </div>
-            <div className="text-center py-8 text-gray-500">
-              Funcionalidad de crear cita se implementará próximamente
-            </div>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal de crear cita */}
+      <DoctorAppointmentModal
+        isOpen={showCreateModal}
+        onClose={() => {
+          setShowCreateModal(false);
+          setSelectedDate(null);
+          setSelectedTime('');
+        }}
+        selectedDate={selectedDate}
+        selectedTime={selectedTime}
+        onAppointmentCreated={(appointment) => {
+          console.log('Nueva cita creada:', appointment);
+          // Aquí se podría actualizar el calendario con la nueva cita
+          refreshEvents();
+        }}
+      />
 
-      {/* Debug component - solo en desarrollo */}
-      {process.env.NODE_ENV === 'development' && (
-        <DebugCalendarSync
-          currentDate={currentDate}
-          currentView={currentView}
-        />
-      )}
       
-      {/* Debug de tiempo - temporal */}
-      {process.env.NODE_ENV === 'development' && (
-        <TimeDebugComponent />
-      )}
+      {/* Modal de detalles de cita */}
+      <AppointmentDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false);
+          setSelectedEvent(null);
+        }}
+        event={selectedEvent}
+        onEdit={handleEditEvent}
+        onCancel={handleCancelEvent}
+      />
       
       {/* Offcanvas de solicitudes de citas */}
       <AppointmentRequestsOffcanvas

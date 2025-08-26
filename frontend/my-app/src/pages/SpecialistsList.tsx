@@ -113,10 +113,49 @@ const SpecialistsList: React.FC = () => {
   };
 
   const handleAppointmentRequested = (appointmentData: any) => {
-    console.log('Solicitud de cita enviada:', appointmentData);
+    console.log('Cita creada exitosamente:', appointmentData);
     setShowCalendarModal(false);
-    // Aquí se podría mostrar un mensaje de éxito
-    alert('¡Solicitud de cita enviada correctamente! El doctor recibirá una notificación para aprobar tu solicitud.');
+    
+    // Mostrar mensaje de éxito personalizado si hay un successMessage
+    const message = appointmentData.successMessage || 
+      '¡Cita solicitada exitosamente! El doctor recibirá tu solicitud y la revisará pronto. Recibirás una notificación cuando sea aprobada.';
+    
+    // Crear un modal de éxito más profesional
+    const showSuccessModal = () => {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]';
+      modal.innerHTML = `
+        <div class="bg-white rounded-xl shadow-2xl max-w-md mx-4 p-6">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900">¡Cita Solicitada!</h3>
+          </div>
+          <p class="text-gray-600 mb-6">${message}</p>
+          <div class="flex justify-end">
+            <button 
+              onclick="this.closest('.fixed').remove()" 
+              class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      
+      // Auto-remover después de 5 segundos
+      setTimeout(() => {
+        if (document.body.contains(modal)) {
+          modal.remove();
+        }
+      }, 5000);
+    };
+    
+    showSuccessModal();
   };
 
   if (loading) {

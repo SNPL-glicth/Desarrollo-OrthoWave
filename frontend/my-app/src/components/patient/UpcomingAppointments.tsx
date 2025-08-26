@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { usePatientAppointments } from '../../hooks/usePatientAppointments';
 import AppointmentCard from './AppointmentCard';
+import { Cita } from '../../services/citasService';
 // TODO: Crear RescheduleModal y CancelModal
 // import RescheduleModal from './RescheduleModal';
 // import CancelModal from './CancelModal';
 
 const UpcomingAppointments: React.FC = () => {
-    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [selectedAppointment, setSelectedAppointment] = useState<Cita | null>(null);
     const [showRescheduleModal, setShowRescheduleModal] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
 
@@ -30,7 +31,7 @@ const UpcomingAppointments: React.FC = () => {
                     No tienes citas programadas
                 </div>
             ) : (
-                appointmentsList.map((appointment: any) => (
+                appointmentsList.map((appointment: Cita) => (
                     <AppointmentCard
                         key={appointment.id || Math.random()}
                         appointment={appointment}

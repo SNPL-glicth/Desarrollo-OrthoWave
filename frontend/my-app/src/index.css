@@ -92,6 +92,41 @@
   .section-subtitle {
     @apply text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto;
   }
+  
+  /* Componentes adicionales para móviles */
+  .mobile-card {
+    @apply bg-white rounded-lg shadow-md p-4 mb-4 mx-2 sm:mx-0;
+  }
+  
+  .mobile-button {
+    @apply w-full sm:w-auto px-6 py-3 text-base font-medium rounded-lg transition-all duration-200 touch-manipulation;
+    min-height: 44px;
+  }
+  
+  .mobile-input {
+    @apply w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary;
+    min-height: 44px;
+  }
+  
+  .mobile-grid {
+    @apply grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .dashboard-container {
+    @apply min-h-screen bg-gray-50 p-2 sm:p-4 lg:p-6;
+  }
+  
+  .dashboard-header {
+    @apply bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6;
+  }
+  
+  .sidebar-mobile {
+    @apply fixed inset-0 z-50 lg:relative lg:inset-auto;
+  }
+  
+  .overlay-mobile {
+    @apply fixed inset-0 bg-black bg-opacity-50 lg:hidden;
+  }
 }
 
 /* Estilos globales adicionales */
@@ -332,6 +367,30 @@
   .hover-only {
     display: none;
   }
+  
+  /* Mejorar tamaño de botones para touch */
+  button, 
+  .btn-primary,
+  .btn-secondary {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Estilos específicos para tablets */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .container {
+    @apply px-6;
+  }
+  
+  .section-title {
+    @apply text-3xl;
+  }
+  
+  /* Optimizar grids para tablets */
+  .grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-3 {
+    @apply md:grid-cols-2;
+  }
 }
 
 /* Ajustar el calendario para móviles */
@@ -348,5 +407,53 @@
     height: 100px;
     font-size: 14px;
     padding: 8px;
+  }
+  
+  /* Mejorar formularios en móviles */
+  .form-container {
+    @apply px-4;
+  }
+  
+  /* Optimizar modales para móviles */
+  .modal-content {
+    @apply mx-2 my-4;
+    width: calc(100% - 16px) !important;
+    max-width: none !important;
+  }
+  
+  /* Mejorar navegación móvil */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t z-50;
+    height: 60px;
+  }
+  
+  /* Ajustar contenido para navegación inferior */
+  .mobile-content {
+    padding-bottom: 70px;
+  }
+  
+  /* Mejorar tablas en móviles */
+  .table-responsive {
+    @apply block overflow-x-auto whitespace-nowrap;
+  }
+  
+  .table-responsive table {
+    @apply min-w-full;
+  }
+}
+
+/* Estilos para orientación horizontal en móviles */
+@media (max-height: 500px) and (orientation: landscape) {
+  .landscape-adjust {
+    @apply py-2;
+  }
+  
+  .section-title {
+    @apply text-xl mb-2;
+  }
+  
+  .btn-primary, 
+  .btn-secondary {
+    @apply py-2 text-sm;
   }
 }

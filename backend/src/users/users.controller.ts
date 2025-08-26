@@ -173,6 +173,13 @@ export class UsersController {
     return await this.usersService.obtenerEstadisticasUsuarios();
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('doctors')
+  async obtenerDoctores(@Request() req) {
+    // Cualquier usuario autenticado puede ver la lista de doctores
+    return await this.usersService.obtenerDoctores();
+  }
+
   // IMPORTANT: This route must come AFTER all specific /admin/* routes
   // to avoid conflicts with parameterized routes like /admin/:id
   @UseGuards(JwtAuthGuard)

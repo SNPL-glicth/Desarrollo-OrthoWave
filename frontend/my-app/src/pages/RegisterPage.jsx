@@ -20,10 +20,15 @@ const RegisterPage = () => {
     phone: ''
   });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { register, login } = useAuth();
 
   const handleChange = (e) => {
+    // Limpiar error al escribir
+    if (error) {
+      setError('');
+    }
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -33,41 +38,94 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Prevenir múltiples submissions
+    if (isLoading) {
+      return;
+    }
+
+    // Validaciones del frontend
+    if (!formData.firstName.trim()) {
+      setError('El nombre es requerido');
+      return;
+    }
+    
+    if (!formData.lastName.trim()) {
+      setError('El apellido es requerido');
+      return;
+    }
+    
+    if (!formData.email.trim()) {
+      setError('El correo electrónico es requerido');
+      return;
+    }
+    
+    if (!formData.phone.trim()) {
+      setError('El teléfono es requerido');
+      return;
+    }
+    
+    if (formData.phone.length < 10) {
+      setError('El teléfono debe tener al menos 10 dígitos');
+      return;
+    }
+    
+    if (formData.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
     }
-                                                                                                                                                                                                                                                                                                                                             
-                                                                                                                                                  // Transformar los nombres de los campos al formato que espera el backend
+    
+    setIsLoading(true);
+
+    // Transformar los nombres de los campos al formato que espera el backend
     const userData = {                          
-      nombre: formData.firstName,                                       
-      apellido: formData.lastName,
-      email: formData.email,
-      telefono: formData.phone,
-      password: formData.password
+      nombre: formData.firstName.trim(),                                       
+      apellido: formData.lastName.trim(),
+      email: formData.email.trim().toLowerCase(),
+      telefono: formData.phone.trim(),
+      password: formData.password,
+      rolId: 3 // Siempre paciente para registro público
     };
 
     try {
-      await register(userData);
+      console.log('Enviando datos de registro:', { ...userData, password: '[OCULTA]' });
+      const response = await register(userData);
+      console.log('Respuesta de registro completa:', response);
+      console.log('requiresVerification:', response?.requiresVerification);
+      console.log('Tipo de requiresVerification:', typeof response?.requiresVerification);
       
-      // Realizar login automático después del registro exitoso
-      await login(userData.email, userData.password);
-      
-      // Redirigir directamente al dashboard del paciente después del registro
-      navigate('/dashboard/patient');
+      // Si requiere verificación por código de email
+      if (response && response.requiresVerification === true) {
+        console.log('Redirigiendo a verificación de email con URL:', `/verify-email?email=${encodeURIComponent(userData.email)}`);
+        // Redirigir a la página de verificación
+        navigate(`/verify-email?email=${encodeURIComponent(userData.email)}`);
+      } else {
+        console.log('No requiere verificación o respuesta inesperada, haciendo login automático');
+        console.log('Valor de requiresVerification:', response?.requiresVerification);
+        // Si no requiere verificación (usuarios creados por admin), hacer login
+        await login(userData.email, userData.password);
+        navigate('/dashboard/patient');
+      }
     } catch (err) {
-      setError('Error al registrar usuario. Por favor intente nuevamente.');
+      console.error('Error en registro:', err);
+      setError(err.message || 'Error al registrar usuario. Por favor intente nuevamente.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white py-4 sm:py-12 px-2 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-lg relative"
+        className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-4 sm:p-8 rounded-xl sm:rounded-2xl shadow-lg relative mx-2 sm:mx-0"
       >
         <Link
           to="/"
@@ -83,7 +141,7 @@ const RegisterPage = () => {
               className="h-12"
             />
           </Link>
-          <h2 className="text-center text-3xl font-bold text-gray-900">
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-900">
             Crear una cuenta
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -129,10 +187,13 @@ const RegisterPage = () => {
                     name="firstName"
                     type="text"
                     required
-                    className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
-                    placeholder="Juan"
+                    disabled={isLoading}
+                    className="appearance-none block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation disabled:bg-gray-50 disabled:cursor-not-allowed"
+                    placeholder="Tu nombre"
                     value={formData.firstName}
                     onChange={handleChange}
+                    autoComplete="given-name"
+                    autoCapitalize="words"
                   />
                 </div>
               </div>
@@ -150,10 +211,13 @@ const RegisterPage = () => {
                     name="lastName"
                     type="text"
                     required
-                    className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
-                    placeholder="Pérez"
+                    disabled={isLoading}
+                    className="appearance-none block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation disabled:bg-gray-50 disabled:cursor-not-allowed"
+                    placeholder="Tu apellido"
                     value={formData.lastName}
                     onChange={handleChange}
+                    autoComplete="family-name"
+                    autoCapitalize="words"
                   />
                 </div>
               </div>
@@ -172,10 +236,14 @@ const RegisterPage = () => {
                   name="email"
                   type="email"
                   required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                  disabled={isLoading}
+                  className="appearance-none block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation disabled:bg-gray-50 disabled:cursor-not-allowed"
                   placeholder="tu@email.com"
                   value={formData.email}
                   onChange={handleChange}
+                  autoComplete="email"
+                  autoCapitalize="off"
+                  autoCorrect="off"
                 />
               </div>
             </div>
@@ -194,10 +262,12 @@ const RegisterPage = () => {
                   type="tel"
                   required
                   pattern="[0-9]{10}"
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                  disabled={isLoading}
+                  className="appearance-none block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation disabled:bg-gray-50 disabled:cursor-not-allowed"
                   placeholder="3001234567"
                   value={formData.phone}
                   onChange={handleChange}
+                  autoComplete="tel"
                 />
               </div>
             </div>
@@ -215,10 +285,12 @@ const RegisterPage = () => {
                   name="password"
                   type="password"
                   required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                  disabled={isLoading}
+                  className="appearance-none block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation disabled:bg-gray-50 disabled:cursor-not-allowed"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
+                  autoComplete="new-password"
                 />
               </div>
             </div>
@@ -236,10 +308,12 @@ const RegisterPage = () => {
                   name="confirmPassword"
                   type="password"
                   required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                  disabled={isLoading}
+                  className="appearance-none block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation disabled:bg-gray-50 disabled:cursor-not-allowed"
                   placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  autoComplete="new-password"
                 />
               </div>
             </div>
@@ -248,9 +322,20 @@ const RegisterPage = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 transform hover:scale-[1.02]"
+              disabled={isLoading}
+              className={`group relative w-full flex justify-center py-3 sm:py-2.5 px-4 border border-transparent rounded-lg text-base sm:text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 transform hover:scale-[1.02] touch-manipulation min-h-[48px] ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
             >
-              Crear cuenta
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l-3-2.647z"></path>
+                  </svg>
+                  Creando cuenta...
+                </span>
+              ) : (
+                'Crear cuenta'
+              )}
             </button>
           </div>
         </form>
@@ -259,4 +344,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage; 
+export default RegisterPage;

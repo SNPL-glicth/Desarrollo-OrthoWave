@@ -22,6 +22,7 @@ interface AvailableSlot {
   id?: string;
   startTime?: string;
   specialist?: Doctor;
+  isOccupied?: boolean;
 }
 
 interface Doctor {
@@ -257,8 +258,10 @@ export const CitaProvider: React.FC<{ children: React.ReactNode }> = ({ children
           doctor: doctor || { id: doctorId, nombre: 'Doctor', apellido: 'Desconocido', especialidad: 'General' },
           fecha,
           id: `${doctorId}_${fecha}_${hora}`,
-          startTime: `${fecha}T${hora}:00`,
-          specialist: doctor
+          // Usar timezone de Colombia para evitar conversiones UTC incorrectas
+          startTime: `${fecha}T${hora}:00-05:00`, // Colombia UTC-5
+          specialist: doctor,
+          isOccupied: false // Marcar como disponible por defecto
         }));
 
         // Actualizar cache

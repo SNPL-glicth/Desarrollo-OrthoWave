@@ -10,7 +10,8 @@ export type AppointmentStatus =
   | 'completed' 
   | 'in_progress' 
   | 'no_show'
-  | 'pending';
+  | 'pending'
+  | 'blocked';
 
 export interface CalendarEvent {
   id: string;

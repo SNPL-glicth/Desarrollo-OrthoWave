@@ -17,7 +17,6 @@ const AppointmentRequestsOffcanvas: React.FC<AppointmentRequestsOffcanvasProps> 
 }) => {
   const {
     solicitudes,
-    solicitudesPendientes,
     contadorPendientes,
     loading,
     error,
@@ -83,77 +82,98 @@ const AppointmentRequestsOffcanvas: React.FC<AppointmentRequestsOffcanvasProps> 
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay moderno con blur */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-all duration-300"
           style={{ zIndex: 9998 }}
           onClick={onClose}
         />
       )}
 
-      {/* Offcanvas */}
+      {/* Offcanvas rediseñado - Responsivo */}
       <div 
-        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-full max-w-md sm:max-w-lg bg-white/95 backdrop-blur-lg shadow-2xl transform transition-all duration-300 ease-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{ zIndex: 9999 }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              Solicitudes de Citas
-            </h2>
-            <p className="text-sm text-gray-500">
-              {contadorPendientes} solicitudes pendientes
-            </p>
+        {/* Header moderno */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200/50 bg-gradient-to-r from-blue-50/50 to-indigo-50/50">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">
+                Solicitudes de Citas
+              </h2>
+              <p className="text-sm text-gray-500">
+                {contadorPendientes} pendientes • {solicitudes.length} total
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-white/80 rounded-xl transition-all duration-200 text-gray-500 hover:text-gray-700"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Content con diseño moderno */}
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
           {loading && solicitudes.length === 0 ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-              <span className="ml-3 text-gray-600">Cargando solicitudes...</span>
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+              <div className="relative">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500/20 border-t-blue-500"></div>
+                <div className="absolute inset-0 rounded-full bg-blue-500/10 animate-pulse"></div>
+              </div>
+              <p className="mt-4 text-gray-600 font-medium">Cargando solicitudes...</p>
+              <p className="text-sm text-gray-400 mt-1">Un momento por favor</p>
             </div>
           ) : error ? (
-            <div className="p-6 text-center">
-              <div className="text-red-600 mb-2">
-                <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="font-medium">Error al cargar solicitudes</p>
-                <p className="text-sm text-gray-600 mt-1">{error}</p>
-                <p className="text-xs text-gray-500 mt-2">Verifica tu conexión y que el backend esté funcionando</p>
               </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Error al cargar solicitudes</h3>
+              <p className="text-sm text-gray-600 mb-1">{error}</p>
+              <p className="text-xs text-gray-400 mb-6">Verifica tu conexión y que el backend esté funcionando</p>
               <button
                 onClick={cargarSolicitudes}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
               >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
                 Reintentar
               </button>
             </div>
           ) : solicitudes.length === 0 ? (
-            <div className="p-6 text-center">
-              <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <div className="p-12 text-center">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
                 No hay solicitudes
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-500 mb-6">
                 No tienes solicitudes de citas en este momento.
               </p>
+              <div className="bg-blue-50 rounded-xl p-4">
+                <p className="text-sm text-blue-700">
+                  📝 Las nuevas solicitudes aparecerán aquí automáticamente
+                </p>
+              </div>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">

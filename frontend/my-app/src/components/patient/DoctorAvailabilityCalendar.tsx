@@ -5,6 +5,7 @@ import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks,
 import { es } from 'date-fns/locale';
 import api from '../../services/api';
 import { getCurrentColombiaDate } from '../../utils/dateUtils';
+import { citasService } from '../../services/citasService';
 
 interface Doctor {
   id: number;
@@ -192,7 +193,8 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
       const [hours, minutes] = selectedTime.split(':').map(Number);
       fechaHora.setHours(hours, minutes, 0, 0);
 
-      const solicitudData = {
+      // Crear la cita usando el servicio de citas
+      const citaData = {
         doctorId: doctor.id,
         pacienteId: Number(user.id),
         fechaHora: fechaHora.toISOString(),
@@ -200,13 +202,21 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
         tipoConsulta: formData.tipoConsulta,
         motivoConsulta: formData.motivoConsulta,
         notasPaciente: formData.notasPaciente,
-        estado: 'solicitada'
+        costo: 75000 // Valor por defecto - esto debería venir del perfil del doctor
       };
 
-      // Aquí iría la llamada al backend para crear la solicitud
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulación
-
-      onRequestAppointment(solicitudData);
+      console.log('🚀 Creando cita real con datos:', citaData);
+      
+      // Llamada REAL al backend para crear la cita
+      const nuevaCita = await citasService.crearCita(citaData);
+      
+      console.log('✅ Cita creada exitosamente:', nuevaCita);
+      
+      // Llamar al callback con los datos de la cita creada
+      onRequestAppointment({
+        ...nuevaCita,
+        successMessage: `¡Cita solicitada exitosamente! El Dr. ${doctor.nombre} ${doctor.apellido} recibirá tu solicitud y la revisará pronto. Recibirás una notificación cuando sea aprobada.`
+      });
       
       // Resetear formulario
       setSelectedDate(null);
@@ -547,9 +557,32 @@ const DoctorAvailabilityCalendar: React.FC<DoctorAvailabilityCalendarProps> = ({
                 </div>
               </div>
 
+              {/* Debug info - temporal */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                  <p className="text-xs text-yellow-800">
+                    <strong>Debug:</strong>
+                    selectedDate: {selectedDate ? 'SÍ' : 'NO'} |
+                    selectedTime: {selectedTime || 'NO'} |
+                    motivoConsulta: {formData.motivoConsulta.trim() ? 'SÍ' : 'NO'} |
+                    submitting: {submitting ? 'SÍ' : 'NO'}
+                  </p>
+                </div>
+              )}
+
               <div className="flex space-x-3">
                 <button
-                  onClick={handleRequestAppointment}
+                  onClick={() => {
+                    console.log('🔴 Botón Solicitar Cita clickeado - Estado actual:', {
+                      selectedDate,
+                      selectedTime,
+                      motivoConsulta: formData.motivoConsulta,
+                      submitting,
+                      user,
+                      doctor
+                    });
+                    handleRequestAppointment();
+                  }}
                   disabled={submitting || !selectedDate || !selectedTime || !formData.motivoConsulta.trim()}
                   className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >

@@ -1,4 +1,5 @@
 import api from './api';
+import { getCurrentColombiaDate, extractTimeFromDateTime } from '../utils/timezoneUtils';
 
 export interface Cita {
   id: number;
@@ -124,34 +125,45 @@ class CitasServiceClass {
         throw new Error('Datos incompletos para crear la cita');
       }
 
-      // Verificar disponibilidad antes de crear
-      const disponibilidad = await this.buscarDisponibilidad({
-        doctorId: citaData.doctorId,
-        fecha: citaData.fechaHora.split('T')[0],
-        duracion: citaData.duracion || 60
-      });
+      console.log('🚀 Creando cita con datos:', citaData);
 
-      const horaSeleccionada = citaData.fechaHora.split('T')[1].substring(0, 5);
-      if (!disponibilidad.includes(horaSeleccionada)) {
-        throw new Error('El horario seleccionado ya no está disponible');
-      }
-
-      // Crear la cita
+      // Crear la cita directamente - el backend manejará la validación
       const response = await api.post('/citas', {
         ...citaData,
         estado: 'pendiente',
-        fechaCreacion: new Date().toISOString()
+        fechaCreacion: getCurrentColombiaDate().toISOString()
       });
 
       const nuevaCita = response.data;
+      console.log('✅ Cita creada exitosamente:', nuevaCita);
       
       // Notificar creación
       this.notifyCreated(nuevaCita);
       
       return nuevaCita;
     } catch (error: any) {
-      console.error('Error al crear cita:', error);
-      throw new Error(error.response?.data?.message || error.message || 'Error al crear la cita');
+      console.error('❌ Error al crear cita:', error);
+      
+      // Mejorar el manejo de errores específicos
+      let errorMessage = 'Error al crear la cita';
+      
+      if (error.response?.status === 409) {
+        errorMessage = 'El horario seleccionado ya está ocupado. Por favor, selecciona otro horario.';
+      } else if (error.response?.status === 400) {
+        errorMessage = error.response?.data?.message || 'Los datos de la cita no son válidos.';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Error del servidor. Por favor, intenta más tarde.';
+      } else if (error.message?.includes('Network Error')) {
+        errorMessage = 'Error de conexión. Verifica tu conexión a internet.';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      throw new Error(errorMessage);
     }
   }
 
@@ -168,6 +180,21 @@ class CitasServiceClass {
     const response = await api.get(`/citas/doctor/${doctorId}`, {
       signal
     });
+    
+    // DEBUGGING: Verificar datos recibidos del backend
+    if (response.data && response.data.length > 0) {
+      console.log('🔍 DEBUGGING - Datos de citas recibidos del backend:', {
+        totalCitas: response.data.length,
+        primeraCita: response.data[0],
+        fechaHoraEjemplo: {
+          valor: response.data[0]?.fechaHora,
+          tipo: typeof response.data[0]?.fechaHora,
+          string: response.data[0]?.fechaHora?.toString(),
+        },
+        timestamp: new Date().toISOString()
+      });
+    }
+    
     return response.data;
   }
 
@@ -188,7 +215,7 @@ class CitasServiceClass {
     try {
       const response = await api.patch(`/citas/${id}/estado`, {
         ...estadoData,
-        fechaActualizacion: new Date().toISOString()
+        fechaActualizacion: getCurrentColombiaDate().toISOString()
       });
       
       const citaActualizada = response.data;
@@ -306,7 +333,9 @@ class CitasServiceClass {
   }
 
   formatearFecha(fecha: string): string {
-    return new Date(fecha).toLocaleDateString('es-ES', {
+    const date = new Date(fecha);
+    return date.toLocaleDateString('es-CO', {
+      timeZone: 'America/Bogota',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -314,14 +343,13 @@ class CitasServiceClass {
   }
 
   formatearHora(fecha: string): string {
-    return new Date(fecha).toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return extractTimeFromDateTime(fecha);
   }
 
   formatearFechaHora(fecha: string): string {
-    return new Date(fecha).toLocaleDateString('es-ES', {
+    const date = new Date(fecha);
+    return date.toLocaleDateString('es-CO', {
+      timeZone: 'America/Bogota',
       year: 'numeric',
       month: 'short',
       day: 'numeric',

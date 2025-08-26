@@ -48,7 +48,7 @@
 }
 
 .fc-dayGridMonth-view .fc-daygrid-day {
-  min-height: 120px;
+  min-height: 180px;
   background-color: #ffffff;
   border-right: 1px solid #e0e0e0;
   border-bottom: 1px solid #e0e0e0;
@@ -314,7 +314,7 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .fc-dayGridMonth-view .fc-daygrid-day {
-    min-height: 80px;
+    min-height: 120px;
   }
 
   .fc-dayGridMonth-view .fc-daygrid-day-number {

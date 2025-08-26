@@ -90,3 +90,15 @@ tmp/
 
 # Yarn Integrity file
 .yarn-integrity
+
+# Archivos de prueba y desarrollo
+test-*.js
+debug_*.js
+check-*.js
+*.sql
+backup_*.sql
+.same/
+
+# Backups
+*.backup
+*.bak

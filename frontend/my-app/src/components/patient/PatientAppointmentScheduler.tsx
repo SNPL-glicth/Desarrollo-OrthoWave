@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useCitas } from '../../contexts/CitasContext';
 import { useAuth } from '../../context/AuthContext';
 import { useAvailableSlotsForDoctor } from '../../hooks/useAvailableSlotsOptimized';
-import { getCurrentColombiaDate } from '../../utils/dateUtils';
+import { getCurrentColombiaDate, createColombiaDateTimeISO, isInPastColombiaTime } from '../../utils/timezoneUtils';
 
 interface PatientAppointmentSchedulerProps {
   doctorId?: number;
@@ -43,11 +43,9 @@ const PatientAppointmentScheduler: React.FC<PatientAppointmentSchedulerProps> = 
       return;
     }
 
-    // Validación adicional: evitar agendar en fechas/horas pasadas usando hora de Colombia
-    const selectedDateTime = new Date(`${selectedDate.toISOString().split('T')[0]}T${selectedSlot}:00`);
-    const nowColombia = getCurrentColombiaDate();
-    
-    if (selectedDateTime <= nowColombia) {
+    // Validación adicional: evitar agendar en fechas/horas pasadas usando timezone de Colombia
+    if (isInPastColombiaTime(selectedDate, selectedSlot)) {
+      const nowColombia = getCurrentColombiaDate();
       const currentTimeStr = nowColombia.toLocaleTimeString('es-CO', {
         hour: '2-digit',
         minute: '2-digit',
@@ -67,7 +65,7 @@ const PatientAppointmentScheduler: React.FC<PatientAppointmentSchedulerProps> = 
       const appointmentData = {
         pacienteId: Number(user.id),
         doctorId: selectedDoctorId,
-        fechaHora: `${selectedDate.toISOString().split('T')[0]}T${selectedSlot}:00`,
+        fechaHora: createColombiaDateTimeISO(selectedDate, selectedSlot),
         tipoConsulta: consultationType,
         motivoConsulta: consultationReason,
         duracion: 60 // 60 minutos por defecto

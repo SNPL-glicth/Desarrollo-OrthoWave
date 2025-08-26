@@ -4,9 +4,11 @@ import { AuthProvider } from './context/AuthContext';
 import { initDevEnvironment } from './utils/devInit';
 import { CartProvider } from './context/CartContext';
 import { CitaProvider } from './contexts/CitasContext';
+import { useColombiaTimezone } from './hooks/useColombiaTimezone';
 import VerificationPage from './pages/VerificationPage';
 import RegisterPage from './pages/RegisterPage';
 import RegistroPendientePage from './pages/RegistroPendientePage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import CreateUserForm from './components/CreateUserForm';
@@ -20,6 +22,7 @@ import AdminDashboard from './components/dashboards/AdminDashboard';
 import DoctorDashboard from './components/dashboards/DoctorDashboard';
 import PatientDashboardRouter from './components/dashboards/PatientDashboardRouter';
 import GoogleCalendarPage from './components/calendar/GoogleCalendarPage';
+import DoctorSchedulePage from './pages/DoctorSchedulePage';
 
 
 const CreateUserPage = () => {
@@ -38,6 +41,9 @@ const CreateUserPage = () => {
 initDevEnvironment();
 
 const App: React.FC = () => {
+  // Inicializar timezone de Colombia para toda la aplicación
+  useColombiaTimezone();
+  
   return (
     <AuthProvider>
       <CartProvider>
@@ -48,6 +54,7 @@ const App: React.FC = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/registro-pendiente" element={<RegistroPendientePage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="/verification" element={<VerificationPage />} />
               <Route
                 path="/dashboard/admin"
@@ -98,6 +105,22 @@ const App: React.FC = () => {
                 }
               />
               <Route
+                path="/dashboard/patient/estados-citas"
+                element={
+                  <ProtectedRoute role="paciente">
+                    <PatientDashboardRouter />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/patient/documentos"
+                element={
+                  <ProtectedRoute role="paciente">
+                    <PatientDashboardRouter />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/usuarios/crear"
                 element={
                   <ProtectedRoute role="admin">
@@ -118,6 +141,14 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute role="doctor">
                     <GoogleCalendarPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor/schedule"
+                element={
+                  <ProtectedRoute role="doctor">
+                    <DoctorSchedulePage />
                   </ProtectedRoute>
                 }
               />

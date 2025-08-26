@@ -76,7 +76,7 @@ export const useAdminDashboard = (): AdminDashboardData => {
     // Procesar estadísticas con validación segura
     const distribuciones = statsData.distribuciones || {};
     const estadisticas = {
-      usuariosActivos: (statsData.verificados || 0) - (distribuciones.admins || 0),
+      usuariosActivos: (distribuciones.doctores || 0) + (distribuciones.pacientes || 0),
       doctores: distribuciones.doctores || 0,
       pacientes: distribuciones.pacientes || 0,
       total: (statsData.total || 0) - (distribuciones.admins || 0)

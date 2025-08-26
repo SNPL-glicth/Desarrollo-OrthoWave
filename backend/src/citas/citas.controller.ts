@@ -107,11 +107,31 @@ export class CitasController {
   async obtenerMisSolicitudesPendientes(@Request() req) {
     const usuario = req.user;
 
-    if (usuario.rol.nombre !== 'doctor') {
+    if (!usuario || !usuario.rol || usuario.rol.nombre !== 'doctor') {
       throw new HttpException('Solo los doctores pueden ver solicitudes pendientes', HttpStatus.FORBIDDEN);
     }
 
-    return await this.citasService.obtenerSolicitudesPendientesDoctor(usuario.id);
+    try {
+      return await this.citasService.obtenerSolicitudesPendientesDoctor(usuario.id);
+    } catch (error) {
+      throw new HttpException('Error al obtener las solicitudes pendientes', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Get('mi-conteo-solicitudes-pendientes')
+  async obtenerMiConteoSolicitudesPendientes(@Request() req) {
+    const usuario = req.user;
+
+    if (!usuario || !usuario.rol || usuario.rol.nombre !== 'doctor') {
+      throw new HttpException('Solo los doctores pueden ver el conteo de solicitudes pendientes', HttpStatus.FORBIDDEN);
+    }
+
+    try {
+      const solicitudes = await this.citasService.obtenerSolicitudesPendientesDoctor(usuario.id);
+      return { count: solicitudes.length };
+    } catch (error) {
+      throw new HttpException('Error al obtener el conteo de solicitudes pendientes', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Patch(':id/aprobar')

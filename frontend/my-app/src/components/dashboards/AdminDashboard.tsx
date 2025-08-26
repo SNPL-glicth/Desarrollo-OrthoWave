@@ -105,7 +105,7 @@ const AdminDashboard: React.FC = () => {
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <img className="h-8 w-auto" src="/logo.png" alt="Logo" />
+                <img className="h-8 w-auto" src="/images/White logo - no background_page-0001.webp" alt="Logo" />
               </div>
             </div>
             <div className="flex items-center space-x-4">

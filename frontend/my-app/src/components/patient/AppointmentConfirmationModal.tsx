@@ -13,13 +13,15 @@ interface AppointmentConfirmationModalProps {
             specialty: string;
         };
     } | null;
+    loading?: boolean;
 }
 
 const AppointmentConfirmationModal: React.FC<AppointmentConfirmationModalProps> = ({
     isOpen,
     onClose,
     onConfirm,
-    appointmentData
+    appointmentData,
+    loading = false
 }) => {
     if (!isOpen || !appointmentData) return null;
 
@@ -51,15 +53,20 @@ const AppointmentConfirmationModal: React.FC<AppointmentConfirmationModalProps> 
                 <div className="mt-6 flex justify-end space-x-3">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                        disabled={loading}
+                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Cancelar
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        disabled={loading}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                     >
-                        Confirmar Cita
+                        {loading && (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        )}
+                        <span>{loading ? 'Confirmando...' : 'Confirmar Cita'}</span>
                     </button>
                 </div>
             </div>

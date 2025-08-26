@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
@@ -30,8 +29,7 @@ interface PatientProfile {
   prefiereSms?: boolean;
 }
 
-const PatientProfile: React.FC = () => {
-  const { user } = useAuth();
+const PatientProfileComponent: React.FC = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<PatientProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -587,4 +585,4 @@ const PatientProfile: React.FC = () => {
   );
 };
 
-export default PatientProfile;
+export default PatientProfileComponent;

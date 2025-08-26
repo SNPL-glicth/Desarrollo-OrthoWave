@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCurrentTimeString, getCurrentDateTimeString, getCurrentColombiaDate } from '../../utils/dateUtils';
+import { getCurrentTimeString, getCurrentDateTimeString } from '../../utils/dateUtils';
 
 interface ColombiaTimeWidgetProps {
   className?: string;
@@ -14,21 +14,6 @@ const ColombiaTimeWidget: React.FC<ColombiaTimeWidgetProps> = ({
 }) => {
   const [currentTime, setCurrentTime] = useState<string>(getCurrentTimeString());
   const [currentDateTime, setCurrentDateTime] = useState<string>(getCurrentDateTimeString());
-  const [debugInfo, setDebugInfo] = useState<{
-    localTime: string;
-    colombiaTime: string;
-    utcTime: string;
-    offset: number;
-  }>(() => {
-    const now = new Date();
-    const colombiaDate = getCurrentColombiaDate();
-    return {
-      localTime: now.toLocaleTimeString(),
-      colombiaTime: colombiaDate.toLocaleTimeString(),
-      utcTime: now.toISOString(),
-      offset: now.getTimezoneOffset()
-    };
-  });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -36,16 +21,6 @@ const ColombiaTimeWidget: React.FC<ColombiaTimeWidgetProps> = ({
       if (showDate) {
         setCurrentDateTime(getCurrentDateTimeString());
       }
-      
-      // Actualizar debug info
-      const now = new Date();
-      const colombiaDate = getCurrentColombiaDate();
-      setDebugInfo({
-        localTime: now.toLocaleTimeString(),
-        colombiaTime: colombiaDate.toLocaleTimeString(),
-        utcTime: now.toISOString(),
-        offset: now.getTimezoneOffset()
-      });
     }, 1000); // Actualizar cada segundo
 
     return () => clearInterval(interval);
@@ -96,15 +71,6 @@ const ColombiaTimeWidget: React.FC<ColombiaTimeWidgetProps> = ({
       <div className="text-xs text-blue-600 mt-1 text-center">
         UTC-5 (COT)
       </div>
-      
-      {/* Debug info - solo en desarrollo */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-2 pt-2 border-t border-blue-200 text-xs text-blue-600 space-y-1">
-          <div><strong>Local:</strong> {debugInfo.localTime}</div>
-          <div><strong>Colombia:</strong> {debugInfo.colombiaTime}</div>
-          <div><strong>Offset:</strong> {debugInfo.offset}min</div>
-        </div>
-      )}
     </div>
   );
 };

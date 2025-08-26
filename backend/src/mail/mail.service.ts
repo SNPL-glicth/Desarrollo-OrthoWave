@@ -88,4 +88,57 @@ export class MailService {
       console.error('Error enviando recordatorio de cita:', error);
     }
   }
+
+  async enviarConfirmacionCita(cita: Cita) {
+    try {
+      // Confirmación al paciente únicamente
+      if (cita.paciente?.email) {
+        // Formatear fecha y hora
+        const fechaCita = new Date(cita.fechaHora);
+        const appointmentDate = fechaCita.toLocaleDateString('es-CO', {
+          timeZone: 'America/Bogota',
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        const appointmentTime = fechaCita.toLocaleTimeString('es-CO', {
+          timeZone: 'America/Bogota',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        // Traducir tipo de consulta
+        const tiposConsulta: Record<string, string> = {
+          'primera_vez': 'Primera vez',
+          'control': 'Control',
+          'seguimiento': 'Seguimiento',
+          'urgencia': 'Urgencia'
+        };
+
+        await this.mailerService.sendMail({
+          to: cita.paciente.email,
+          subject: '¡Tu cita ha sido confirmada! - Orto-Whave',
+          template: './appointment-confirmation',
+          context: {
+            patientName: cita.paciente.nombre,
+            doctorName: `Dr. ${cita.doctor?.nombre} ${cita.doctor?.apellido}`,
+            appointmentDate: appointmentDate,
+            appointmentTime: appointmentTime,
+            consultationType: tiposConsulta[cita.tipoConsulta] || cita.tipoConsulta,
+            consultationReason: cita.motivoConsulta,
+            duration: cita.duracion || 60,
+            clinicPhone: process.env.CLINIC_PHONE || '+57 (1) 234-5678',
+            clinicEmail: process.env.CLINIC_EMAIL || 'info@orto-whave.com',
+            clinicAddress: process.env.CLINIC_ADDRESS || 'Calle 123 #45-67, Bogotá, Colombia'
+          },
+        });
+
+        console.log(`✅ Email de confirmación enviado a: ${cita.paciente.email}`);
+      }
+    } catch (error) {
+      console.error('❌ Error enviando confirmación de cita:', error);
+    }
+  }
 }

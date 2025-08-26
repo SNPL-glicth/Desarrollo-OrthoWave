@@ -8,6 +8,9 @@ import { CrearCitaDto } from './dto/crear-cita.dto';
 import { ActualizarEstadoCitaDto } from './dto/actualizar-estado-cita.dto';
 import { BuscarDisponibilidadDto } from './dto/buscar-disponibilidad.dto';
 import { RealtimeWebSocketGateway } from '../websocket/websocket.gateway';
+import { NotificationsService } from '../notifications/notifications.service';
+import { MailService } from '../mail/mail.service';
+import { getCurrentColombiaDateTime, parseColombiaDateTime, isInPast, getMinutesToNow } from '../utils/timezone.utils';
 
 @Injectable()
 export class CitasService {
@@ -20,6 +23,8 @@ export class CitasService {
     private usersRepository: Repository<User>,
     @Inject(forwardRef(() => RealtimeWebSocketGateway))
     private websocketGateway: RealtimeWebSocketGateway,
+    private notificationsService: NotificationsService,
+    private mailService: MailService,
   ) {}
 
   async crearCita(crearCitaDto: CrearCitaDto): Promise<Cita> {
@@ -43,25 +48,33 @@ export class CitasService {
       throw new NotFoundException('Paciente no encontrado');
     }
 
-    // Validar antelación mínima de 1 hora
-    const fechaHora = new Date(crearCitaDto.fechaHora);
-    const fechaActual = new Date();
-    const diferenciaMinutos = (fechaHora.getTime() - fechaActual.getTime()) / (1000 * 60);
+    // Validar antelación mínima de 20 minutos usando timezone de Colombia
+    const fechaHora = parseColombiaDateTime(crearCitaDto.fechaHora);
+    const minutosAnticipoRequeridos = getMinutesToNow(fechaHora);
 
-    if (diferenciaMinutos < 60) {
-      throw new BadRequestException('Las citas deben solicitarse con al menos 1 hora de antelación');
+    if (minutosAnticipoRequeridos < 20) {
+      throw new BadRequestException('Las citas deben solicitarse con al menos 20 minutos de antelación');
     }
 
     // Verificar disponibilidad del horario
     // Ya tenemos fechaHora definida arriba
-    const fechaFin = new Date(fechaHora.getTime() + (crearCitaDto.duracion || 60) * 60000);
+    const fechaFin = getCurrentColombiaDateTime();
+    fechaFin.setTime(fechaHora.getTime() + (crearCitaDto.duracion || 60) * 60000);
 
     const citaConflicto = await this.citasRepository.findOne({
       where: {
         doctorId: crearCitaDto.doctorId,
         fechaHora: Between(
-          new Date(fechaHora.getTime() - 59 * 60000), // 59 minutos antes
-          new Date(fechaFin.getTime() + 59 * 60000)   // 59 minutos después
+          (() => {
+            const inicio = getCurrentColombiaDateTime();
+            inicio.setTime(fechaHora.getTime() - 59 * 60000);
+            return inicio;
+          })(), // 59 minutos antes
+          (() => {
+            const fin = getCurrentColombiaDateTime();
+            fin.setTime(fechaFin.getTime() + 59 * 60000);
+            return fin;
+          })()   // 59 minutos después
         ),
         estado: 'cancelada' // Excluir citas canceladas
       }
@@ -151,7 +164,7 @@ export class CitasService {
 
     // Si se está aprobando la cita, agregar fecha de aprobación
     if (actualizarEstadoDto.estado === 'aprobada') {
-      cita.fechaAprobacion = new Date();
+      cita.fechaAprobacion = getCurrentColombiaDateTime();
       if (actualizarEstadoDto.aprobadaPor) {
         cita.aprobadaPor = actualizarEstadoDto.aprobadaPor;
       }
@@ -159,6 +172,22 @@ export class CitasService {
 
     Object.assign(cita, actualizarEstadoDto);
     const citaActualizada = await this.citasRepository.save(cita);
+    
+    // Crear notificación y enviar email para el paciente según el cambio de estado
+    try {
+      if (actualizarEstadoDto.estado === 'aprobada') {
+        await this.notificationsService.crearNotificacionConfirmacionCita(citaActualizada.id);
+        // Enviar email de confirmación al paciente
+        await this.mailService.enviarConfirmacionCita(citaActualizada);
+      } else if (actualizarEstadoDto.estado === 'cancelada' || actualizarEstadoDto.estado === 'rechazada') {
+        await this.notificationsService.crearNotificacionCancelacionCita(
+          citaActualizada.id, 
+          actualizarEstadoDto.razonRechazo
+        );
+      }
+    } catch (error) {
+      console.error('Error al crear notificación o enviar email:', error);
+    }
     
     // Emitir notificación WebSocket
     try {
@@ -188,13 +217,13 @@ export class CitasService {
     }
 
     // Obtener citas del doctor para esa fecha (EXCLUYENDO las canceladas)
-    const fechaInicio = new Date(fecha + 'T00:00:00');
-    const fechaFin = new Date(fecha + 'T23:59:59');
+    const fechaInicio = parseColombiaDateTime(fecha + 'T00:00:00');
+    const fechaFinBusqueda = parseColombiaDateTime(fecha + 'T23:59:59');
 
     const citasExistentes = await this.citasRepository.find({
       where: {
         doctorId,
-        fechaHora: Between(fechaInicio, fechaFin)
+        fechaHora: Between(fechaInicio, fechaFinBusqueda)
       },
       order: { fechaHora: 'ASC' }
     });
@@ -258,7 +287,7 @@ export class CitasService {
 
     while (horaActual < horaLimite) {
       const horaString = this.formatearHora(horaActual);
-      const fechaHoraCompleta = new Date(fecha + 'T' + horaString + ':00');
+      const fechaHoraCompleta = parseColombiaDateTime(fecha + 'T' + horaString + ':00');
 
       // Verificar si está en horario de almuerzo
       if (this.estaEnHorarioAlmuerzo(horaString, perfilMedico)) {
@@ -268,9 +297,11 @@ export class CitasService {
 
       // Verificar si hay conflicto con citas existentes
       const hayConflicto = citasOcupadas.some(cita => {
-        const inicioCita = new Date(cita.fechaHora);
-        const finCita = new Date(inicioCita.getTime() + cita.duracion * 60000);
-        const finConsulta = new Date(fechaHoraCompleta.getTime() + duracion * 60000);
+        const inicioCita = parseColombiaDateTime(cita.fechaHora.toISOString());
+        const finCita = getCurrentColombiaDateTime();
+        finCita.setTime(inicioCita.getTime() + cita.duracion * 60000);
+        const finConsulta = getCurrentColombiaDateTime();
+        finConsulta.setTime(fechaHoraCompleta.getTime() + duracion * 60000);
 
         return (fechaHoraCompleta < finCita && finConsulta > inicioCita);
       });

@@ -1,20 +1,44 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
-import { EnvelopeIcon, LockClosedIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, LockClosedIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+
+  useEffect(() => {
+    // Verificar si hay un mensaje de éxito desde la verificación
+    const state = location.state;
+    if (state?.message) {
+      setSuccessMessage(state.message);
+      if (state.email) {
+        setEmail(state.email);
+      }
+      // Limpiar el state para evitar que persista en recargas
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevenir múltiples submissions
+    if (isLoading) {
+      console.log('Login ya en proceso, ignorando clic adicional');
+      return;
+    }
+    
     setError('');
+    setSuccessMessage('');
     setIsLoading(true);
 
     try {
@@ -54,8 +78,9 @@ const LoginPage = () => {
       const redirectPath = getRedirectPathByRole(response.user.rol);
       console.log('Redirigiendo a:', redirectPath);
       
-      // Si todo está bien, redirigir
-      navigate(redirectPath);
+      // Redirigir inmediatamente tras el login exitoso
+      navigate(redirectPath, { replace: true });
+      
     } catch (error) {
       console.error('Error en el formulario de login:', error);
       
@@ -70,9 +95,11 @@ const LoginPage = () => {
       }
       
       setError(errorMessage);
-    } finally {
+      
+      // Solo desactivar loading en caso de error
       setIsLoading(false);
     }
+    // NO desactivar loading en caso de éxito, dejar que la redirección maneje eso
   };
 
   const getRedirectPathByRole = (rol) => {
@@ -87,12 +114,22 @@ const LoginPage = () => {
 
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white py-4 sm:py-12 px-2 sm:px-6 lg:px-8 relative">
+      {/* Componente de loading reutilizable */}
+      <LoadingOverlay 
+        isVisible={isLoading}
+        title="Iniciando sesión..."
+        message="Por favor espere mientras verificamos sus credenciales"
+        size="md"
+      />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-lg relative"
+        className={`w-full max-w-md space-y-6 sm:space-y-8 bg-white p-4 sm:p-8 rounded-xl sm:rounded-2xl shadow-lg relative mx-2 sm:mx-0 ${
+          isLoading ? 'opacity-75 pointer-events-none' : ''
+        }`}
       >
         <Link
           to="/"
@@ -108,22 +145,24 @@ const LoginPage = () => {
               className="h-12"
             />
           </Link>
-          <h2 className="text-center text-3xl font-bold text-gray-900">
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-900">
             Bienvenido de nuevo
           </h2>
-          <div className="mt-2 text-center text-sm">
+          <div className="mt-2 text-center text-xs sm:text-sm">
             <p className="text-gray-600 mb-2">
               Credenciales de prueba:
             </p>
-            <p className="text-gray-600">
-              <strong>Administrador:</strong> admin@ortowhave.com / admin123
-            </p>
-            <p className="text-gray-600">
-              <strong>Doctor:</strong> doctor@ortowhave.com / doctor123
-            </p>
-            <p className="text-gray-600 mb-4">
-              <strong>Paciente:</strong> paciente@ortowhave.com / paciente123
-            </p>
+            <div className="space-y-1 text-gray-600">
+              <p className="break-all">
+                <strong>Admin:</strong> admin@ortowhave.com / admin123
+              </p>
+              <p className="break-all">
+                <strong>Doctor:</strong> doctor@ortowhave.com / doctor123
+              </p>
+              <p className="break-all mb-4">
+                <strong>Paciente:</strong> paciente@ortowhave.com / paciente123
+              </p>
+            </div>
           </div>
           <p className="mt-2 text-center text-sm text-gray-600">
             ¿No tienes una cuenta?{' '}
@@ -134,6 +173,23 @@ const LoginPage = () => {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {successMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-green-50 border-l-4 border-green-400 p-4 rounded-md"
+            >
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <CheckCircleIcon className="h-5 w-5 text-green-400" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-green-700">{successMessage}</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+          
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -167,7 +223,7 @@ const LoginPage = () => {
                   name="email"
                   type="email"
                   required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                  className="appearance-none block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation"
                   placeholder="tu@email.com"
                   value={email}
                   onChange={(e) => {
@@ -175,6 +231,9 @@ const LoginPage = () => {
                     setError(''); // Limpiar error al escribir
                   }}
                   disabled={isLoading}
+                  autoComplete="email"
+                  autoCapitalize="off"
+                  autoCorrect="off"
                 />
               </div>
             </div>
@@ -192,7 +251,7 @@ const LoginPage = () => {
                   name="password"
                   type="password"
                   required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                  className="appearance-none block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => {
@@ -200,6 +259,7 @@ const LoginPage = () => {
                     setError(''); // Limpiar error al escribir
                   }}
                   disabled={isLoading}
+                  autoComplete="current-password"
                 />
               </div>
             </div>
@@ -232,7 +292,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 transform hover:scale-[1.02] ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+              className={`group relative w-full flex justify-center py-3 sm:py-2.5 px-4 border border-transparent rounded-lg text-base sm:text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 transform hover:scale-[1.02] touch-manipulation min-h-[44px] ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
             >
               {isLoading ? (
                 <span className="flex items-center">

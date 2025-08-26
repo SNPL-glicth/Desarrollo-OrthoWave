@@ -7,12 +7,13 @@ import {
 } from '../types/calendar';
 import { 
   navigateDate, 
-  createEventFromAppointment, 
-  createEventFromRequest 
+  createEventFromAppointment 
 } from '../components/calendar/utils/calendarUtils';
 import { citasService } from '../services/citasService';
 import { useAuth } from '../context/AuthContext';
 import { getCurrentDate } from '../utils/dateUtils';
+import { blockedScheduleService } from '../services/blockedScheduleService';
+import { scheduleUpdateService } from '../services/scheduleUpdateService';
 
 // Función para obtener la configuración por defecto con fecha actual
 const getDefaultConfig = (): CalendarConfig => ({
@@ -25,7 +26,7 @@ const getDefaultConfig = (): CalendarConfig => ({
   },
   timeSlotDuration: 30,
   locale: 'es',
-  timezone: 'America/Bogota', // Zona horaria fija para Colombia
+  timezone: 'local', // Usar timezone local del navegador (que ya está configurado a Colombia)
   theme: 'light',
   features: {
     dragAndDrop: true,
@@ -60,6 +61,7 @@ export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): Cale
       initialDate: today,
       view: currentView 
     }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar una vez al montar
 
   // Sincronizar configuración cuando cambie currentDate o currentView
@@ -79,7 +81,7 @@ export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): Cale
     setError(null);
 
     try {
-      // Obtener citas del doctor
+      // Obtener citas del doctor/paciente
       let appointments: any[] = [];
       if (user.rol === 'doctor') {
         appointments = await citasService.obtenerCitasPorDoctor(Number(user.id));
@@ -90,10 +92,36 @@ export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): Cale
       // Convertir citas a eventos del calendario
       const calendarEvents = appointments.map(createEventFromAppointment);
 
+      // Para doctores, también cargar horarios bloqueados
+      if (user.rol === 'doctor') {
+        try {
+          const blockedSchedules = await blockedScheduleService.getBlockedSchedules();
+          const blockedEvents = blockedScheduleService.convertToCalendarEvents(blockedSchedules);
+          
+          console.log('📅 Horarios bloqueados cargados:', {
+            totalBlocked: blockedSchedules.length,
+            blockedEvents: blockedEvents.length,
+            schedules: blockedSchedules
+          });
+          
+          // Agregar eventos bloqueados al calendario
+          calendarEvents.push(...blockedEvents);
+        } catch (blockedError) {
+          console.warn('⚠️ Error al cargar horarios bloqueados:', blockedError);
+          // No fallar completamente, continuar sin horarios bloqueados
+        }
+      }
+
       // Aquí puedes agregar solicitudes de citas si es necesario
       // const requests = await fetchAppointmentRequests();
       // const requestEvents = requests.map(createEventFromRequest);
       // calendarEvents.push(...requestEvents);
+
+      console.log('📊 Total eventos cargados:', {
+        appointments: appointments.length,
+        totalEvents: calendarEvents.length,
+        userRole: user.rol
+      });
 
       setEvents(calendarEvents);
     } catch (err: any) {
@@ -110,6 +138,33 @@ export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): Cale
       fetchEvents();
     }
   }, [user?.id, fetchEvents]);
+
+  // Escuchar eventos de actualización de horarios
+  useEffect(() => {
+    if (!user?.id || user?.rol !== 'doctor') {
+      return; // Solo doctores necesitan escuchar actualizaciones de horarios
+    }
+
+    console.log('🎧 Configurando listener de eventos de actualización de horarios');
+
+    const unsubscribe = scheduleUpdateService.onScheduleUpdate((eventData) => {
+      console.log('🔄 Actualizando calendario por evento de horario:', eventData);
+      
+      // Verificar si el evento es para este doctor
+      if (eventData.doctorId && eventData.doctorId !== Number(user.id)) {
+        console.log('⏭️ Evento no es para este doctor, ignorando');
+        return;
+      }
+
+      // Refrescar eventos cuando hay cambios en horarios
+      fetchEvents();
+    });
+
+    return () => {
+      console.log('🔇 Removiendo listener de eventos de actualización de horarios');
+      unsubscribe();
+    };
+  }, [user?.id, user?.rol, fetchEvents]);
 
   // Navegación
   const nextPeriod = useCallback(() => {
@@ -160,6 +215,7 @@ export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): Cale
 
     try {
       // Extraer el ID numérico del evento
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const numericId = parseInt(id.replace(/^(appointment-|request-)/, ''));
       
       // Aquí implementarías la lógica para actualizar la cita
@@ -186,6 +242,7 @@ export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): Cale
 
     try {
       // Extraer el ID numérico del evento
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const numericId = parseInt(id.replace(/^(appointment-|request-)/, ''));
       
       // Aquí implementarías la lógica para eliminar la cita
@@ -206,10 +263,10 @@ export const useGoogleCalendar = (initialConfig?: Partial<CalendarConfig>): Cale
     await fetchEvents();
   }, [fetchEvents]);
 
-  // Actualizar configuración
-  const updateConfig = useCallback((newConfig: Partial<CalendarConfig>) => {
-    setConfig(prev => ({ ...prev, ...newConfig }));
-  }, []);
+  // Actualizar configuración - Función disponible para futuro uso
+  // const updateConfig = useCallback((newConfig: Partial<CalendarConfig>) => {
+  //   setConfig(prev => ({ ...prev, ...newConfig }));
+  // }, []);
 
   // Cambiar vista (la configuración se actualiza automáticamente en useEffect)
   const changeView = useCallback((view: CalendarView) => {

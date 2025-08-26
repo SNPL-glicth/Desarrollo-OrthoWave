@@ -1,0 +1,143 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Notification } from './entities/notification.entity';
+import { Cita } from '../citas/entities/cita.entity';
+import { User } from '../users/entities/user.entity';
+
+@Injectable()
+export class NotificationsService {
+  constructor(
+    @InjectRepository(Notification)
+    private notificationsRepository: Repository<Notification>,
+    @InjectRepository(Cita)
+    private citasRepository: Repository<Cita>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
+
+  async crearNotificacionConfirmacionCita(citaId: number) {
+    try {
+      // Obtener la cita con detalles del paciente y doctor
+      const cita = await this.citasRepository.findOne({
+        where: { id: citaId },
+        relations: ['paciente', 'doctor'],
+      });
+
+      if (!cita || !cita.paciente || !cita.doctor) {
+        console.error('Cita, paciente o doctor no encontrado:', citaId);
+        return;
+      }
+
+      // Crear la notificación
+      const notification = this.notificationsRepository.create({
+        usuarioId: cita.pacienteId,
+        citaId: cita.id,
+        tipo: 'cita_confirmada',
+        titulo: '¡Tu cita ha sido confirmada!',
+        mensaje: `Tu cita para el ${new Date(cita.fechaHora).toLocaleDateString('es-ES', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })} ha sido confirmada.`,
+        doctorNombre: `${cita.doctor.nombre} ${cita.doctor.apellido}`,
+        fechaCita: cita.fechaHora,
+        leida: false,
+      });
+
+      await this.notificationsRepository.save(notification);
+      console.log('Notificación de confirmación creada para usuario:', cita.pacienteId);
+
+    } catch (error) {
+      console.error('Error al crear notificación de confirmación:', error);
+    }
+  }
+
+  async crearNotificacionCancelacionCita(citaId: number, razon?: string) {
+    try {
+      // Obtener la cita con detalles del paciente y doctor
+      const cita = await this.citasRepository.findOne({
+        where: { id: citaId },
+        relations: ['paciente', 'doctor'],
+      });
+
+      if (!cita || !cita.paciente || !cita.doctor) {
+        console.error('Cita, paciente o doctor no encontrado:', citaId);
+        return;
+      }
+
+      // Crear la notificación
+      const notification = this.notificationsRepository.create({
+        usuarioId: cita.pacienteId,
+        citaId: cita.id,
+        tipo: 'cita_cancelada',
+        titulo: 'Tu cita ha sido cancelada',
+        mensaje: `Tu cita para el ${new Date(cita.fechaHora).toLocaleDateString('es-ES', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })} ha sido cancelada.${razon ? ` Motivo: ${razon}` : ''}`,
+        doctorNombre: `${cita.doctor.nombre} ${cita.doctor.apellido}`,
+        fechaCita: cita.fechaHora,
+        leida: false,
+      });
+
+      await this.notificationsRepository.save(notification);
+      console.log('Notificación de cancelación creada para usuario:', cita.pacienteId);
+
+    } catch (error) {
+      console.error('Error al crear notificación de cancelación:', error);
+    }
+  }
+
+  async obtenerNotificacionesUsuario(usuarioId: number) {
+    return await this.notificationsRepository.find({
+      where: { usuarioId },
+      order: { fechaCreacion: 'DESC' },
+      take: 20, // Límite de 20 notificaciones más recientes
+    });
+  }
+
+  async marcarComoLeida(notificationId: number, usuarioId: number) {
+    const notification = await this.notificationsRepository.findOne({
+      where: { id: notificationId, usuarioId },
+    });
+
+    if (notification) {
+      notification.leida = true;
+      await this.notificationsRepository.save(notification);
+      return notification;
+    }
+
+    return null;
+  }
+
+  async marcarTodasComoLeidas(usuarioId: number) {
+    await this.notificationsRepository.update(
+      { usuarioId, leida: false },
+      { leida: true }
+    );
+  }
+
+  async contarNotificacionesNoLeidas(usuarioId: number): Promise<number> {
+    return await this.notificationsRepository.count({
+      where: { usuarioId, leida: false },
+    });
+  }
+
+  async eliminarNotificacionesAntiguas() {
+    // Eliminar notificaciones más antiguas a 30 días
+    const fechaLimite = new Date();
+    fechaLimite.setDate(fechaLimite.getDate() - 30);
+
+    await this.notificationsRepository
+      .createQueryBuilder()
+      .delete()
+      .where('fecha_creacion < :fechaLimite', { fechaLimite })
+      .execute();
+  }
+}

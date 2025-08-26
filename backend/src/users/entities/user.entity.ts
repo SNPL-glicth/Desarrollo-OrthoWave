@@ -1,5 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
+import { PerfilMedico } from '../../perfil-medico/entities/perfil-medico.entity';
+import { Paciente } from '../../pacientes/entities/paciente.entity';
 
 @Entity('usuarios')
 export class User {
@@ -60,4 +62,10 @@ export class User {
 
   @Column({ name: 'rejection_reason', nullable: true, type: 'text' })
   rejectionReason: string;
+
+  @OneToOne(() => PerfilMedico, perfilMedico => perfilMedico.usuario)
+  perfilMedico: PerfilMedico;
+
+  @OneToOne(() => Paciente, paciente => paciente.usuario)
+  paciente: Paciente;
 }

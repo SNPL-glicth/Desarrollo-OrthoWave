@@ -1,70 +1,315 @@
-# Getting Started with Create React App
+# 🌟 Orto-Whave Frontend
+*Aplicación React del Sistema de Gestión para Clínicas de Ortopedia*
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Esta es la aplicación frontend del sistema Orto-Whave, desarrollada con **React 18+** y **TypeScript**, que proporciona una interfaz moderna y responsive para la gestión de clínicas de ortopedia y traumatología.
 
-## Available Scripts
+## 🚀 Tecnologías Utilizadas
 
-In the project directory, you can run:
+- **React 18+** - Biblioteca de UI moderna
+- **TypeScript** - Tipado estático para mayor robustez
+- **Tailwind CSS** - Estilos modernos y responsivos
+- **React Router** - Navegación SPA
+- **Axios** - Cliente HTTP para comunicación con el backend
+- **React Bootstrap** - Componentes UI prediseñados
+- **Context API** - Gestión de estado global
+- **Big Calendar** - Visualización avanzada de calendarios
+- **React Hook Form** - Manejo eficiente de formularios
 
-### `npm start`
+## 📱 Características Principales
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 🔐 **Sistema de Autenticación**
+- Login seguro con JWT tokens
+- Registro de usuarios con validación
+- Recuperación de contraseñas
+- Verificación por email
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 👥 **Dashboards Especializados**
+- **Dashboard Admin**: Gestión completa de usuarios y estadísticas
+- **Dashboard Doctor**: Citas pendientes, calendario personal, gestión de pacientes
+- **Dashboard Paciente**: Agendamiento de citas, historial médico
 
-### `npm test`
+### 📅 **Sistema de Citas Avanzado**
+- Calendario interactivo con múltiples vistas (día/semana/mes)
+- Agendamiento en tiempo real
+- Validación de disponibilidad
+- Estados de cita dinámicos
+- Horarios flexibles por doctor
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 🔔 **Notificaciones en Tiempo Real**
+- Campana de notificaciones
+- Actualizaciones automáticas
+- Tipos diferenciados de notificación
+- Marcado como leído
 
-### `npm run build`
+## 🛠️ Comandos Disponibles
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Desarrollo
+```bash
+# Instalar dependencias
+npm install
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# Iniciar en modo desarrollo
+npm start
+# La aplicación se abrirá en http://localhost:3000
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Producción
+```bash
+# Construir para producción
+npm run build
 
-### `npm run eject`
+# Los archivos optimizados se generarán en la carpeta 'build/'
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Otros Comandos
+```bash
+# Ejecutar tests
+npm test
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# Analizar bundle de producción
+npm run build && npx serve -s build
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📂 Estructura del Proyecto
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+src/
+├── 📁 components/          # Componentes reutilizables
+│   ├── 📁 dashboards/      # Dashboards por rol
+│   ├── 📁 appointment/     # Sistema de citas
+│   ├── 📁 calendar/        # Componentes de calendario
+│   ├── 📁 doctor/          # Componentes específicos de doctor
+│   ├── 📁 patient/         # Componentes específicos de paciente
+│   ├── 📁 notifications/   # Sistema de notificaciones
+│   └── 📁 shared/          # Componentes compartidos
+├── 📁 contexts/            # Context providers
+│   ├── AuthContext.tsx    # Contexto de autenticación
+│   └── NotificationContext.tsx # Contexto de notificaciones
+├── 📁 hooks/               # Hooks personalizados
+│   ├── useAuth.ts          # Hook de autenticación
+│   ├── usePolling.ts       # Hook de polling
+│   └── useNotifications.ts # Hook de notificaciones
+├── 📁 services/            # Servicios de API
+│   ├── api.ts              # Cliente Axios configurado
+│   ├── authService.ts      # Servicios de autenticación
+│   ├── appointmentService.ts # Servicios de citas
+│   └── doctorService.ts    # Servicios de doctor
+├── 📁 utils/               # Utilidades y helpers
+│   ├── dateUtils.ts        # Utilidades de fechas
+│   ├── validationUtils.ts  # Utilidades de validación
+│   └── constants.ts        # Constantes de la aplicación
+├── 📁 types/               # Tipos TypeScript
+│   ├── auth.ts             # Tipos de autenticación
+│   ├── appointment.ts      # Tipos de citas
+│   └── user.ts             # Tipos de usuario
+└── 📄 App.tsx              # Componente principal
+```
 
-## Learn More
+## 🔧 Configuración
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Variables de Entorno
+Crea un archivo `.env.local` en la raíz del proyecto:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```env
+# URL del backend
+REACT_APP_API_URL=http://localhost:4000
 
-### Code Splitting
+# Configuraciones adicionales
+REACT_APP_APP_NAME="Orto-Whave"
+REACT_APP_VERSION="2.0.0"
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Configuración del Proxy
+El archivo `package.json` incluye configuración de proxy para desarrollo:
+```json
+"proxy": "http://localhost:4000"
+```
 
-### Analyzing the Bundle Size
+## 🎨 Guía de Estilos
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Tailwind CSS
+Se utiliza Tailwind CSS para estilos con configuración personalizada:
 
-### Making a Progressive Web App
+```css
+/* Colores principales */
+.bg-primary { @apply bg-blue-600; }
+.bg-secondary { @apply bg-gray-600; }
+.bg-success { @apply bg-green-600; }
+.bg-danger { @apply bg-red-600; }
+.bg-warning { @apply bg-yellow-600; }
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Bootstrap Components
+Se utilizan componentes de React Bootstrap para:
+- Modales
+- Formularios
+- Navegación
+- Cards y containers
 
-### Advanced Configuration
+## 🧪 Testing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Estructura de Tests
+```
+src/
+├── 📁 __tests__/           # Tests principales
+├── 📁 components/
+│   └── 📄 Component.test.tsx # Tests unitarios
+└── 📁 utils/
+    └── 📄 helpers.test.ts    # Tests de utilidades
+```
 
-### Deployment
+### Ejecutar Tests
+```bash
+# Tests en modo watch
+npm test
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+# Tests con coverage
+npm test -- --coverage
 
-### `npm run build` fails to minify
+# Tests sin watch
+npm test -- --watchAll=false
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 📊 Optimizaciones Implementadas
+
+### Performance
+- **Lazy Loading** de componentes
+- **Code Splitting** automático
+- **Memoización** de componentes pesados
+- **Debounce** en búsquedas
+- **Cache** inteligente de datos
+
+### UX/UI
+- **Loading states** informativos
+- **Error boundaries** para manejo de errores
+- **Feedback visual** inmediato
+- **Responsive design** para todos los dispositivos
+- **Accesibilidad** mejorada
+
+## 🔗 Integración con Backend
+
+### Endpoints Principales
+```typescript
+// Autenticación
+POST /auth/login
+POST /auth/register
+GET  /auth/me
+
+// Citas
+GET    /citas/mis-citas
+POST   /citas
+PATCH  /citas/:id/estado
+
+// Usuarios
+GET    /users/admin/todos
+POST   /users/admin/crear-usuario
+
+// Notificaciones
+GET    /notifications
+PATCH  /notifications/:id/read
+```
+
+### Servicios API
+```typescript
+// Ejemplo de servicio
+import apiClient from './api';
+
+export const appointmentService = {
+  getMyAppointments: () => apiClient.get('/citas/mis-citas'),
+  createAppointment: (data) => apiClient.post('/citas', data),
+  updateAppointmentStatus: (id, status) => 
+    apiClient.patch(`/citas/${id}/estado`, { estado: status })
+};
+```
+
+## 🚀 Despliegue
+
+### Build de Producción
+```bash
+# Generar build optimizado
+npm run build
+
+# Los archivos se generarán en build/
+# Listos para servir con cualquier servidor web
+```
+
+### Servidor Estático
+```bash
+# Servir build localmente
+npx serve -s build
+
+# Disponible en http://localhost:3000
+```
+
+### Docker (Opcional)
+```dockerfile
+# Dockerfile para producción
+FROM node:18-alpine as build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+```
+
+## 🐛 Troubleshooting
+
+### Problemas Comunes
+
+**Error: "Cannot connect to backend"**
+```bash
+# Verificar que el backend esté corriendo en puerto 4000
+curl http://localhost:4000/api/health
+
+# Verificar variables de entorno
+echo $REACT_APP_API_URL
+```
+
+**Error: "Module not found"**
+```bash
+# Limpiar dependencias e instalar
+rm -rf node_modules package-lock.json
+npm install
+```
+
+**Error en build**
+```bash
+# Verificar sintaxis TypeScript
+npx tsc --noEmit
+
+# Limpiar cache
+npm start -- --reset-cache
+```
+
+## 📝 Contribución
+
+### Estándares de Código
+- **ESLint** configurado con reglas estrictas
+- **Prettier** para formateo automático
+- **TypeScript** obligatorio para nuevas características
+- **Comentarios en español** para funciones complejas
+
+### Workflow de Desarrollo
+1. Crear feature branch: `git checkout -b feature/nueva-funcionalidad`
+2. Implementar cambios con TypeScript
+3. Agregar tests si es necesario
+4. Ejecutar linting: `npm run lint`
+5. Commit con mensaje descriptivo
+6. Push y crear Pull Request
+
+## 📞 Soporte
+
+Para problemas específicos del frontend:
+1. Verificar logs en consola del navegador (F12)
+2. Revisar Network tab para problemas de API
+3. Verificar que el backend esté funcionando
+4. Consultar documentación principal en `../../README.md`
+
+---
+
+*Desarrollado con ❤️ para el Sistema Orto-Whave*
+*Última actualización: Enero 2025 - v2.0.0*

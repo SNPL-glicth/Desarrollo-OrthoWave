@@ -1,7 +1,6 @@
 // Script de inicialización para desarrollo
 // Este archivo se ejecuta al inicio de la aplicación para asegurar un estado limpio
 
-import { forceLogout } from './auth';
 
 // Función para limpiar COMPLETAMENTE cualquier rastro de autenticación
 export const forceCleanAuthData = () => {

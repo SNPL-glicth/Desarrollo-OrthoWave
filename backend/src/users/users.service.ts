@@ -267,9 +267,8 @@ export class UsersService {
   async eliminarUsuario(id: number): Promise<void> {
     const usuario = await this.obtenerUsuarioPorId(id);
 
-    // En lugar de eliminar completamente, marcamos como inactivo
-    usuario.isVerified = false;
-    await this.usersRepository.save(usuario);
+    // Eliminar completamente el usuario de la base de datos
+    await this.usersRepository.remove(usuario);
   }
 
   async buscarUsuarios(termino: string): Promise<User[]> {
@@ -294,16 +293,27 @@ export class UsersService {
   async obtenerEstadisticasUsuarios() {
     const total = await this.usersRepository.count();
     const verificados = await this.usersRepository.count({ where: { isVerified: true } });
+    
+    // Contar solo usuarios verificados para consistencia con la tabla del dashboard
     const admins = await this.usersRepository.count({
-      where: { rol: { nombre: 'admin' } },
+      where: { 
+        rol: { nombre: 'admin' },
+        isVerified: true 
+      },
       relations: ['rol']
     });
     const doctores = await this.usersRepository.count({
-      where: { rol: { nombre: 'doctor' } },
+      where: { 
+        rol: { nombre: 'doctor' },
+        isVerified: true 
+      },
       relations: ['rol']
     });
     const pacientes = await this.usersRepository.count({
-      where: { rol: { nombre: 'paciente' } },
+      where: { 
+        rol: { nombre: 'paciente' },
+        isVerified: true 
+      },
       relations: ['rol']
     });
 
@@ -322,6 +332,29 @@ export class UsersService {
   async verificarEmailDisponible(email: string): Promise<boolean> {
     const count = await this.usersRepository.count({ where: { email } });
     return count === 0;
+  }
+
+  async obtenerDoctores(): Promise<User[]> {
+    return await this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.rol', 'rol')
+      .leftJoinAndSelect('user.perfilMedico', 'perfilMedico')
+      .where('rol.nombre = :rolNombre', { rolNombre: 'doctor' })
+      .andWhere('user.isVerified = :verified', { verified: true })
+      .select([
+        'user.id',
+        'user.nombre', 
+        'user.apellido', 
+        'user.email',
+        'user.telefono',
+        'rol.id',
+        'rol.nombre',
+        'perfilMedico.especialidad',
+        'perfilMedico.biografia',
+        'perfilMedico.añoGraduacion'
+      ])
+      .orderBy('user.nombre', 'ASC')
+      .getMany();
   }
 
   async obtenerRoles(): Promise<Role[]> {

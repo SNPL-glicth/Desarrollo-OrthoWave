@@ -1,6 +1,6 @@
 export * from './user';
 
-export type AppointmentStatus = 'scheduled' | 'confirmed' | 'cancelled' | 'completed' | 'in_progress' | 'no_show';
+export type AppointmentStatus = 'scheduled' | 'confirmed' | 'cancelled' | 'completed' | 'in_progress' | 'no_show' | 'pending' | 'blocked';
 
 export interface Appointment {
   id: number;

@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { citasService, Cita } from '../services/citasService';
 import { useAuth } from '../context/AuthContext';
+import { getCurrentColombiaDate, formatTimeInColombiaTimezone, isInPastColombiaTime } from '../utils/timezoneUtils';
 
 interface UsePollingCitasOptions {
   interval?: number; // Intervalo en milisegundos, por defecto 30 segundos
@@ -110,7 +111,7 @@ export const usePollingCitas = (options: UsePollingCitasOptions = {}) => {
       const citasArray = Array.isArray(citasData) ? citasData : [];
       
       setCitas(citasArray);
-      setLastUpdate(new Date());
+      setLastUpdate(getCurrentColombiaDate());
       setRetryCount(0); // Resetear contador de reintentos
       consecutiveErrors.current = 0; // Resetear errores consecutivos
       lastSuccessfulFetch.current = Date.now();
@@ -206,7 +207,7 @@ export const usePollingCitas = (options: UsePollingCitasOptions = {}) => {
           cita.id === citaActualizada.id ? citaActualizada : cita
         )
       );
-      setLastUpdate(new Date());
+      setLastUpdate(getCurrentColombiaDate());
     });
 
     const unsubscribeCreated = citasService.onCitaCreated((nuevaCita) => {
@@ -216,13 +217,13 @@ export const usePollingCitas = (options: UsePollingCitasOptions = {}) => {
         (user.rol === 'doctor' && nuevaCita.doctorId === user.id)
       ) {
         setCitas(prev => [...prev, nuevaCita]);
-        setLastUpdate(new Date());
+        setLastUpdate(getCurrentColombiaDate());
       }
     });
 
     const unsubscribeChanged = citasService.onCitasChanged((citasActualizadas) => {
       setCitas(citasActualizadas);
-      setLastUpdate(new Date());
+      setLastUpdate(getCurrentColombiaDate());
     });
 
     // Combinar funciones de limpieza

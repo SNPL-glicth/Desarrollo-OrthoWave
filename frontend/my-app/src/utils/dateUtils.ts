@@ -1,10 +1,15 @@
 /**
  * Utilidad central para fechas - asegura que todos los componentes usen la misma fecha actual
  * Sincronizado con la zona horaria de Bogotá, Colombia (America/Bogota)
+ * 
+ * NOTA: Para nuevas funciones de timezone, usar timezoneUtils.ts
  */
 
-// Zona horaria de Colombia
-const COLOMBIA_TIMEZONE = 'America/Bogota';
+// Re-export funciones principales desde timezoneUtils para usar sistema unificado
+export { getCurrentColombiaDate, getColombiaTimeInfo, COLOMBIA_TIMEZONE } from './timezoneUtils';
+
+// Zona horaria de Colombia (deprecated - usar COLOMBIA_TIMEZONE de timezoneUtils)
+const COLOMBIA_TIMEZONE_LOCAL = 'America/Bogota';
 
 // Función central para obtener la fecha actual en la zona horaria de Colombia
 export const getCurrentDate = (): Date => {
@@ -13,34 +18,7 @@ export const getCurrentDate = (): Date => {
   return new Date();
 };
 
-// Función específica para obtener la fecha/hora actual en Colombia
-export const getCurrentColombiaDate = (): Date => {
-  const now = new Date();
-  const formatter = new Intl.DateTimeFormat('en-CA', {
-    timeZone: COLOMBIA_TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-  
-  const parts = formatter.formatToParts(now);
-  const year = parts.find(p => p.type === 'year')?.value || '2024';
-  const month = parts.find(p => p.type === 'month')?.value || '01';
-  const day = parts.find(p => p.type === 'day')?.value || '01';
-  const hour = parts.find(p => p.type === 'hour')?.value || '00';
-  const minute = parts.find(p => p.type === 'minute')?.value || '00';
-  const second = parts.find(p => p.type === 'second')?.value || '00';
-  
-  // Crear la fecha como UTC y luego ajustar para Colombia
-  const utcDate = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`);
-  // Ajustar 5 horas hacia atrás para compensar la diferencia UTC
-  utcDate.setHours(utcDate.getHours() + 5);
-  return utcDate;
-};
+// getCurrentColombiaDate está exportado desde timezoneUtils (ver arriba)
 
 // Función alternativa usando Intl.DateTimeFormat para mayor precisión
 export const getCurrentDateWithIntl = (): Date => {
@@ -56,7 +34,7 @@ export const getCurrentDateOnly = (): Date => {
 // Función para obtener la hora actual de Colombia como texto
 export const getCurrentTimeString = (): string => {
   return new Intl.DateTimeFormat('es-CO', {
-    timeZone: COLOMBIA_TIMEZONE,
+    timeZone: COLOMBIA_TIMEZONE_LOCAL,
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
@@ -67,7 +45,7 @@ export const getCurrentTimeString = (): string => {
 // Función para obtener la fecha y hora actual de Colombia como texto
 export const getCurrentDateTimeString = (): string => {
   return new Intl.DateTimeFormat('es-CO', {
-    timeZone: COLOMBIA_TIMEZONE,
+    timeZone: COLOMBIA_TIMEZONE_LOCAL,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -81,7 +59,7 @@ export const getCurrentDateTimeString = (): string => {
 // Función para convertir cualquier fecha a la zona horaria de Colombia
 export const convertToColombiaTime = (date: Date): Date => {
   const formatter = new Intl.DateTimeFormat('en-CA', {
-    timeZone: COLOMBIA_TIMEZONE,
+    timeZone: COLOMBIA_TIMEZONE_LOCAL,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -125,4 +103,4 @@ export const getTodayColombia = (): Date => {
 };
 
 // Constante exportada con la zona horaria
-export const TIMEZONE = COLOMBIA_TIMEZONE;
+export const TIMEZONE = COLOMBIA_TIMEZONE_LOCAL;

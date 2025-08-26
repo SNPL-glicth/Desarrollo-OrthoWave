@@ -23,16 +23,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     const user = await this.usersRepository.findOne({
       where: { id: payload.sub },
-      relations: ['rol'],
+      relations: ['rol', 'paciente', 'perfilMedico'],
     });
 
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
 
+    // Comentar temporalmente la verificación para debugging
+    /*
     if (!user.isVerified) {
       throw new UnauthorizedException('Usuario no verificado');
     }
+    */
 
     return user;
   }

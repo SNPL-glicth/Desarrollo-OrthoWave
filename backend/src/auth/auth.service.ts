@@ -8,6 +8,7 @@ import * as crypto from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { getCurrentColombiaDateTime } from '../utils/timezone.utils';
 
 @Injectable()
 export class AuthService {
@@ -36,14 +37,14 @@ export class AuthService {
         return { error: 'USER_NOT_FOUND', message: 'No existe una cuenta registrada con este correo electrónico.' };
       }
 
-      // Comentado: Verificaciones de aprobación eliminadas para permitir login sin burocracia
-      // Los usuarios pueden iniciar sesión inmediatamente después del registro
-      /*
+      // Verificar que la cuenta esté verificada por email
       if (!user.isVerified) {
         this.logger.warn(`Intento de login con cuenta no verificada: ${email}`);
-        throw new UnauthorizedException('La cuenta no ha sido verificada. Por favor revisa tu correo electrónico y completa el proceso de verificación.');
+        return { 
+          error: 'EMAIL_NOT_VERIFIED', 
+          message: 'La cuenta no ha sido verificada. Por favor revisa tu correo electrónico y completa el proceso de verificación con el código que te enviamos.'
+        };
       }
-      */
 
       // Usar bcrypt para comparar contraseñas
       const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -120,8 +121,16 @@ export class AuthService {
     // Asignar rolId=3 (paciente) por defecto si no se especifica
     const rolId = userData.rolId || 3;
 
-    // Generar código de verificación de 6 dígitos
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generar código de verificación de 6 dígitos - asegurar que siempre sean exactamente 6 dígitos
+    const randomNum = Math.floor(100000 + Math.random() * 900000);
+    const verificationCode = randomNum.toString().padStart(6, '0'); // Asegurar 6 dígitos con ceros a la izquierda si es necesario
+    this.logger.log(`Código generado para ${userData.email}: ${verificationCode}`);
+    
+    // Validar que el código tiene exactamente 6 dígitos
+    if (verificationCode.length !== 6 || !/^\d{6}$/.test(verificationCode)) {
+      this.logger.error(`Error: Código generado inválido: ${verificationCode}`);
+      throw new BadRequestException('Error interno al generar el código de verificación.');
+    }
 
     // Usar bcrypt para hashear la contraseña de forma segura
     const saltRounds = 12; // Usar 12 rounds para mayor seguridad
@@ -134,36 +143,66 @@ export class AuthService {
       ...userData,
       password: hashedPassword,
       rolId,
-      isVerified: true,
+      isVerified: false, // Usuario no verificado hasta que ingrese el código
       verificationCode,
-      // Pacientes aprobados inmediatamente
-      isApproved: true, // Todos los usuarios aprobados inmediatamente
-      approvalStatus: 'approved',
+      // Pacientes aprobados una vez verificados
+      isApproved: false,
+      approvalStatus: 'pending',
     });
 
     await this.usersRepository.save(newUser);
 
-    // Comentado: Envío de correo de verificación eliminado
+    // Enviar código de verificación por correo
+    try {
+      this.logger.log(`Enviando email con código ${verificationCode} a: ${userData.email}`);
+      
+      // Asegurar que el código sea exactamente el mismo que se guardó en la BD
+      const codeToSend = verificationCode.toString().trim();
+      this.logger.log(`Código a enviar (procesado): '${codeToSend}' (longitud: ${codeToSend.length})`);
+      
+      await this.mailerService.sendMail({
+        to: userData.email,
+        subject: 'Código de verificación - Orto-Whave',
+        template: './verification-code',
+        context: {
+          name: userData.nombre,
+          verificationCode: codeToSend, // Usar la variable procesada
+          email: userData.email,
+        },
+      });
+      this.logger.log(`Código de verificación enviado a: ${userData.email}`);
+    } catch (emailError) {
+      this.logger.error(`Error al enviar código de verificación a ${userData.email}:`, emailError.message);
+      // Si no se puede enviar el email, eliminar el usuario creado
+      await this.usersRepository.remove(newUser);
+      throw new BadRequestException('Error al enviar el código de verificación. Por favor, intenta nuevamente.');
+    }
 
-    // Mensaje único para registro exitoso
-    const message = 'Usuario registrado exitosamente. Ya puedes acceder a tu cuenta.';
+    // Mensaje para verificación de correo
+    const message = 'Usuario registrado exitosamente. Hemos enviado un código de verificación a tu correo electrónico.';
     
     return {
       message,
       email: userData.email,
-      requiresApproval: false,
+      requiresVerification: true,
     };
   }
 
   async verifyCode(email: string, code: string) {
+    this.logger.log(`Verificando código para: ${email}`);
+    
     const user = await this.usersRepository.findOne({ 
       where: { email },
       relations: ['rol']
     });
+    
     if (!user) {
+      this.logger.warn(`Usuario no encontrado para verificación: ${email}`);
       throw new UnauthorizedException('Usuario no encontrado');
     }
+    
     if (user.isVerified) {
+      this.logger.log(`Usuario ${email} ya está verificado`);
       // Si ya está verificado, verificar si es paciente pendiente
       if (user.rol?.nombre === 'paciente' && user.approvalStatus === 'pending') {
         return { 
@@ -173,9 +212,32 @@ export class AuthService {
       }
       return { message: 'La cuenta ya está verificada.' };
     }
-    if (user.verificationCode !== code) {
+    
+    // Limpiar y normalizar ambos códigos para comparación
+    const storedCode = (user.verificationCode || '').toString().trim();
+    const receivedCode = (code || '').toString().trim();
+    
+    this.logger.log(`Comparando códigos para ${email}:`);
+    this.logger.log(`  - Código almacenado: '${storedCode}' (longitud: ${storedCode.length})`);
+    this.logger.log(`  - Código recibido: '${receivedCode}' (longitud: ${receivedCode.length})`);
+    
+    // Validar que ambos códigos sean numéricos de 6 dígitos
+    if (!/^\d{6}$/.test(storedCode)) {
+      this.logger.error(`Código almacenado inválido para ${email}: '${storedCode}'`);
+      throw new UnauthorizedException('Error interno. Código de verificación corrupto.');
+    }
+    
+    if (!/^\d{6}$/.test(receivedCode)) {
+      this.logger.warn(`Código recibido inválido para ${email}: '${receivedCode}'`);
+      throw new UnauthorizedException('El código debe ser de exactamente 6 dígitos numéricos.');
+    }
+    
+    if (storedCode !== receivedCode) {
+      this.logger.warn(`Código incorrecto para ${email}. Esperado: '${storedCode}', Recibido: '${receivedCode}'`);
       throw new UnauthorizedException('Código de verificación incorrecto');
     }
+    
+    this.logger.log(`Código verificado correctamente para: ${email}`);
     
     user.isVerified = true;
     user.verificationCode = null;
@@ -207,7 +269,7 @@ export class AuthService {
 
       // Generar token seguro
       const resetToken = crypto.randomBytes(32).toString('hex');
-      const resetTokenExpires = new Date();
+      const resetTokenExpires = getCurrentColombiaDateTime();
       resetTokenExpires.setHours(resetTokenExpires.getHours() + 1); // Token válido por 1 hora
 
       // Guardar token en la base de datos
@@ -270,7 +332,7 @@ export class AuthService {
       }
 
       // Verificar si el token ha expirado
-      if (user.resetPasswordExpires < new Date()) {
+      if (user.resetPasswordExpires < getCurrentColombiaDateTime()) {
         this.logger.warn(`Token expirado para usuario: ${user.email}`);
         // Limpiar token expirado
         user.resetPasswordToken = null;
@@ -299,7 +361,7 @@ export class AuthService {
           template: './password-changed',
           context: {
             email: user.email,
-            date: new Date().toLocaleString('es-CO'),
+            date: getCurrentColombiaDateTime().toLocaleString('es-CO'),
           },
         });
       } catch (emailError) {

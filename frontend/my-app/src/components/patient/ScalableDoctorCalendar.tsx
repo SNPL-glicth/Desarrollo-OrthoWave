@@ -19,7 +19,6 @@ import {
 import { es } from 'date-fns/locale';
 import { useDoctorAvailability } from '../../hooks/useDoctorAvailability';
 import { useAuth } from '../../context/AuthContext';
-import citasService from '../../services/citasService';
 import { getCurrentColombiaDate } from '../../utils/dateUtils';
 
 interface Doctor {
@@ -46,6 +45,8 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [warningData, setWarningData] = useState<any>(null);
   
   // Formulario de solicitud
   const [formData, setFormData] = useState({
@@ -58,19 +59,16 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
   // Hook escalable para obtener disponibilidad del doctor específico
   const {
     schedule,
-    availableSlots,
-    occupiedSlots,
     isLoading,
     error,
-    refreshAvailability,
-    isSlotAvailable
+    refreshAvailability
   } = useDoctorAvailability({
     doctorId: doctor.id,
     selectedDate,
     refreshInterval: 30000 // Refresh cada 30 segundos
   });
 
-  // Generar matriz de días para el mes actual incluyendo semanas completas
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const monthDays = useMemo(() => {
     const startMonth = startOfMonth(selectedDate);
     const endMonth = endOfMonth(selectedDate);
@@ -84,7 +82,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
     return days;
   }, [selectedDate]);
 
-  // Días de la semana para headers
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const weekDayHeaders = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
   // Colores para estados de slots
@@ -104,57 +102,138 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
 
   // Manejar selección de slot
   const handleSlotClick = (slot: any) => {
-    if (slot.isAvailable) {
+    console.log('🎯 Slot clickeado:', slot);
+    
+    if (slot.isAvailable && !slot.isOccupied) {
       setSelectedTime(slot.time);
       setShowForm(true);
+      console.log('✅ Slot seleccionado:', slot.time);
+    } else {
+      console.log('❌ Slot no disponible:', {
+        time: slot.time,
+        isAvailable: slot.isAvailable,
+        isOccupied: slot.isOccupied,
+        estado: slot.estado
+      });
+      
+      if (slot.isOccupied) {
+        let mensaje = `El horario ${slot.time} ya está ocupado`;
+        if (slot.estado) {
+          mensaje += ` (${slot.estado})`;
+        }
+        alert(mensaje);
+      } else {
+        alert(`El horario ${slot.time} no está disponible`);
+      }
     }
+  };
+
+  // Función para mostrar modal de advertencia de antelación
+  const showAdvanceTimeWarning = (data: any) => {
+    setWarningData(data);
+    setShowWarningModal(true);
   };
 
   // Enviar solicitud de cita
   const handleSubmitRequest = async () => {
+    // Validaciones básicas
     if (!selectedTime || !formData.motivoConsulta.trim()) {
       alert('Por favor completa todos los campos requeridos');
       return;
     }
 
-    // Validación: evitar agendar en fechas/horas pasadas usando hora de Colombia
-    const [hours, minutes] = selectedTime.split(':').map(Number);
-    const selectedDateTime = new Date(selectedDate);
-    selectedDateTime.setHours(hours, minutes, 0, 0);
-    const nowColombia = getCurrentColombiaDate();
-    
-    if (selectedDateTime <= nowColombia) {
-      const currentTimeStr = nowColombia.toLocaleTimeString('es-CO', {
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'America/Bogota'
-      });
-      const currentDateStr = nowColombia.toLocaleDateString('es-CO', {
-        timeZone: 'America/Bogota'
-      });
-      alert(`No se puede agendar una cita en el pasado. Hora actual de Colombia: ${currentDateStr} ${currentTimeStr}`);
+    if (!user?.id || !doctor?.id) {
+      alert('Error de autenticación. Por favor, recarga la página e intenta de nuevo.');
       return;
     }
 
-    setSubmitting(true);
+    // Validación: evitar agendar en fechas/horas pasadas y verificar antelación mínima
     try {
-      const fechaHora = new Date(selectedDate);
       const [hours, minutes] = selectedTime.split(':').map(Number);
-      fechaHora.setHours(hours, minutes, 0, 0);
+      const selectedDateTime = new Date(selectedDate);
+      selectedDateTime.setHours(hours, minutes, 0, 0);
+      const nowColombia = getCurrentColombiaDate();
+      
+      // Antelación mínima de 1 hora
+      const minimumAdvanceTime = new Date(nowColombia.getTime() + (60 * 60 * 1000)); // +1 hora
+      
+      if (selectedDateTime <= nowColombia) {
+        const currentTimeStr = nowColombia.toLocaleTimeString('es-CO', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'America/Bogota'
+        });
+        const currentDateStr = nowColombia.toLocaleDateString('es-CO', {
+          timeZone: 'America/Bogota'
+        });
+        
+        // Mostrar modal bonito en lugar de alert
+        showAdvanceTimeWarning({
+          type: 'past',
+          selectedTime: selectedTime,
+          selectedDate: selectedDate,
+          currentTime: currentTimeStr,
+          currentDate: currentDateStr,
+          minimumTime: null
+        });
+        return;
+      }
+      
+      if (selectedDateTime <= minimumAdvanceTime) {
+        const minimumTimeStr = minimumAdvanceTime.toLocaleTimeString('es-CO', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'America/Bogota'
+        });
+        const currentTimeStr = nowColombia.toLocaleTimeString('es-CO', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'America/Bogota'
+        });
+        
+        // Mostrar modal bonito para antelación mínima
+        showAdvanceTimeWarning({
+          type: 'advance',
+          selectedTime: selectedTime,
+          selectedDate: selectedDate,
+          currentTime: currentTimeStr,
+          minimumTime: minimumTimeStr
+        });
+        return;
+      }
+
+      setSubmitting(true);
+      
+      // Crear fecha correcta en zona horaria de Colombia
+      const year = selectedDate.getFullYear();
+      const month = selectedDate.getMonth() + 1;
+      const day = selectedDate.getDate();
+      
+      // Formatear como ISO string con timezone de Colombia (UTC-5)
+      const fechaHoraISO = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00.000-05:00`;
+      
+      console.log('📅 Fecha seleccionada:', format(selectedDate, 'yyyy-MM-dd'));
+      console.log('⏰ Hora seleccionada:', selectedTime);
+      console.log('🌍 Fecha/Hora ISO Colombia:', fechaHoraISO);
+      console.log('🔄 Verificación:', new Date(fechaHoraISO).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
 
       const solicitudData = {
         doctorId: doctor.id,
         pacienteId: Number(user?.id),
-        fechaHora: fechaHora.toISOString(),
-        duracion: formData.duracion,
-        tipoConsulta: formData.tipoConsulta,
-        motivoConsulta: formData.motivoConsulta,
-        notasPaciente: formData.notasPaciente
+        fechaHora: fechaHoraISO,
+        duracion: formData.duracion || 60,
+        tipoConsulta: formData.tipoConsulta || 'primera_vez',
+        motivoConsulta: formData.motivoConsulta.trim(),
+        notasPaciente: formData.notasPaciente?.trim() || ''
       };
+
+      console.log('🚀 Enviando solicitud de cita:', solicitudData);
 
       await onRequestAppointment(solicitudData);
       
-      // Resetear formulario y refrescar calendario
+      console.log('✅ Solicitud de cita enviada exitosamente');
+      
+      // Resetear formulario
       setSelectedTime('');
       setShowForm(false);
       setFormData({
@@ -165,11 +244,33 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
       });
       
       // Refrescar la disponibilidad para mostrar el cambio
-      setTimeout(refreshAvailability, 1000);
+      setTimeout(() => {
+        try {
+          refreshAvailability();
+        } catch (refreshError) {
+          console.warn('Error al refrescar disponibilidad:', refreshError);
+        }
+      }, 1000);
       
     } catch (error: any) {
-      console.error('Error al solicitar cita:', error);
-      alert('Error al enviar la solicitud. Inténtalo de nuevo.');
+      console.error('❌ Error al solicitar cita:', error);
+      
+      // Mejorar el manejo de errores específicos
+      let errorMessage = 'Error al enviar la solicitud. Inténtalo de nuevo.';
+      
+      if (error?.response?.status === 409) {
+        errorMessage = 'El horario seleccionado ya no está disponible. Por favor, selecciona otro horario.';
+      } else if (error?.response?.status === 401) {
+        errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+      } else if (error?.response?.status >= 500) {
+        errorMessage = 'Error del servidor. Por favor, intenta más tarde o contacta al soporte.';
+      } else if (error?.message?.includes('Network Error')) {
+        errorMessage = 'Error de conexión. Verifica tu conexión a internet e intenta nuevamente.';
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      alert(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -462,6 +563,61 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
             </div>
           )}
         </div>
+
+        {/* Modal de advertencia de antelación */}
+        {showWarningModal && warningData && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+              <div className="flex items-center mb-4">
+                <div className="flex-shrink-0">
+                  <svg className="h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {warningData.type === 'past' ? 'Horario en el pasado' : 'Antelación mínima requerida'}
+                  </h3>
+                </div>
+              </div>
+              
+              <div className="mt-2">
+                {warningData.type === 'past' ? (
+                  <p className="text-sm text-gray-500">
+                    No puedes agendar una cita en una fecha y hora que ya ha pasado.
+                    <br/><br/>
+                    <strong>Hora actual:</strong> {warningData.currentDate} {warningData.currentTime}
+                    <br/>
+                    <strong>Hora seleccionada:</strong> {format(warningData.selectedDate, "d 'de' MMMM 'de' yyyy", { locale: es })} {warningData.selectedTime}
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    Para agendar una cita, debes hacerlo con al menos 1 hora de antelación.
+                    <br/><br/>
+                    <strong>Hora actual:</strong> {warningData.currentTime}
+                    <br/>
+                    <strong>Hora mínima permitida:</strong> {warningData.minimumTime}
+                    <br/>
+                    <strong>Hora seleccionada:</strong> {warningData.selectedTime}
+                  </p>
+                )}
+              </div>
+              
+              <div className="mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowWarningModal(false);
+                    setWarningData(null);
+                  }}
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
