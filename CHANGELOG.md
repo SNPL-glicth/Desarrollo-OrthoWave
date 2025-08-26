@@ -5,6 +5,24 @@ Todas las mejoras notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-01-26
+
+### 🔄 Migración a MySQL Completa
+- **Eliminación Completa de SQLite**: Transición total a MySQL Server
+  - Configuración única para desarrollo y producción
+  - Conexión exclusiva a MySQL en puerto 3306
+  - Actualización de seed-roles.js para sintaxis MySQL
+  - Limpieza de dependencias sqlite3 de package.json
+- **Documentación Actualizada**
+  - README.md actualizado con configuración MySQL única
+  - Scripts de instalación actualizados (install.sh e install.bat)
+  - Comandos de debugging actualizados para MySQL
+  - Variables de entorno simplificadas
+- **Optimización de Configuración**
+  - database.config.ts simplificado solo para MySQL
+  - .gitignore limpio sin referencias SQLite
+  - Eliminación de archivos de configuración obsoletos
+
 ## [2.0.0] - 2025-01-22
 
 ### 🎯 Características Principales Agregadas

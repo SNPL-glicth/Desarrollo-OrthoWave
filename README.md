@@ -54,7 +54,7 @@ Orto-Whave es una plataforma completa de gestión clínica desarrollada con **Ne
 - NestJS 9+ - Framework de Node.js escalable
 - TypeScript - Desarrollo tipado y robusto
 - TypeORM - ORM para gestión de base de datos
-- SQLite/MySQL - Base de datos configurable
+- MySQL - Base de datos principal
 - JWT - Autenticación segura
 - Bcrypt - Encriptación de contraseñas
 - Nodemailer - Envío de emails
@@ -80,7 +80,7 @@ Orto-Whave es una plataforma completa de gestión clínica desarrollada con **Ne
 ### **Desarrollo**
 - **Node.js** 16+ y npm
 - **Git** para control de versiones
-- **SQLite3** (incluido) o MySQL (opcional)
+- **MySQL** 5.7+ o 8.0+ (requerido)
 
 ### **Producción**
 - **Servidor web** (Nginx recomendado)
@@ -122,9 +122,12 @@ cp backend/.env.example backend/.env
 
 Editar `backend/.env`:
 ```env
-# Base de datos
-DATABASE_TYPE=sqlite
-DATABASE_NAME=orto_whave_dev.db
+# Base de datos MySQL
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=ortowhave
+DB_PASSWORD=Root123a
+DB_DATABASE=orto_whave_db
 
 # JWT
 JWT_SECRET=tu_jwt_secret_muy_seguro_aqui
@@ -489,13 +492,7 @@ MAIL_SECURE=true
 
 ### **🗄️ Configuración de Base de Datos**
 
-#### **SQLite (Desarrollo):**
-```env
-DATABASE_TYPE=sqlite
-DATABASE_NAME=orto_whave_dev.db
-```
-
-#### **MySQL (Producción):**
+#### **MySQL (Desarrollo y Producción):**
 ```env
 DATABASE_TYPE=mysql
 DATABASE_HOST=localhost
@@ -608,15 +605,14 @@ grep -r "citas" backend/logs/ 2>/dev/null || echo "No logs disponibles"
 
 #### **Estados de la Base de Datos:**
 ```bash
-# Verificar usuarios activos
-cd backend
-sqlite3 orto_whave_dev.db "SELECT id, email, rol, isVerified FROM users;"
+# Conectar a MySQL y verificar usuarios activos
+mysql -h localhost -u ortowhave -pRoot123a orto_whave_db -e "SELECT id, email, rol, isVerified FROM users;"
 
 # Verificar perfiles médicos
-sqlite3 orto_whave_dev.db "SELECT * FROM perfil_medico;"
+mysql -h localhost -u ortowhave -pRoot123a orto_whave_db -e "SELECT * FROM perfil_medico;"
 
 # Verificar citas recientes
-sqlite3 orto_whave_dev.db "SELECT * FROM citas ORDER BY fechaCreacion DESC LIMIT 5;"
+mysql -h localhost -u ortowhave -pRoot123a orto_whave_db -e "SELECT * FROM citas ORDER BY fechaCreacion DESC LIMIT 5;"
 ```
 
 ## 🔮 Roadmap y Mejoras Futuras

@@ -14,7 +14,7 @@ echo Este script instalará automáticamente:
 echo • Node.js y npm (si no están instalados)
 echo • Dependencias del backend (NestJS)
 echo • Dependencias del frontend (React)
-echo • Base de datos SQLite con datos iniciales
+echo • Configuración de base de datos MySQL
 echo • Configuración de variables de entorno
 echo.
 echo Presiona cualquier tecla para continuar o Ctrl+C para cancelar
@@ -106,20 +106,8 @@ echo [SUCCESS] Dependencias del frontend instaladas correctamente
 cd ..\..
 
 :: Configurar base de datos
-echo [INFO] Configurando base de datos...
+echo [INFO] Configurando conexión a MySQL...
 cd backend
-if exist "orto_whave_dev.db" (
-    echo [WARNING] Base de datos ya existe. ¿Deseas reinicializarla? (s/N)
-    set /p response=
-    if /i "!response!"=="s" (
-        del "orto_whave_dev.db"
-        echo [INFO] Base de datos anterior eliminada
-    ) else (
-        echo [INFO] Conservando base de datos existente
-        cd ..
-        goto create_scripts
-    )
-)
 
 :: Compilar TypeScript
 echo [INFO] Compilando backend...
@@ -128,13 +116,16 @@ if errorlevel 1 (
     echo [WARNING] Error al compilar backend, continuando...
 )
 
+echo [WARNING] Asegúrate de que MySQL esté ejecutándose en puerto 3306
+echo [WARNING] Y que la base de datos 'orto_whave_db' exista con las credenciales correctas
+
 :: Inicializar base de datos con datos de prueba
 echo [INFO] Inicializando base de datos con roles...
 if exist "seed-roles.js" (
     node seed-roles.js
 )
 
-echo [SUCCESS] Base de datos configurada
+echo [SUCCESS] Configuración de base de datos completada
 cd ..
 
 :create_scripts

@@ -17,11 +17,8 @@ yarn-debug.log*
 yarn-error.log*
 backend/logs/
 
-# Base de datos
-*.db
-*.sqlite
-*.sqlite3
-backend/*.db
+# Base de datos MySQL
+# (archivos de configuración sensibles ya están en .env)
 
 # Variables de entorno
 .env
@@ -42,8 +39,9 @@ frontend/.env
 ._*
 .Spotlight-V100
 .Trashes
-ehthumbs.db
+# Archivos de Windows
 Thumbs.db
+ehthumbs.db
 
 # IDE
 .vscode/

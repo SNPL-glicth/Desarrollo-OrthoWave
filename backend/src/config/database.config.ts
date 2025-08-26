@@ -3,16 +3,6 @@ import { config } from 'dotenv';
 
 config();
 
-// Configuración para desarrollo con SQLite
-const developmentConfig: TypeOrmModuleOptions = {
-  type: 'sqlite',
-  database: 'orto_whave_dev.db',
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: true, // Solo para desarrollo
-  logging: true,
-  migrationsRun: false, // No ejecutar migraciones en desarrollo con SQLite
-};
-
 // Configuración para desarrollo con MySQL
 const developmentMySQLConfig: TypeOrmModuleOptions = {
   type: 'mysql',
@@ -54,5 +44,4 @@ const productionConfig: TypeOrmModuleOptions = {
 };
 
 export const databaseConfig: TypeOrmModuleOptions =
-  process.env.NODE_ENV === 'production' ? productionConfig : 
-  process.env.DB_HOST ? developmentMySQLConfig : developmentConfig; // Usar SQLite si no hay DB_HOST configurado
+  process.env.NODE_ENV === 'production' ? productionConfig : developmentMySQLConfig;

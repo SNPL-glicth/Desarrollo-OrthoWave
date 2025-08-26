@@ -47,7 +47,7 @@ print_banner() {
     echo "• Node.js y npm"
     echo "• Dependencias del backend (NestJS)"
     echo "• Dependencias del frontend (React)"
-    echo "• Base de datos SQLite con datos iniciales"
+    echo "• Configuración de base de datos MySQL"
     echo "• Configuración de variables de entorno"
     echo ""
     echo -e "${YELLOW}Presiona ENTER para continuar o Ctrl+C para cancelar${NC}"
@@ -88,7 +88,6 @@ install_system_dependencies() {
         build-essential \
         python3 \
         python3-pip \
-        sqlite3 \
         software-properties-common \
         apt-transport-https \
         ca-certificates \
@@ -208,35 +207,26 @@ install_frontend_dependencies() {
 
 # Configurar base de datos
 setup_database() {
-    log_info "Configurando base de datos..."
+    log_info "Configurando conexión a MySQL..."
 
     cd backend
-
-    # Verificar si la base de datos ya existe
-    if [[ -f "orto_whave_dev.db" ]]; then
-        log_warning "Base de datos ya existe. ¿Deseas reinicializarla? (y/N)"
-        read -r response
-        if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-            rm orto_whave_dev.db
-            log_info "Base de datos anterior eliminada"
-        else
-            log_info "Conservando base de datos existente"
-            cd ..
-            return
-        fi
-    fi
 
     # Compilar TypeScript
     log_info "Compilando backend..."
     npm run build
 
+    # Verificar conexión a MySQL
+    log_info "Verificando conexión a MySQL..."
+    log_warning "Asegúrate de que MySQL esté ejecutándose en puerto 3306"
+    log_warning "Y que la base de datos 'orto_whave_db' exista con las credenciales correctas"
+    
     # Inicializar base de datos con datos de prueba
     log_info "Inicializando base de datos con roles..."
     if [[ -f "seed-roles.js" ]]; then
         node seed-roles.js
     fi
 
-    log_success "Base de datos configurada"
+    log_success "Configuración de base de datos completada"
     cd ..
 }
 
