@@ -4,7 +4,7 @@
 .fc {
   font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
-  background-color: #ffffff;
+  background-color: #f9fafb;
 }
 
 /* Header del calendario - ocultamos el por defecto */
@@ -19,7 +19,7 @@
 
 /* Estilos para vista mensual */
 .fc-dayGridMonth-view {
-  background-color: #ffffff;
+  background-color: #f9fafb;
 }
 
 .fc-dayGridMonth-view .fc-scrollgrid {
@@ -27,7 +27,7 @@
 }
 
 .fc-dayGridMonth-view .fc-col-header {
-  background-color: #ffffff;
+  background-color: #f9fafb;
   border-bottom: 1px solid #e0e0e0;
   height: 40px;
 }
@@ -49,7 +49,7 @@
 
 .fc-dayGridMonth-view .fc-daygrid-day {
   min-height: 180px;
-  background-color: #ffffff;
+  background-color: #f9fafb;
   border-right: 1px solid #e0e0e0;
   border-bottom: 1px solid #e0e0e0;
   position: relative;
@@ -83,11 +83,11 @@
 
 /* Día actual en vista mensual */
 .fc-dayGridMonth-view .fc-day-today {
-  background-color: #ffffff !important;
+  background-color: #f9fafb !important;
 }
 
 .fc-dayGridMonth-view .fc-day-today .fc-daygrid-day-number {
-  background-color: #1a73e8;
+  background-color: #6b7280;
   color: #ffffff;
   font-weight: 500;
 }
@@ -128,7 +128,7 @@
 
 /* Estilos para vista semanal */
 .fc-timeGridWeek-view {
-  background-color: #ffffff;
+  background-color: #f9fafb;
 }
 
 .fc-timeGridWeek-view .fc-scrollgrid {
@@ -136,7 +136,7 @@
 }
 
 .fc-timeGridWeek-view .fc-col-header {
-  background-color: #ffffff;
+  background-color: #f9fafb;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -159,12 +159,12 @@
 
 /* Día actual en vista semanal */
 .fc-timeGridWeek-view .fc-day-today .fc-col-header-cell-cushion {
-  color: #1a73e8;
+  color: #6b7280;
   font-weight: 600;
 }
 
 .fc-timeGridWeek-view .fc-day-today .fc-col-header-cell {
-  background-color: #e8f0fe;
+  background-color: #f3f4f6;
 }
 
 /* Grid de tiempo */
@@ -222,13 +222,13 @@
 
 /* Estilos para vista diaria */
 .fc-timeGridDay-view {
-  background-color: #ffffff;
+  background-color: #f9fafb;
 }
 
 .fc-timeGridDay-view .fc-col-header-cell {
   padding: 20px;
   text-align: center;
-  background-color: #ffffff;
+  background-color: #f9fafb;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -240,7 +240,7 @@
 }
 
 .fc-timeGridDay-view .fc-day-today .fc-col-header-cell-cushion {
-  color: #1a73e8;
+  color: #6b7280;
   font-weight: 600;
 }
 

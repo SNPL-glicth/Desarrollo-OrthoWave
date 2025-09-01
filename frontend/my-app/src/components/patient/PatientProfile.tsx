@@ -205,7 +205,7 @@ const PatientProfileComponent: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando perfil...</p>
         </div>
       </div>
@@ -220,7 +220,7 @@ const PatientProfileComponent: React.FC = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/dashboard/patient')}
-              className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+              className="flex items-center text-primary hover:text-primary-dark transition-colors"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -271,7 +271,7 @@ const PatientProfileComponent: React.FC = () => {
           {/* Información del Usuario */}
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold">
                 {profile?.usuario.nombre?.charAt(0)?.toUpperCase() || 'U'}
               </div>
               <div>
@@ -280,7 +280,7 @@ const PatientProfileComponent: React.FC = () => {
                 </h2>
                 <p className="text-gray-600">{profile?.usuario.email}</p>
                 {profile?.edad && (
-                  <p className="text-blue-600 font-medium">{profile.edad} años</p>
+                  <p className="text-primary font-medium">{profile.edad} años</p>
                 )}
               </div>
             </div>
@@ -334,7 +334,7 @@ const PatientProfileComponent: React.FC = () => {
                           telefono: e.target.value 
                         }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                       placeholder="Ej: +57 300 123 4567"
                     />
                   ) : (
@@ -368,7 +368,7 @@ const PatientProfileComponent: React.FC = () => {
                       name="genero"
                       value={formData.genero || ''}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                     >
                       <option value="">Seleccionar</option>
                       <option value="Masculino">Masculino</option>
@@ -393,7 +393,7 @@ const PatientProfileComponent: React.FC = () => {
                       name="tipoAfiliacion"
                       value={formData.tipoAfiliacion || ''}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                     >
                       <option value="">Seleccionar</option>
                       <option value="EPS">EPS</option>
@@ -421,7 +421,7 @@ const PatientProfileComponent: React.FC = () => {
                         name="eps"
                         value={formData.eps || ''}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                         placeholder="Ej: Sura, Sanitas, etc."
                       />
                     ) : (
@@ -445,7 +445,7 @@ const PatientProfileComponent: React.FC = () => {
                       name="fechaNacimiento"
                       value={formatDate(formData.fechaNacimiento)}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                     />
                   ) : (
                     <input
@@ -467,7 +467,7 @@ const PatientProfileComponent: React.FC = () => {
                         name="tipoIdentificacion"
                         value={formData.tipoIdentificacion || 'CC'}
                         onChange={handleInputChange}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                       >
                         <option value="CC">CC</option>
                         <option value="CE">CE</option>
@@ -479,7 +479,7 @@ const PatientProfileComponent: React.FC = () => {
                         name="numeroIdentificacion"
                         value={formData.numeroIdentificacion || ''}
                         onChange={handleInputChange}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                         placeholder="Número de documento"
                       />
                     </div>
@@ -511,7 +511,7 @@ const PatientProfileComponent: React.FC = () => {
                       name="contactoEmergenciaNombre"
                       value={formData.contactoEmergenciaNombre || ''}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                       placeholder="Nombre del contacto"
                     />
                   ) : (
@@ -534,7 +534,7 @@ const PatientProfileComponent: React.FC = () => {
                       name="contactoEmergenciaTelefono"
                       value={formData.contactoEmergenciaTelefono || ''}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                       placeholder="Teléfono de emergencia"
                     />
                   ) : (
@@ -556,7 +556,7 @@ const PatientProfileComponent: React.FC = () => {
                       name="contactoEmergenciaParentesco"
                       value={formData.contactoEmergenciaParentesco || ''}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                     >
                       <option value="">Seleccionar</option>
                       <option value="Padre">Padre</option>

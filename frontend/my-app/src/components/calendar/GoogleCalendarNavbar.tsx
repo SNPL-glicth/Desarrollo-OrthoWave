@@ -86,7 +86,7 @@ const GoogleCalendarNavbar: React.FC<GoogleCalendarNavbarProps> = ({
   };
 
   return (
-    <div className="bg-white border-b border-gray-200 px-6 py-4">
+    <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         {/* Lado izquierdo - Logo, hamburger y navegación */}
         <div className="flex items-center space-x-6">
@@ -198,7 +198,7 @@ const GoogleCalendarNavbar: React.FC<GoogleCalendarNavbarProps> = ({
               className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-full transition-colors"
               title={`${userInfo.name} (${userInfo.email})`}
             >
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-white">
                   {userInfo.name?.charAt(0)?.toUpperCase() || userInfo.email?.charAt(0)?.toUpperCase() || 'U'}
                 </span>

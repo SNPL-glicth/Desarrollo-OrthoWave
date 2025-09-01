@@ -11,6 +11,8 @@ import RegistroPendientePage from './pages/RegistroPendientePage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import CreateUserForm from './components/CreateUserForm';
 import UserManagement from './components/UserManagement';
 import AutoRedirect from './components/AutoRedirect';
@@ -56,6 +58,8 @@ const App: React.FC = () => {
               <Route path="/registro-pendiente" element={<RegistroPendientePage />} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="/verification" element={<VerificationPage />} />
+              <Route path="/recuperar-contrasena" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route
                 path="/dashboard/admin"
                 element={

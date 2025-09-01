@@ -4,7 +4,6 @@ import GoogleCalendarNavbar from './GoogleCalendarNavbar';
 import GoogleStyleCalendar from './GoogleStyleCalendar';
 import MiniCalendar from './MiniCalendar';
 import UserAccountModal from './UserAccountModal';
-import ColombiaTimeWidget from './ColombiaTimeWidget';
 import AppointmentRequestsOffcanvas from '../doctor/AppointmentRequestsOffcanvas';
 import DoctorAppointmentModal from '../doctor/DoctorAppointmentModal';
 import AppointmentDetailsModal from '../doctor/AppointmentDetailsModal';
@@ -244,7 +243,7 @@ const GoogleCalendarPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Google Calendar Navbar */}
       <GoogleCalendarNavbar
         currentDate={currentDate}
@@ -269,12 +268,12 @@ const GoogleCalendarPage: React.FC = () => {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar izquierdo estilo Google Calendar */}
-        <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
+        <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
           {/* Botón Crear */}
           <div className="p-6">
             <button
               onClick={handleCreateEvent}
-              className="flex items-center space-x-3 bg-white border border-gray-300 rounded-full px-6 py-3 hover:shadow-md transition-shadow w-full group hover:bg-gray-50"
+              className="flex items-center space-x-3 bg-gray-50 border border-gray-300 rounded-full px-6 py-3 hover:shadow-md transition-shadow w-full group hover:bg-gray-100"
             >
               <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -283,10 +282,6 @@ const GoogleCalendarPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Widget de Hora Colombia */}
-          <div className="px-6 pb-4">
-            <ColombiaTimeWidget size="sm" />
-          </div>
 
           {/* Mini Calendar */}
           <div className="px-6 pb-6 flex-1">
@@ -301,7 +296,7 @@ const GoogleCalendarPage: React.FC = () => {
         </div>
 
         {/* Área principal del calendario */}
-        <div className="flex-1 bg-white overflow-hidden">
+        <div className="flex-1 bg-gray-50 overflow-hidden">
           <div className="h-full p-6">
             {loading && (
               <div className="flex items-center justify-center h-64">

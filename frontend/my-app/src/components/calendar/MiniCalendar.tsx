@@ -140,7 +140,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
   const dayNames = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
   return (
-    <div className={`bg-white ${className}`}>
+    <div className={`bg-gray-50 ${className}`}>
       {/* Header con navegación */}
       <div className="flex items-center justify-between mb-4">
         <button
@@ -188,12 +188,12 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
             onClick={() => handleDateClick(day.date)}
             className={`
               relative w-8 h-8 text-xs rounded-full transition-all duration-200 ease-in-out
-              hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+              hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50
               ${!day.isCurrentMonth ? 'text-gray-300' : 'text-gray-900'}
               ${day.isToday
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-gray-600 text-white hover:bg-gray-700'
                 : day.isSelected
-                  ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                  ? 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   : ''
               }
             `}
@@ -205,7 +205,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
 
             {/* Indicador de eventos */}
             {day.hasEvents && !day.isToday && (
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full"></div>
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gray-600 rounded-full"></div>
             )}
 
             {/* Indicador especial para eventos en el día de hoy */}
