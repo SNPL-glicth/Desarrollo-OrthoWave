@@ -95,27 +95,41 @@ export class PatientDocumentsController {
       throw new HttpException('No se ha proporcionado ningún archivo', HttpStatus.BAD_REQUEST);
     }
 
-    // Obtener el ID del paciente desde el usuario autenticado
-    let patientId = req.user.paciente?.id;
-    if (!patientId) {
+    // Obtener o crear el perfil del paciente
+    let patient = await this.pacientesService.obtenerPorUsuarioId(req.user.id);
+    
+    if (!patient) {
+      console.log('Perfil de paciente no existe, creando uno nuevo...');
       // Si no existe el perfil de paciente, crearlo automáticamente
-      const newPaciente = await this.pacientesService.crearPaciente({
+      patient = await this.pacientesService.crearPaciente({
         usuarioId: req.user.id,
         activo: true,
         primeraConsulta: true
       });
-      
-      patientId = newPaciente.id;
     }
+    
+    const patientId = patient.id;
+    console.log('Upload - Usuario ID:', req.user.id, 'Paciente ID:', patientId);
 
     return this.patientDocumentsService.uploadDocument(file, patientId, uploadDocumentDto);
   }
 
-  // TEMPORAL: Sin autenticación para debugging - retorna TODOS los documentos
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async getPatientDocuments(): Promise<PatientDocumentResponseDto[]> {
-    // Temporal: retornar todos los documentos sin verificar autenticación
-    return this.patientDocumentsService.getAllDocumentsDebug();
+  async getPatientDocuments(@Request() req): Promise<PatientDocumentResponseDto[]> {
+    const usuario = req.user;
+    
+    console.log('=== GET PATIENT DOCUMENTS ===');
+    console.log('Usuario ID:', usuario.id);
+    console.log('Usuario rol:', usuario.rol?.nombre);
+    
+    // Solo pacientes pueden ver sus propios documentos
+    if (usuario.rol.nombre !== 'paciente') {
+      throw new HttpException('Solo los pacientes pueden ver sus documentos', HttpStatus.FORBIDDEN);
+    }
+    
+    // Obtener documentos del paciente usando su usuario ID
+    return this.patientDocumentsService.getDocumentsByPatientId(usuario.id);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -231,26 +231,75 @@ const PatientAppointmentScheduler: React.FC<PatientAppointmentSchedulerProps> = 
               </div>
             ) : availableSlots.length > 0 ? (
               <div className="grid grid-cols-3 gap-2">
-                {availableSlots.map((slot) => (
-                  <button
-                    key={slot.hora}
-                    type="button"
-                    onClick={() => setSelectedSlot(slot.hora)}
-                    className={`p-2 text-sm rounded-md border ${
-                      selectedSlot === slot.hora
-                        ? 'bg-blue-500 text-white border-blue-500'
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {slot.hora}
-                  </button>
-                ))}
+                {availableSlots.map((slot) => {
+                  const isSelected = selectedSlot === slot.hora;
+                  const isOccupiedByOthers = slot.isOccupied;
+                  const isOccupiedByCurrentUser = slot.isOccupiedByCurrentUser;
+                  const availableForCurrentUser = slot.availableForCurrentUser;
+                  
+                  return (
+                    <button
+                      key={slot.hora}
+                      type="button"
+                      onClick={() => {
+                        if (availableForCurrentUser || isOccupiedByCurrentUser) {
+                          setSelectedSlot(slot.hora);
+                        }
+                      }}
+                      disabled={isOccupiedByOthers && !isOccupiedByCurrentUser}
+                      className={`p-2 text-sm rounded-md border relative ${
+                        isSelected
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : isOccupiedByCurrentUser
+                          ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200'
+                          : isOccupiedByOthers
+                          ? 'bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                      title={
+                        isOccupiedByCurrentUser
+                          ? 'Ya tienes una cita a esta hora (aprobada)'
+                          : isOccupiedByOthers
+                          ? 'Reservado por otro paciente'
+                          : 'Disponible para agendar'
+                      }
+                    >
+                      {slot.hora}
+                      {isOccupiedByCurrentUser && (
+                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white"></span>
+                      )}
+                      {isOccupiedByOthers && !isOccupiedByCurrentUser && (
+                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-gray-400 rounded-full border border-white"></span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-gray-500 text-sm">
                 No hay horarios disponibles para esta fecha
               </p>
             )}
+            
+            {/* Legend */}
+            <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-600">
+              <div className="flex items-center space-x-1">
+                <div className="w-3 h-3 bg-white border border-gray-300 rounded"></div>
+                <span>Disponible</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className="w-3 h-3 bg-green-100 border border-green-300 rounded relative">
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full"></span>
+                </div>
+                <span>Tu cita aprobada</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className="w-3 h-3 bg-gray-200 border border-gray-300 rounded relative">
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-gray-400 rounded-full"></span>
+                </div>
+                <span>Reservado</span>
+              </div>
+            </div>
           </div>
         )}
 

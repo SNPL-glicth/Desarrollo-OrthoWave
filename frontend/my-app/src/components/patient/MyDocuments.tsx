@@ -128,7 +128,7 @@ const MyDocuments: React.FC = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate('/dashboard/patient')}
-                className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors"
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -153,7 +153,7 @@ const MyDocuments: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowUpload(!showUpload)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
               >
                 {showUpload ? 'Cancelar' : 'Subir Documento'}
               </button>
@@ -224,7 +224,7 @@ const MyDocuments: React.FC = () => {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto mb-4"></div>
                 <p className="text-gray-600">Cargando documentos...</p>
               </div>
             </div>
@@ -239,7 +239,7 @@ const MyDocuments: React.FC = () => {
               </p>
               <button
                 onClick={() => setShowUpload(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
               >
                 Subir Documento
               </button>
@@ -284,7 +284,7 @@ const MyDocuments: React.FC = () => {
                         e.stopPropagation();
                         handleViewDocument(document);
                       }}
-                      className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
                       title="Ver documento"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

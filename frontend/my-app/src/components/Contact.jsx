@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPinIcon, PhoneIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 
 const Contact = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
@@ -59,8 +61,17 @@ const Contact = () => {
     try {
       // Simulación de envío exitoso
       console.log('Formulario enviado:', formData);
+      
+      // Guardar los datos antes de resetear el formulario
+      const datosParaRegistro = {
+        nombre: formData.nombre,
+        email: formData.email,
+        telefono: formData.telefono
+      };
+      
       setEnviado(true);
       setError(false);
+      
       // Resetear formulario después de envío exitoso
       setFormData({
         nombre: '',
@@ -68,7 +79,17 @@ const Contact = () => {
         telefono: '',
         mensaje: '',
       });
-      setTimeout(() => setEnviado(false), 5000); // Ocultar mensaje después de 5 segundos
+      
+      // Redirigir al registro después de 2 segundos con los datos guardados
+      setTimeout(() => {
+        navigate('/register', {
+          state: {
+            message: 'Gracias por contactarnos. Tu mensaje ha sido enviado exitosamente. Completa tu registro para acceder a nuestros servicios.',
+            prefilledData: datosParaRegistro
+          }
+        });
+      }, 2000);
+      
     } catch (err) {
       console.error('Error al enviar formulario:', err);
       setError(true);
@@ -126,7 +147,15 @@ const Contact = () => {
         >
           {enviado && (
             <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-100 border border-green-400 text-green-700 rounded text-sm sm:text-base">
-              ¡Gracias por contactarnos! Te responderemos a la brevedad.
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <p className="font-semibold">¡Mensaje enviado exitosamente!</p>
+                  <p className="text-sm">Te responderemos pronto. Serás redirigido al registro en un momento...</p>
+                </div>
+              </div>
             </div>
           )}
 

@@ -146,10 +146,10 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
         className={`
           relative border-2 border-dashed rounded-lg p-6 transition-colors duration-200 cursor-pointer
           ${isDragActive 
-            ? 'border-blue-400 bg-blue-50' 
+            ? 'border-gray-400 bg-gray-50' 
             : uploading 
             ? 'border-gray-300 bg-gray-50 cursor-not-allowed' 
-            : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
           }
         `}
         onDragEnter={handleDragIn}
@@ -170,7 +170,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
         <div className="text-center">
           {uploading ? (
             <>
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto mb-4"></div>
               <p className="text-lg font-medium text-gray-900 mb-2">
                 Subiendo documentos...
               </p>
@@ -178,7 +178,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
                 <div className="text-sm text-gray-600 space-y-1">
                   {uploadingFiles.map((fileName, index) => (
                     <div key={index} className="flex items-center justify-center space-x-2">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b border-blue-600"></div>
+                      <div className="animate-spin rounded-full h-3 w-3 border-b border-gray-600"></div>
                       <span>{fileName}</span>
                     </div>
                   ))}
@@ -231,7 +231,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
                     {fileName}
                   </span>
                 </div>
-                <div className="animate-spin rounded-full h-4 w-4 border-b border-blue-600"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b border-gray-600"></div>
               </div>
             </div>
           ))}

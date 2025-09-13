@@ -120,16 +120,16 @@ export class PacientesService {
   }
 
   async obtenerPacientesPorDoctor(doctorId: number): Promise<any[]> {
-    // Obtener pacientes que han tenido citas con este doctor
-    const pacientesUsuarios = await this.usersRepository
-      .createQueryBuilder('usuario')
-      .innerJoin('usuario.rol', 'rol')
-      .leftJoin('citas', 'cita', 'cita.pacienteId = usuario.id')
-      .where('rol.nombre = :rol', { rol: 'paciente' })
-      .andWhere('cita.doctorId = :doctorId', { doctorId })
-      .groupBy('usuario.id')
-      .select(['usuario.id', 'usuario.nombre', 'usuario.apellido', 'usuario.email', 'usuario.telefono'])
-      .getMany();
+    // Obtener todos los pacientes verificados (sin importar estado de aprobación)
+    const pacientesUsuarios = await this.usersRepository.find({
+      where: { 
+        rol: { nombre: 'paciente' },
+        isVerified: true
+      },
+      relations: ['rol'],
+      select: ['id', 'nombre', 'apellido', 'email', 'telefono'],
+      order: { id: 'DESC' }
+    });
 
     // Para cada paciente, obtener información adicional del perfil de paciente
     const pacientesCompletos = [];

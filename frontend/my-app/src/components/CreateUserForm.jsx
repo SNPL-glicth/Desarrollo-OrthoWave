@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { buildUrl, API_ENDPOINTS } from '../config/api.js';
 
 const CreateUserForm = ({ onClose, onUserCreated }) => {
   const [activeTab, setActiveTab] = useState('admin'); // Pestaña activa por defecto
@@ -28,7 +29,7 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
     // Cargar roles disponibles
     const fetchRoles = async () => {
       try {
-        const response = await fetch('http://localhost:4000/users/public/roles');
+        const response = await fetch(buildUrl(API_ENDPOINTS.USERS.PUBLIC_ROLES));
         if (response.ok) {
           const rolesData = await response.json();
           setRoles(rolesData);
@@ -106,7 +107,7 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
           telefono: formData.telefono
         };
 
-        const response = await fetch('http://localhost:4000/users/admin/crear-paciente', {
+        const response = await fetch(buildUrl(API_ENDPOINTS.USERS.CREATE_PATIENT), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -158,7 +159,7 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
       }
 
       // Usar el endpoint de admin para crear usuarios sin verificación
-      const response = await fetch('http://localhost:4000/users/admin/crear-usuario', {
+      const response = await fetch(buildUrl(API_ENDPOINTS.USERS.CREATE_USER), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,25 +194,52 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
   const isDoctor = activeTab === 'doctor';
   const isPaciente = activeTab === 'paciente';
   
-  // Configuración de las pestañas
+  // Configuración de las pestañas con iconos profesionales SVG
   const tabs = [
-    { id: 'admin', label: 'Administrador', icon: '👑', color: 'bg-red-500' },
-    { id: 'doctor', label: 'Doctor', icon: '👩‍⚕️', color: 'bg-green-500' },
-    { id: 'paciente', label: 'Paciente', icon: '👤', color: 'bg-blue-500' }
+    { 
+      id: 'admin', 
+      label: 'Administrador', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      ), 
+      color: 'bg-gray-600' 
+    },
+    { 
+      id: 'doctor', 
+      label: 'Doctor', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      ), 
+      color: 'bg-gray-500' 
+    },
+    { 
+      id: 'paciente', 
+      label: 'Paciente', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      ), 
+      color: 'bg-gray-400' 
+    }
   ];
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
-        <div className="mt-3">
+    <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div className="relative top-10 mx-auto p-6 border border-gray-300 w-full max-w-4xl shadow-xl rounded-lg bg-gray-50">
+        <div className="">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">
+            <h3 className="text-xl font-semibold leading-6 text-gray-800">
               Crear Nuevo Usuario {isAdmin ? '(Administrador)' : isDoctor ? '(Doctor)' : isPaciente ? '(Paciente)' : ''}
             </h3>
             <button
               type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-md hover:bg-gray-200"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -220,20 +248,20 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
           </div>
 
           {/* Pestañas */}
-          <div className="border-b border-gray-200 mb-6">
+          <div className="border-b border-gray-300 mb-6">
             <nav className="-mb-px flex space-x-8">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => handleTabChange(tab.id)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 flex items-center space-x-2 ${
+                  className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors duration-200 flex items-center space-x-2 ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-gray-600 text-gray-700 bg-gray-100'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-400 hover:bg-gray-50'
                   }`}
                 >
-                  <span className="text-lg">{tab.icon}</span>
+                  {tab.icon}
                   <span>{tab.label}</span>
                 </button>
               ))}
@@ -415,35 +443,52 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
                  manteniendo consistencia con el formulario de registro normal */}
 
             <div className={`p-4 rounded-md border ${
-              isAdmin ? 'bg-red-50 border-red-200' : 
-              isDoctor ? 'bg-green-50 border-green-200' : 
-              'bg-blue-50 border-blue-200'
+              isAdmin ? 'bg-gray-200 border-gray-300' : 
+              isDoctor ? 'bg-gray-100 border-gray-300' : 
+              'bg-gray-50 border-gray-200'
             }`}>
               <div className="flex items-center">
                 <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
-                  isAdmin ? 'bg-red-500' : 
-                  isDoctor ? 'bg-green-500' : 
-                  'bg-blue-500'
+                  isAdmin ? 'bg-gray-600' : 
+                  isDoctor ? 'bg-gray-500' : 
+                  'bg-gray-400'
                 }`}>
                   <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className={`text-sm font-medium ${
-                    isAdmin ? 'text-red-800' : 
-                    isDoctor ? 'text-green-800' : 
-                    'text-blue-800'
+                  <p className={`text-sm font-medium flex items-center ${
+                    isAdmin ? 'text-gray-800' : 
+                    isDoctor ? 'text-gray-700' : 
+                    'text-gray-700'
                   }`}>
-                    {isAdmin && '🛡️ Administrador con permisos completos'}
-                    {isDoctor && '👩‍⚕️ Doctor con perfil médico automático'}
-                    {isPaciente && '👤 Paciente con perfil básico'}
+                    {isAdmin && (
+                      <>
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        Administrador con permisos completos
+                      </>
+                    )}
+                    {isDoctor && (
+                      <>
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        Doctor con perfil médico automático
+                      </>
+                    )}
+                    {isPaciente && (
+                      <>
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Paciente con perfil básico
+                      </>
+                    )}
                   </p>
-                  <p className={`text-sm ${
-                    isAdmin ? 'text-red-700' : 
-                    isDoctor ? 'text-green-700' : 
-                    'text-blue-700'
-                  }`}>
+                  <p className="text-sm text-gray-600">
                     Usuario verificado automáticamente, puede iniciar sesión inmediatamente
                   </p>
                 </div>
@@ -469,9 +514,9 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
                 type="submit"
                 disabled={loading}
                 className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 transition-colors ${
-                  isAdmin ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' : 
-                  isDoctor ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 
-                  'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+                  isAdmin ? 'bg-gray-700 hover:bg-gray-800 focus:ring-gray-500' : 
+                  isDoctor ? 'bg-gray-600 hover:bg-gray-700 focus:ring-gray-500' : 
+                  'bg-gray-500 hover:bg-gray-600 focus:ring-gray-400'
                 }`}
               >
                 {loading ? (

@@ -15,7 +15,7 @@ export class Notification {
 
   @Column({
     type: 'enum',
-    enum: ['cita_confirmada', 'cita_cancelada', 'recordatorio', 'cita_reagendada'],
+    enum: ['cita_confirmada', 'cita_cancelada', 'recordatorio', 'cita_reagendada', 'completar_perfil'],
     default: 'cita_confirmada'
   })
   tipo: string;

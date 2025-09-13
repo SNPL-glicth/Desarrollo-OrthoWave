@@ -37,7 +37,7 @@ const ForgotPasswordPage = () => {
 
   if (isEmailSent) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -55,14 +55,14 @@ const ForgotPasswordPage = () => {
               Si el correo <span className="font-semibold text-gray-900">{email}</span> está registrado, 
               recibirás un enlace para restablecer tu contraseña.
             </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <EnvelopeIcon className="h-5 w-5 text-blue-400 mt-0.5" />
+                  <EnvelopeIcon className="h-5 w-5 text-gray-400 mt-0.5" />
                 </div>
                 <div className="ml-3 text-sm">
-                  <p className="text-blue-800 font-medium mb-1">Revisa tu bandeja de entrada</p>
-                  <p className="text-blue-700">
+                  <p className="text-gray-800 font-medium mb-1">Revisa tu bandeja de entrada</p>
+                  <p className="text-gray-700">
                     El enlace de recuperación expira en <strong>1 hora</strong>. 
                     Si no ves el correo, revisa tu carpeta de spam.
                   </p>
@@ -97,7 +97,7 @@ const ForgotPasswordPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -113,8 +113,8 @@ const ForgotPasswordPage = () => {
             Volver al login
           </Link>
           
-          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full flex items-center justify-center mb-6 shadow-lg">
-            <EnvelopeIcon className="h-10 w-10 text-blue-600" />
+          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-gray-100 to-slate-100 rounded-full flex items-center justify-center mb-6 shadow-lg">
+            <EnvelopeIcon className="h-10 w-10 text-gray-600" />
           </div>
           
           <h2 className="text-3xl font-bold text-gray-900 mb-2">

@@ -7,6 +7,9 @@ import { RegisterPatientSimpleDto } from './dto/register-patient-simple.dto';
 import { VerifyDto } from './dto/verify.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordCodeDto } from './dto/forgot-password-code.dto';
+import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
+import { ResetPasswordWithCodeDto } from './dto/reset-password-with-code.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -58,13 +61,30 @@ export class AuthController {
     return req.user;
   }
 
+  // Métodos para recuperación con código numérico
   @Post('forgot-password')
-  async forgotPassword(@Body(ValidationPipe) forgotPasswordDto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(forgotPasswordDto);
+  async forgotPassword(@Body(ValidationPipe) forgotPasswordCodeDto: ForgotPasswordCodeDto) {
+    return this.authService.forgotPasswordWithCode(forgotPasswordCodeDto);
+  }
+
+  @Post('verify-reset-code')
+  async verifyResetCode(@Body(ValidationPipe) verifyResetCodeDto: VerifyResetCodeDto) {
+    return this.authService.verifyResetCode(verifyResetCodeDto);
   }
 
   @Post('reset-password')
-  async resetPassword(@Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
+  async resetPassword(@Body(ValidationPipe) resetPasswordWithCodeDto: ResetPasswordWithCodeDto) {
+    return this.authService.resetPasswordWithCode(resetPasswordWithCodeDto);
+  }
+
+  // Métodos legacy (si necesitas mantener compatibilidad)
+  @Post('forgot-password-legacy')
+  async forgotPasswordLegacy(@Body(ValidationPipe) forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Post('reset-password-legacy')
+  async resetPasswordLegacy(@Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetPasswordDto);
   }
 }

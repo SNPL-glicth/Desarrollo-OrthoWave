@@ -141,10 +141,10 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center space-x-4">
-            <div className="bg-blue-100 p-3 rounded-full">
-              <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-gray-200 p-3 rounded-full">
+              <svg className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
@@ -160,7 +160,7 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+            className="text-gray-400 hover:text-gray-700 text-2xl font-bold transition-colors"
           >
             ×
           </button>
@@ -216,56 +216,56 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
 
           {/* Estadísticas del paciente */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="bg-gray-100 p-4 rounded-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Total Citas</p>
-                  <p className="text-2xl font-bold text-blue-900">{stats.total}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Citas</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
                 </div>
-                <div className="bg-blue-100 p-2 rounded">
-                  <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="bg-gray-200 p-2 rounded">
+                  <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
               </div>
             </div>
 
-            <div className="bg-green-50 p-4 rounded-lg">
+            <div className="bg-gray-100 p-4 rounded-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Completadas</p>
-                  <p className="text-2xl font-bold text-green-900">{stats.completadas}</p>
+                  <p className="text-sm font-medium text-gray-600">Completadas</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.completadas}</p>
                 </div>
-                <div className="bg-green-100 p-2 rounded">
-                  <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="bg-gray-200 p-2 rounded">
+                  <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
             </div>
 
-            <div className="bg-yellow-50 p-4 rounded-lg">
+            <div className="bg-gray-100 p-4 rounded-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-yellow-600">Pendientes</p>
-                  <p className="text-2xl font-bold text-yellow-900">{stats.pendientes}</p>
+                  <p className="text-sm font-medium text-gray-600">Pendientes</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.pendientes}</p>
                 </div>
-                <div className="bg-yellow-100 p-2 rounded">
-                  <svg className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="bg-gray-200 p-2 rounded">
+                  <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
             </div>
 
-            <div className="bg-red-50 p-4 rounded-lg">
+            <div className="bg-gray-100 p-4 rounded-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-red-600">Canceladas</p>
-                  <p className="text-2xl font-bold text-red-900">{stats.canceladas}</p>
+                  <p className="text-sm font-medium text-gray-600">Canceladas</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.canceladas}</p>
                 </div>
-                <div className="bg-red-100 p-2 rounded">
-                  <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="bg-gray-200 p-2 rounded">
+                  <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </div>
@@ -280,7 +280,7 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
               <button
                 onClick={fetchPatientAppointments}
                 disabled={loading}
-                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors"
               >
                 {loading ? 'Actualizando...' : 'Actualizar'}
               </button>
@@ -288,7 +288,7 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
 
             {loading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400 mx-auto"></div>
                 <p className="mt-2 text-gray-600">Cargando historial...</p>
               </div>
             ) : error ? (
@@ -332,9 +332,9 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
                         </div>
 
                         {cita.notasDoctor && (
-                          <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                            <p className="text-sm font-medium text-blue-800 mb-1">Notas del Doctor:</p>
-                            <p className="text-sm text-blue-700">{cita.notasDoctor}</p>
+                          <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <p className="text-sm font-medium text-gray-700 mb-1">Notas del Doctor:</p>
+                            <p className="text-sm text-gray-600">{cita.notasDoctor}</p>
                           </div>
                         )}
                       </div>
@@ -357,7 +357,7 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
               <button
                 onClick={fetchPatientDocuments}
                 disabled={documentsLoading}
-                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors"
               >
                 {documentsLoading ? 'Actualizando...' : 'Actualizar'}
               </button>
@@ -365,7 +365,7 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
 
             {documentsLoading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400 mx-auto"></div>
                 <p className="mt-2 text-gray-600">Cargando documentos...</p>
               </div>
             ) : documentsError ? (
@@ -401,7 +401,7 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
                           <div className="mt-3 flex space-x-2">
                             <button
                               onClick={() => handleViewDocument(document)}
-                              className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors"
+                              className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
                             >
                               <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -428,10 +428,10 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end p-6 border-t border-gray-200">
+        <div className="flex justify-end p-6 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
           >
             Cerrar
           </button>

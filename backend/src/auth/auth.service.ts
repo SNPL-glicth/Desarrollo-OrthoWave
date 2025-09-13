@@ -8,7 +8,11 @@ import * as crypto from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordCodeDto } from './dto/forgot-password-code.dto';
+import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
+import { ResetPasswordWithCodeDto } from './dto/reset-password-with-code.dto';
 import { getCurrentColombiaDateTime } from '../utils/timezone.utils';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +23,7 @@ export class AuthService {
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
     private mailerService: MailerService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -243,12 +248,22 @@ export class AuthService {
     user.verificationCode = null;
     await this.usersRepository.save(user);
     
-    // Si es un paciente, mostrar mensaje de aprobación pendiente
-    if (user.rol?.nombre === 'paciente' && user.approvalStatus === 'pending') {
-      return { 
-        message: 'Cuenta verificada exitosamente. Tu solicitud está pendiente de aprobación y será revisada en un plazo máximo de 48 horas. Para agilizar el proceso, puedes contactarnos por nuestros canales oficiales.',
-        requiresApproval: true
-      };
+    // Si es un paciente, crear notificación para completar perfil y mostrar mensaje de aprobación pendiente
+    if (user.rol?.nombre === 'paciente') {
+      try {
+        await this.notificationsService.crearNotificacionCompletarPerfil(user.id);
+        this.logger.log(`Notificación de completar perfil creada para paciente: ${user.email}`);
+      } catch (notificationError) {
+        this.logger.error(`Error al crear notificación de completar perfil para ${user.email}:`, notificationError.message);
+        // No fallar el proceso de verificación por error de notificación
+      }
+      
+      if (user.approvalStatus === 'pending') {
+        return { 
+          message: 'Cuenta verificada exitosamente. Tu solicitud está pendiente de aprobación y será revisada en un plazo máximo de 48 horas. Para agilizar el proceso, puedes contactarnos por nuestros canales oficiales.',
+          requiresApproval: true
+        };
+      }
     }
     
     return { message: 'Cuenta verificada exitosamente.' };
@@ -372,6 +387,194 @@ export class AuthService {
       return { message: 'Contraseña restablecida exitosamente.' };
     } catch (error) {
       this.logger.error('Error en resetPassword:', error.message);
+      throw error;
+    }
+  }
+
+  // Nuevos métodos para recuperación con código numérico
+  async forgotPasswordWithCode(forgotPasswordCodeDto: ForgotPasswordCodeDto): Promise<{ message: string }> {
+    const { email } = forgotPasswordCodeDto;
+    this.logger.log(`Solicitud de recuperación de contraseña con código para: ${email}`);
+
+    try {
+      const user = await this.usersRepository.findOne({ where: { email } });
+
+      if (!user) {
+        this.logger.warn(`Solicitud de reset para email no existente: ${email}`);
+        // Por seguridad, siempre devolvemos el mismo mensaje
+        return { message: 'Si el correo existe, recibirás un código de recuperación.' };
+      }
+
+      if (!user.isVerified) {
+        this.logger.warn(`Intento de recuperación para cuenta no verificada: ${email}`);
+        throw new BadRequestException('La cuenta debe estar verificada para poder recuperar la contraseña.');
+      }
+
+      // Generar código de recuperación de 6 dígitos
+      const randomNum = Math.floor(100000 + Math.random() * 900000);
+      const resetCode = randomNum.toString().padStart(6, '0');
+      this.logger.log(`Código de recuperación generado para ${email}: ${resetCode}`);
+
+      // Establecer expiración del código (15 minutos)
+      const resetCodeExpires = getCurrentColombiaDateTime();
+      resetCodeExpires.setMinutes(resetCodeExpires.getMinutes() + 15);
+
+      // Guardar código en la base de datos
+      user.passwordResetCode = resetCode;
+      user.passwordResetCodeExpires = resetCodeExpires;
+      await this.usersRepository.save(user);
+
+      // Enviar correo con código de recuperación
+      try {
+        await this.mailerService.sendMail({
+          to: email,
+          subject: 'Código de recuperación de contraseña - Orto-Whave',
+          template: './password-reset-code',
+          context: {
+            name: user.nombre,
+            resetCode,
+            email,
+            expiresIn: '15 minutos',
+          },
+        });
+
+        this.logger.log(`Código de recuperación enviado a: ${email}`);
+      } catch (emailError) {
+        this.logger.error(`Error al enviar código de recuperación a ${email}:`, emailError.message);
+        // Limpiar el código si no se pudo enviar el email
+        user.passwordResetCode = null;
+        user.passwordResetCodeExpires = null;
+        await this.usersRepository.save(user);
+        throw new BadRequestException('Error al enviar el código de recuperación. Por favor, intenta nuevamente.');
+      }
+
+      return { message: 'Si el correo existe, recibirás un código de recuperación de 6 dígitos.' };
+    } catch (error) {
+      this.logger.error(`Error en forgotPasswordWithCode para ${email}:`, error.message);
+      throw error;
+    }
+  }
+
+  async verifyResetCode(verifyResetCodeDto: VerifyResetCodeDto): Promise<{ message: string; isValid: boolean }> {
+    const { email, code } = verifyResetCodeDto;
+    this.logger.log(`Verificando código de recuperación para: ${email}`);
+
+    try {
+      const user = await this.usersRepository.findOne({ where: { email } });
+
+      if (!user) {
+        this.logger.warn(`Usuario no encontrado para verificación de código: ${email}`);
+        throw new UnauthorizedException('Usuario no encontrado.');
+      }
+
+      if (!user.passwordResetCode) {
+        this.logger.warn(`No hay código de recuperación activo para: ${email}`);
+        throw new BadRequestException('No hay un código de recuperación activo. Solicita uno nuevo.');
+      }
+
+      // Verificar si el código ha expirado
+      if (user.passwordResetCodeExpires < getCurrentColombiaDateTime()) {
+        this.logger.warn(`Código de recuperación expirado para: ${email}`);
+        // Limpiar código expirado
+        user.passwordResetCode = null;
+        user.passwordResetCodeExpires = null;
+        await this.usersRepository.save(user);
+        throw new BadRequestException('El código de recuperación ha expirado. Solicita uno nuevo.');
+      }
+
+      // Limpiar y normalizar códigos para comparación
+      const storedCode = (user.passwordResetCode || '').toString().trim();
+      const receivedCode = (code || '').toString().trim();
+
+      this.logger.log(`Comparando códigos de recuperación para ${email}:`);
+      this.logger.log(`  - Código almacenado: '${storedCode}'`);
+      this.logger.log(`  - Código recibido: '${receivedCode}'`);
+
+      if (storedCode !== receivedCode) {
+        this.logger.warn(`Código de recuperación incorrecto para ${email}`);
+        throw new UnauthorizedException('Código de recuperación incorrecto.');
+      }
+
+      this.logger.log(`Código de recuperación verificado correctamente para: ${email}`);
+      return { message: 'Código verificado correctamente. Ahora puedes cambiar tu contraseña.', isValid: true };
+    } catch (error) {
+      this.logger.error(`Error en verifyResetCode para ${email}:`, error.message);
+      throw error;
+    }
+  }
+
+  async resetPasswordWithCode(resetPasswordWithCodeDto: ResetPasswordWithCodeDto): Promise<{ message: string }> {
+    const { email, code, newPassword, confirmPassword } = resetPasswordWithCodeDto;
+    this.logger.log(`Intento de cambio de contraseña con código para: ${email}`);
+
+    try {
+      // Validar que las contraseñas coinciden
+      if (newPassword !== confirmPassword) {
+        throw new BadRequestException('Las contraseñas no coinciden.');
+      }
+
+      const user = await this.usersRepository.findOne({ where: { email } });
+
+      if (!user) {
+        this.logger.warn(`Usuario no encontrado para reset con código: ${email}`);
+        throw new UnauthorizedException('Usuario no encontrado.');
+      }
+
+      if (!user.passwordResetCode) {
+        this.logger.warn(`No hay código de recuperación activo para: ${email}`);
+        throw new BadRequestException('No hay un código de recuperación activo. Solicita uno nuevo.');
+      }
+
+      // Verificar si el código ha expirado
+      if (user.passwordResetCodeExpires < getCurrentColombiaDateTime()) {
+        this.logger.warn(`Código de recuperación expirado para: ${email}`);
+        // Limpiar código expirado
+        user.passwordResetCode = null;
+        user.passwordResetCodeExpires = null;
+        await this.usersRepository.save(user);
+        throw new BadRequestException('El código de recuperación ha expirado. Solicita uno nuevo.');
+      }
+
+      // Verificar el código
+      const storedCode = (user.passwordResetCode || '').toString().trim();
+      const receivedCode = (code || '').toString().trim();
+
+      if (storedCode !== receivedCode) {
+        this.logger.warn(`Código de recuperación incorrecto para cambio de contraseña: ${email}`);
+        throw new UnauthorizedException('Código de recuperación incorrecto.');
+      }
+
+      // Hashear la nueva contraseña
+      const saltRounds = 12;
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      // Actualizar contraseña y limpiar código de recuperación
+      user.password = hashedPassword;
+      user.passwordResetCode = null;
+      user.passwordResetCodeExpires = null;
+      await this.usersRepository.save(user);
+
+      this.logger.log(`Contraseña restablecida exitosamente con código para usuario: ${email}`);
+
+      // Enviar confirmación por email
+      try {
+        await this.mailerService.sendMail({
+          to: email,
+          subject: 'Contraseña restablecida - Orto-Whave',
+          template: './password-changed',
+          context: {
+            email,
+            date: getCurrentColombiaDateTime().toLocaleString('es-CO'),
+          },
+        });
+      } catch (emailError) {
+        this.logger.error(`Error al enviar confirmación de cambio de contraseña:`, emailError.message);
+        // No fallar el proceso por error de email
+      }
+
+      return { message: 'Contraseña restablecida exitosamente.' };
+    } catch (error) {
+      this.logger.error(`Error en resetPasswordWithCode para ${email}:`, error.message);
       throw error;
     }
   }

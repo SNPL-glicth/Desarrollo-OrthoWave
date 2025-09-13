@@ -377,9 +377,9 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
     <div className="fixed inset-0 bg-gradient-to-br from-black/60 via-gray-900/70 to-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
       <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl shadow-black/25 border border-gray-200/50 animate-in zoom-in-95 duration-300">
         {/* Header con gradiente elegante */}
-        <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 p-4 text-white overflow-hidden">
+        <div className="relative bg-gradient-to-r from-gray-600 via-gray-700 to-slate-800 p-4 text-white overflow-hidden">
           {/* Efectos de fondo decorativos */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-transparent to-purple-600/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-600/20 via-transparent to-slate-600/20"></div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32 blur-2xl"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-24 -translate-x-24 blur-xl"></div>
           
@@ -420,11 +420,11 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                   disabled={!canAccess}
                   className={`text-sm font-semibold transition-colors duration-300 ${
                     isActive 
-                      ? 'text-blue-700' : 
+                      ? 'text-gray-700' : 
                     isCompleted 
                       ? 'text-emerald-700' : 
                     canAccess 
-                      ? 'text-gray-700 hover:text-blue-600' : 
+                      ? 'text-gray-700 hover:text-gray-800' : 
                       'text-gray-400 cursor-not-allowed'
                   }`}
                 >
@@ -440,7 +440,7 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
           <div className="relative">
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 ease-out rounded-full"
+                className="h-full bg-gradient-to-r from-gray-500 to-slate-600 transition-all duration-500 ease-out rounded-full"
                 style={{
                   width: `${((currentStep - 1) / 2) * 100}%`
                 }}
@@ -458,7 +458,7 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                     key={step}
                     className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${
                       isActive
-                        ? 'bg-blue-600 border-blue-600 scale-125'
+                        ? 'bg-gray-600 border-gray-600 scale-125'
                         : isCompleted
                         ? 'bg-emerald-500 border-emerald-500'
                         : 'bg-white border-gray-300'
@@ -493,7 +493,7 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
             {currentStep === 1 && (
               <div className="space-y-6">
                 <div className="text-center mb-8">
-                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-gray-600 to-slate-700 rounded-xl flex items-center justify-center mb-6 shadow-lg">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -567,7 +567,7 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                     type="button"
                     onClick={nextStep}
                     disabled={!selectedPatient}
-                    className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center font-medium shadow-md hover:shadow-lg"
+                    className="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center font-medium shadow-md hover:shadow-lg"
                   >
                     <span className="mr-2">Continuar</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -582,8 +582,8 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
             {currentStep === 2 && (
               <div className="space-y-6">
                 <div className="text-center mb-6">
-                  <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -661,17 +661,17 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                               dayData.isCurrentMonth 
                                 ? dayData.isPast 
                                   ? 'text-gray-300 cursor-not-allowed' 
-                                  : 'text-gray-900 hover:bg-blue-50'
+                                  : 'text-gray-900 hover:bg-gray-50'
                                 : 'text-gray-300'
                             }
                             ${
                               dayData.isSelected 
-                                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                                ? 'bg-gray-600 text-white hover:bg-gray-700' 
                                 : ''
                             }
                             ${
                               dayData.isToday && !dayData.isSelected 
-                                ? 'bg-blue-100 text-blue-600 font-semibold' 
+                                ? 'bg-gray-100 text-gray-600 font-semibold' 
                                 : ''
                             }
                           `}
@@ -707,7 +707,7 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                     type="button"
                     onClick={nextStep}
                     disabled={!selectedAppointmentDate}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+                    className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
                   >
                     Continuar
                     <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -722,8 +722,8 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div className="text-center mb-6">
-                  <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
@@ -732,9 +732,9 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                 </div>
 
                 {/* Información de la cita hasta ahora */}
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h4 className="text-sm font-medium text-blue-900 mb-2">Información de la Cita:</h4>
-                  <div className="text-sm text-blue-800 space-y-1">
+                <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">Información de la Cita:</h4>
+                  <div className="text-sm text-gray-800 space-y-1">
                     <p><strong>Paciente:</strong> {selectedPatient?.nombre} {selectedPatient?.apellido}</p>
                     <p><strong>Fecha:</strong> {selectedAppointmentDate && format(selectedAppointmentDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}</p>
                   </div>
@@ -745,7 +745,7 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                   <h4 className="text-sm font-medium text-gray-700 mb-3">Seleccionar Horario:</h4>
                   {slotsLoading ? (
                     <div className="flex items-center justify-center py-8">
-                      <svg className="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -765,8 +765,8 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                               slot.isOccupied
                                 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                                 : selectedSlot === slot.hora
-                                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                                  : 'bg-white text-gray-900 border-gray-300 hover:bg-blue-50 hover:border-blue-300'
+                                  ? 'bg-gray-600 text-white border-gray-600 shadow-md'
+                                  : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50 hover:border-gray-300'
                             }
                           `}
                         >
@@ -799,7 +799,7 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                     <select
                       value={duration}
                       onChange={(e) => setDuration(parseInt(e.target.value))}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                     >
                       <option value={20}>20 minutos</option>
                       <option value={40}>40 minutos</option>
@@ -813,7 +813,7 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                     <select
                       value={consultationType}
                       onChange={(e) => setConsultationType(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                     >
                       <option value="control">Control</option>
                       <option value="seguimiento">Seguimiento</option>
@@ -832,7 +832,7 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                     placeholder="Describa el motivo de la consulta..."
                     required
                   />
@@ -847,7 +847,7 @@ const DoctorAppointmentModal: React.FC<DoctorAppointmentModalProps> = ({
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={2}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                     placeholder="Notas adicionales para el paciente..."
                   />
                 </div>

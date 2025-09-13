@@ -91,13 +91,13 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
       switch (slot.estado) {
         case 'pendiente': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
         case 'aprobada': return 'bg-green-100 text-green-800 border-green-300';
-        case 'confirmada': return 'bg-blue-100 text-blue-800 border-blue-300';
+        case 'confirmada': return 'bg-gray-100 text-gray-800 border-gray-300';
         default: return 'bg-gray-100 text-gray-600 border-gray-300';
       }
     }
     return selectedTime === slot.time 
-      ? 'bg-blue-500 text-white border-blue-600 shadow-md'
-      : 'bg-white text-gray-700 border-gray-200 hover:bg-blue-50 hover:border-blue-300';
+      ? 'bg-gray-500 text-white border-gray-600 shadow-md'
+      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300';
   };
 
   // Manejar selección de slot
@@ -281,7 +281,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
       <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-auto">
         
         {/* Header del Doctor */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4 text-white">
+        <div className="bg-gradient-to-r from-gray-600 to-gray-700 px-6 py-4 text-white">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -293,7 +293,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
                 <h2 className="text-2xl font-bold">
                   Dr. {doctor.nombre} {doctor.apellido}
                 </h2>
-                <p className="text-blue-100 text-sm">{doctor.especialidad}</p>
+                <p className="text-gray-100 text-sm">{doctor.especialidad}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -373,14 +373,14 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
                     disabled={isPastDay}
                     className={`h-12 text-center rounded-lg border transition-colors ${
                       isSameDay(day, selectedDate)
-                        ? 'bg-blue-500 text-white border-blue-600 shadow-md'
+                        ? 'bg-gray-500 text-white border-gray-600 shadow-md'
                         : isToday(day)
                         ? 'bg-green-50 border-green-300 text-green-800 ring-2 ring-green-200'
                         : isPastDay
                         ? 'text-gray-400 border-gray-200 cursor-not-allowed'
                         : !isCurrentMonth
                         ? 'text-gray-400 border-gray-200 hover:bg-gray-50'
-                        : 'border-gray-200 hover:bg-blue-50 hover:border-blue-300'
+                        : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                     }`}
                   >
                     <div className="font-medium">
@@ -404,7 +404,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
               
               {isLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
                   <span className="ml-3 text-gray-600">Cargando disponibilidad...</span>
                 </div>
               ) : error ? (
@@ -459,7 +459,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
                 <span>Aprobada</span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-blue-100 border border-blue-300 rounded"></div>
+                <div className="w-3 h-3 bg-gray-100 border border-gray-300 rounded"></div>
                 <span>Confirmada</span>
               </div>
             </div>
@@ -471,8 +471,8 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
               <h4 className="font-semibold text-gray-900 mb-4">Solicitar Cita</h4>
               
               {/* Resumen de selección */}
-              <div className="bg-blue-50 p-3 rounded-lg mb-4">
-                <div className="text-sm text-blue-800">
+              <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                <div className="text-sm text-gray-800">
                   <div><strong>Fecha:</strong> {format(selectedDate, "d 'de' MMMM", { locale: es })}</div>
                   <div><strong>Hora:</strong> {selectedTime}</div>
                   <div><strong>Doctor:</strong> Dr. {doctor.nombre} {doctor.apellido}</div>
@@ -488,7 +488,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
                   <select
                     value={formData.tipoConsulta}
                     onChange={(e) => setFormData(prev => ({ ...prev, tipoConsulta: e.target.value as any }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                   >
                     <option value="primera_vez">Primera vez</option>
                     <option value="control">Control</option>
@@ -504,7 +504,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
                   <textarea
                     value={formData.motivoConsulta}
                     onChange={(e) => setFormData(prev => ({ ...prev, motivoConsulta: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                     rows={3}
                     placeholder="Describe el motivo de tu consulta..."
                     required
@@ -518,7 +518,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
                   <select
                     value={formData.duracion}
                     onChange={(e) => setFormData(prev => ({ ...prev, duracion: Number(e.target.value) }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                   >
                     <option value={20}>20 minutos</option>
                     <option value={40}>40 minutos</option>
@@ -534,7 +534,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
                   <textarea
                     value={formData.notasPaciente}
                     onChange={(e) => setFormData(prev => ({ ...prev, notasPaciente: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                     rows={2}
                     placeholder="Información adicional..."
                   />
@@ -545,7 +545,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
                   <button
                     onClick={handleSubmitRequest}
                     disabled={submitting || !formData.motivoConsulta.trim()}
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? 'Enviando...' : 'Solicitar Cita'}
                   </button>
@@ -610,7 +610,7 @@ const ScalableDoctorCalendar: React.FC<ScalableDoctorCalendarProps> = ({
                     setShowWarningModal(false);
                     setWarningData(null);
                   }}
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:text-sm"
                 >
                   Entendido
                 </button>

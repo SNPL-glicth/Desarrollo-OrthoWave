@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { 
@@ -7,10 +7,13 @@ import {
   EnvelopeIcon, 
   LockClosedIcon,
   PhoneIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  EyeIcon,
+  EyeSlashIcon
 } from '@heroicons/react/24/outline';
 
 const RegisterPage = () => {
+  const location = useLocation();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -19,10 +22,41 @@ const RegisterPage = () => {
     confirmPassword: '',
     phone: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { register, login } = useAuth();
+  
+  // useEffect para cargar datos del formulario de contacto
+  useEffect(() => {
+    const state = location.state;
+    if (state?.prefilledData && state?.message) {
+      const { nombre, email, telefono } = state.prefilledData;
+      
+      // Dividir el nombre completo en nombre y apellido
+      const nombreCompleto = nombre.trim().split(' ');
+      const firstName = nombreCompleto[0] || '';
+      const lastName = nombreCompleto.slice(1).join(' ') || '';
+      
+      // Precargar los datos en el formulario
+      setFormData(prev => ({
+        ...prev,
+        firstName,
+        lastName,
+        email: email || '',
+        phone: telefono?.replace(/\D/g, '') || '' // Remover caracteres no numéricos del teléfono
+      }));
+      
+      // Mostrar mensaje de éxito del contacto
+      setSuccessMessage(state.message);
+      
+      // Limpiar el state para evitar que persista en recargas
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
     // Limpiar error al escribir
@@ -151,6 +185,25 @@ const RegisterPage = () => {
             </Link>
           </p>
         </div>
+        
+        {successMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-green-50 border-l-4 border-green-400 p-4 rounded-md"
+          >
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-green-700">{successMessage}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
@@ -283,15 +336,27 @@ const RegisterPage = () => {
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   disabled={isLoading}
-                  className="appearance-none block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation disabled:bg-gray-50 disabled:cursor-not-allowed"
+                  className="appearance-none block w-full pl-10 pr-12 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation disabled:bg-gray-50 disabled:cursor-not-allowed"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
                   autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -306,15 +371,27 @@ const RegisterPage = () => {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   required
                   disabled={isLoading}
-                  className="appearance-none block w-full pl-10 pr-3 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation disabled:bg-gray-50 disabled:cursor-not-allowed"
+                  className="appearance-none block w-full pl-10 pr-12 py-3 sm:py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base sm:text-sm transition-colors touch-manipulation disabled:bg-gray-50 disabled:cursor-not-allowed"
                   placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  disabled={isLoading}
+                >
+                  {showConfirmPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                  )}
+                </button>
               </div>
             </div>
           </div>

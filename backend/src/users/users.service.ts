@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -7,10 +7,13 @@ import { PerfilMedico } from '../perfil-medico/entities/perfil-medico.entity';
 import { Paciente } from '../pacientes/entities/paciente.entity';
 import { CrearUsuarioAdminDto } from './dto/crear-usuario-admin.dto';
 import { RegisterPatientSimpleDto } from '../auth/dto/register-patient-simple.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -20,6 +23,7 @@ export class UsersService {
     private perfilMedicoRepository: Repository<PerfilMedico>,
     @InjectRepository(Paciente)
     private pacientesRepository: Repository<Paciente>,
+    private notificationsService: NotificationsService,
   ) {}
 
   async crearUsuarioAdmin(crearUsuarioDto: CrearUsuarioAdminDto): Promise<User> {
@@ -73,6 +77,18 @@ export class UsersService {
       });
     }
 
+    // Si es un paciente, crear notificación para completar perfil
+    if (rol.nombre === 'paciente') {
+      try {
+        this.logger.log(`Creando notificación para paciente creado por admin: ${usuarioGuardado.email} (ID: ${usuarioGuardado.id})`);
+        await this.notificationsService.crearNotificacionCompletarPerfil(usuarioGuardado.id);
+        this.logger.log(`Notificación creada exitosamente para paciente: ${usuarioGuardado.email}`);
+      } catch (notificationError) {
+        this.logger.error(`Error al crear notificación para paciente ${usuarioGuardado.email}:`, notificationError.message);
+        // No fallar la creación del usuario por error de notificación
+      }
+    }
+
     // Retornar usuario sin contraseña
     const { password, ...userData } = usuarioGuardado;
     return userData as User;
@@ -113,6 +129,16 @@ export class UsersService {
     });
 
     const usuarioGuardado = await this.usersRepository.save(nuevoPaciente);
+
+    // Crear notificación para completar perfil del paciente
+    try {
+      this.logger.log(`Creando notificación para paciente simple creado por admin: ${usuarioGuardado.email} (ID: ${usuarioGuardado.id})`);
+      await this.notificationsService.crearNotificacionCompletarPerfil(usuarioGuardado.id);
+      this.logger.log(`Notificación creada exitosamente para paciente: ${usuarioGuardado.email}`);
+    } catch (notificationError) {
+      this.logger.error(`Error al crear notificación para paciente ${usuarioGuardado.email}:`, notificationError.message);
+      // No fallar la creación del usuario por error de notificación
+    }
 
     // Retornar usuario sin contraseña
     const { password, ...userData } = usuarioGuardado;
@@ -267,8 +293,75 @@ export class UsersService {
   async eliminarUsuario(id: number): Promise<void> {
     const usuario = await this.obtenerUsuarioPorId(id);
 
-    // Eliminar completamente el usuario de la base de datos
-    await this.usersRepository.remove(usuario);
+    this.logger.log(`Iniciando eliminación del usuario ID: ${id} (${usuario.email})`);
+
+    try {
+      // Usar transacción para asegurar consistencia
+      await this.usersRepository.manager.transaction(async transactionalEntityManager => {
+        
+        // 1. Eliminar notificaciones asociadas
+        await transactionalEntityManager.query(
+          'DELETE FROM notificaciones WHERE usuario_id = ?', 
+          [id]
+        );
+        this.logger.log(`Notificaciones eliminadas para usuario ID: ${id}`);
+
+        // 2. Eliminar citas donde el usuario es paciente
+        await transactionalEntityManager.query(
+          'DELETE FROM citas WHERE paciente_id = ?', 
+          [id]
+        );
+        this.logger.log(`Citas como paciente eliminadas para usuario ID: ${id}`);
+
+        // 3. Eliminar citas donde el usuario es doctor
+        await transactionalEntityManager.query(
+          'DELETE FROM citas WHERE doctor_id = ?', 
+          [id]
+        );
+        this.logger.log(`Citas como doctor eliminadas para usuario ID: ${id}`);
+
+        // 4. Obtener ID del perfil de paciente si existe (antes de eliminarlo)
+        const pacienteResult = await transactionalEntityManager.query(
+          'SELECT id FROM pacientes WHERE usuario_id = ?', 
+          [id]
+        );
+        const pacienteId = pacienteResult.length > 0 ? pacienteResult[0].id : null;
+
+        // 5. Eliminar documentos de paciente si existen (usando el pacienteId obtenido)
+        if (pacienteId) {
+          await transactionalEntityManager.query(
+            'DELETE FROM patient_documents WHERE patient_id = ?', 
+            [pacienteId]
+          );
+          this.logger.log(`Documentos de paciente eliminados para usuario ID: ${id}`);
+        }
+
+        // 6. Eliminar perfil médico si existe
+        await transactionalEntityManager.query(
+          'DELETE FROM perfiles_medicos WHERE usuario_id = ?', 
+          [id]
+        );
+        this.logger.log(`Perfil médico eliminado para usuario ID: ${id}`);
+
+        // 7. Eliminar perfil de paciente si existe
+        await transactionalEntityManager.query(
+          'DELETE FROM pacientes WHERE usuario_id = ?', 
+          [id]
+        );
+        this.logger.log(`Perfil de paciente eliminado para usuario ID: ${id}`);
+
+        // 8. Finalmente, eliminar el usuario
+        await transactionalEntityManager.query(
+          'DELETE FROM usuarios WHERE id = ?', 
+          [id]
+        );
+        this.logger.log(`Usuario eliminado exitosamente: ID ${id} (${usuario.email})`);
+      });
+
+    } catch (error) {
+      this.logger.error(`Error al eliminar usuario ID: ${id} (${usuario.email}):`, error.message);
+      throw new Error(`Error al eliminar el usuario: ${error.message}`);
+    }
   }
 
   async buscarUsuarios(termino: string): Promise<User[]> {

@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { API_CONFIG } from '../config/api.js';
 
 // Crear una instancia de axios con la configuración base
 const api = axios.create({
-  baseURL: 'http://localhost:4000', // URL base del backend actualizada
-  timeout: 10000, // timeout aumentado a 10 segundos
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: API_CONFIG.TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'

@@ -6,10 +6,12 @@ import { User } from './entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { PerfilMedico } from '../perfil-medico/entities/perfil-medico.entity';
 import { Paciente } from '../pacientes/entities/paciente.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role, PerfilMedico, Paciente])
+    TypeOrmModule.forFeature([User, Role, PerfilMedico, Paciente]),
+    NotificationsModule
   ],
   controllers: [UsersController],
   providers: [UsersService],

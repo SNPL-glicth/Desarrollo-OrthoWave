@@ -78,13 +78,23 @@ const DoctorDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
       {/* Header moderno y responsivo */}
-      <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-40">
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-end items-center h-16">
-            {/* Botones de acción - alineados a la derecha */}
+          <div className="flex justify-between items-center h-16">
+            {/* Logo OrtoWhave - lado izquierdo */}
+            <div className="flex items-center space-x-3">
+              <img className="h-8 w-auto" src="/images/White logo - no background_page-0001.webp" alt="OrtoWhave" />
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-semibold text-gray-900">OrtoWhave</h1>
+                <p className="text-xs text-gray-500">Sistema de Ortopedia</p>
+              </div>
+            </div>
+
+            {/* Botones de acción - lado derecho */}
             <div className="flex items-center space-x-2 md:space-x-3">
+              
               {/* Campana de notificaciones */}
               <NotificationBell onClick={() => {
                 setShowNotificationsOffcanvas(true);
@@ -93,7 +103,7 @@ const DoctorDashboard: React.FC = () => {
               {/* Botón de calendario - oculto en móvil */}
               <button
                 onClick={() => navigate('/dashboard/doctor')}
-                className="hidden md:inline-flex items-center px-3 py-2 bg-white/60 hover:bg-white border border-gray-200 text-sm font-medium rounded-xl text-gray-700 hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="hidden md:inline-flex items-center px-3 py-2 bg-gray-600/80 hover:bg-gray-500 border border-gray-400/50 text-sm font-medium rounded-xl text-white hover:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400/20 backdrop-blur-sm"
               >
                 <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -106,7 +116,7 @@ const DoctorDashboard: React.FC = () => {
               <div className="flex md:hidden items-center space-x-2">
                 <button
                   onClick={() => navigate('/dashboard/doctor')}
-                  className="p-2 rounded-xl text-gray-600 hover:text-primary hover:bg-primary-50 transition-all duration-200"
+                  className="p-2 rounded-xl text-gray-300 hover:text-white hover:bg-gray-600/50 transition-all duration-200"
                   title="Calendario"
                 >
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,17 +124,6 @@ const DoctorDashboard: React.FC = () => {
                   </svg>
                 </button>
               </div>
-              
-              {/* Botón de perfil - desktop */}
-              <button
-                onClick={() => setShowOffcanvas(true)}
-                className="hidden md:inline-flex items-center px-3 py-2 bg-white/60 hover:bg-white border border-gray-200 text-sm font-medium rounded-xl text-gray-700 hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span className="hidden lg:inline">Mi Perfil</span>
-              </button>
               
               {/* Botón de logout */}
               <button

@@ -3,6 +3,45 @@
 
 ---
 
+## 🚀 Instalación Rápida
+
+### Prerrequisitos
+- **Node.js** 16+ y npm
+- **MySQL** 5.7+ o 8.0+
+- **Git**
+
+### Instalación Automática (Recomendada)
+
+#### Linux/macOS:
+```bash
+git clone https://github.com/SNPL-glicth/Desarrollo-Orto-Whave.git
+cd Desarrollo-Orto-Whave
+chmod +x install.sh
+./install.sh
+```
+
+#### Windows:
+```cmd
+git clone https://github.com/SNPL-glicth/Desarrollo-Orto-Whave.git
+cd Desarrollo-Orto-Whave
+install.bat
+```
+
+### Ejecutar el Sistema
+```bash
+# Linux/macOS
+./start.sh
+
+# Windows
+start.bat
+```
+
+### URLs de Acceso
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:4000
+
+---
+
 ## 🌟 Descripción General
 
 Orto-Whave es una plataforma completa de gestión clínica desarrollada con **NestJS** (Backend) y **React + TypeScript** (Frontend), diseñada específicamente para clínicas de ortopedia y traumatología. El sistema ofrece una gestión integral de pacientes, doctores, citas médicas y notificaciones en tiempo real.

@@ -34,7 +34,9 @@ async function bootstrap() {
           'http://localhost:8080', 
           'http://127.0.0.1:3000',
           'http://192.168.20.29:3000', // IP local para acceso desde otros dispositivos
-          'http://192.168.20.29:8080'
+          'http://192.168.20.29:8080',
+          'http://10.23.240.188:3000', // Nueva IP para acceso desde dispositivos móviles externos
+          'http://10.23.240.188:8080'
         ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -68,7 +70,8 @@ async function bootstrap() {
   logger.log(`🌐 Accesible desde:`); 
   logger.log(`   • Local: http://localhost:${port}`);
   logger.log(`   • Red local: http://192.168.20.29:${port}`);
-  logger.log(`   • Celulares/Tablets: http://192.168.20.29:${port}`);
+  logger.log(`   • Dispositivos móviles externos: http://10.23.240.188:${port}`);
+  logger.log(`   • Celulares/Tablets: http://10.23.240.188:${port}`);
   logger.log(`📊 Nivel de logging: ${process.env.LOG_LEVEL || 'info'}`);
   logger.log(`🌍 Entorno: ${process.env.NODE_ENV || 'development'}`);
   logger.log(`📝 Logs guardándose en: ./logs/`);

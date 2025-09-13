@@ -55,6 +55,52 @@ export class NotificationsService {
     }
   }
 
+  async crearNotificacionCompletarPerfil(usuarioId: number) {
+    try {
+      // Obtener información del usuario
+      const usuario = await this.usersRepository.findOne({
+        where: { id: usuarioId },
+      });
+
+      if (!usuario) {
+        console.error('Usuario no encontrado:', usuarioId);
+        return;
+      }
+
+      // Verificar si ya existe una notificación de este tipo para este usuario
+      const notificacionExistente = await this.notificationsRepository.findOne({
+        where: {
+          usuarioId,
+          tipo: 'completar_perfil',
+          leida: false
+        }
+      });
+
+      if (notificacionExistente) {
+        console.log('Ya existe una notificación de completar perfil para el usuario:', usuarioId);
+        return;
+      }
+
+      // Crear la notificación
+      const notification = this.notificationsRepository.create({
+        usuarioId,
+        citaId: null,
+        tipo: 'completar_perfil',
+        titulo: '¡Completa tu perfil!',
+        mensaje: `¡Hola ${usuario.nombre}! Para brindarte una mejor atención, te invitamos a completar tu información personal en la sección "Mi Perfil". Esto nos ayudará a conocerte mejor y ofrecerte un servicio más personalizado.`,
+        doctorNombre: null,
+        fechaCita: null,
+        leida: false,
+      });
+
+      await this.notificationsRepository.save(notification);
+      console.log('Notificación de completar perfil creada para usuario:', usuarioId);
+
+    } catch (error) {
+      console.error('Error al crear notificación de completar perfil:', error);
+    }
+  }
+
   async crearNotificacionCancelacionCita(citaId: number, razon?: string) {
     try {
       // Obtener la cita con detalles del paciente y doctor

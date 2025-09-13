@@ -48,6 +48,12 @@ export class User {
   @Column({ name: 'reset_password_expires', nullable: true, type: 'datetime' })
   resetPasswordExpires: Date;
 
+  @Column({ name: 'password_reset_code', nullable: true, length: 6 })
+  passwordResetCode: string;
+
+  @Column({ name: 'password_reset_code_expires', nullable: true, type: 'datetime' })
+  passwordResetCodeExpires: Date;
+
   @Column({ name: 'is_approved', default: true })
   isApproved: boolean;
 

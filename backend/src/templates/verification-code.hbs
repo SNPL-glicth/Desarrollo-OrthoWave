@@ -22,7 +22,7 @@
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
             color: #fff;
             text-align: center;
             padding: 30px 20px;
@@ -32,25 +32,34 @@
             font-size: 28px;
             font-weight: 300;
         }
+        .logo-container {
+            margin-bottom: 15px;
+        }
+        .logo-svg {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto;
+            display: block;
+        }
         .content {
             padding: 40px 30px;
             text-align: center;
         }
         .verification-code {
             background-color: #f8f9fa;
-            border: 2px dashed #34495e;
+            border: 2px dashed #374151;
             border-radius: 10px;
             padding: 20px;
             margin: 30px 0;
             font-size: 32px;
             font-weight: bold;
             letter-spacing: 5px;
-            color: #34495e;
+            color: #374151;
             font-family: 'Courier New', monospace;
         }
         .instructions {
             background-color: #f8f9fa;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid #374151;
             padding: 15px;
             margin: 20px 0;
             text-align: left;
@@ -66,7 +75,7 @@
         .btn {
             display: inline-block;
             padding: 12px 30px;
-            background-color: #34495e;
+            background-color: #374151;
             color: #fff;
             text-decoration: none;
             border-radius: 5px;
@@ -74,7 +83,7 @@
             font-weight: bold;
         }
         .btn:hover {
-            background-color: #2c3e50;
+            background-color: #1f2937;
         }
         .warning {
             color: #e74c3c;
@@ -86,7 +95,23 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🦷 Orto-Whave</h1>
+            <div class="logo-container">
+                <svg class="logo-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Círculo exterior izquierdo -->
+                    <ellipse cx="100" cy="200" rx="80" ry="150" fill="#ffffff" opacity="0.9"/>
+                    <ellipse cx="120" cy="200" rx="40" ry="120" fill="#374151"/>
+                    <!-- Círculo medio -->
+                    <ellipse cx="200" cy="200" rx="60" ry="180" fill="#ffffff"/>
+                    <ellipse cx="200" cy="200" rx="25" ry="140" fill="#374151"/>
+                    <!-- Círculo interior derecho -->
+                    <ellipse cx="280" cy="200" rx="45" ry="160" fill="#ffffff" opacity="0.95"/>
+                    <ellipse cx="280" cy="200" rx="18" ry="110" fill="#374151"/>
+                    <!-- Elemento pequeño derecho -->
+                    <ellipse cx="350" cy="200" rx="15" ry="50" fill="#ffffff"/>
+                    <ellipse cx="350" cy="200" rx="6" ry="30" fill="#374151"/>
+                </svg>
+            </div>
+            <h1>Orto-Whave</h1>
             <p>Verificación de cuenta</p>
         </div>
         
@@ -118,7 +143,7 @@
         
         <div class="footer">
             <p>Este correo fue enviado automáticamente desde Orto-Whave</p>
-            <p>Si tienes problemas, contacta nuestro soporte: <strong>{{email}}</strong></p>
+            <p>Si tienes problemas, contacta nuestro soporte: <strong>soporte@orto-whave.com</strong></p>
             <p>© 2025 Orto-Whave. Todos los derechos reservados.</p>
         </div>
     </div>

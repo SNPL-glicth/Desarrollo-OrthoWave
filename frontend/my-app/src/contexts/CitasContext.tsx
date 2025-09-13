@@ -23,6 +23,8 @@ interface AvailableSlot {
   startTime?: string;
   specialist?: Doctor;
   isOccupied?: boolean;
+  isOccupiedByCurrentUser?: boolean;
+  availableForCurrentUser?: boolean;
 }
 
 interface Doctor {
@@ -248,21 +250,56 @@ export const CitaProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       try {
         const fecha = date.toISOString().split('T')[0];
+        const user = authService.getCurrentUser();
+        
+        // Obtener disponibilidad del doctor
         const response = await api.get('/citas/disponibilidad', {
           params: { doctorId, fecha, duracion: 60 }
         });
         
+        // Obtener citas existentes del doctor para esta fecha
+        let existingAppointments = [];
+        try {
+          const appointmentsResponse = await api.get(`/citas/doctor/${doctorId}/agenda/${fecha}`);
+          existingAppointments = appointmentsResponse.data.citas || [];
+        } catch (err) {
+          console.log('No se pudieron obtener las citas existentes:', err);
+        }
+        
         const doctor = state.doctors.find(d => d.id === doctorId);
-        const slots = response.data.map((hora: string) => ({
-          hora,
-          doctor: doctor || { id: doctorId, nombre: 'Doctor', apellido: 'Desconocido', especialidad: 'General' },
-          fecha,
-          id: `${doctorId}_${fecha}_${hora}`,
-          // Usar timezone de Colombia para evitar conversiones UTC incorrectas
-          startTime: `${fecha}T${hora}:00-05:00`, // Colombia UTC-5
-          specialist: doctor,
-          isOccupied: false // Marcar como disponible por defecto
-        }));
+        const availableHours = response.data || [];
+        
+        // Crear mapa de citas ocupadas
+        const occupiedByOthers = new Set<string>();
+        const occupiedByCurrentUser = new Set<string>();
+        
+        existingAppointments.forEach((appointment: any) => {
+          const appointmentTime = new Date(appointment.fechaHora).toTimeString().substring(0, 5);
+          if (appointment.pacienteId === user?.id) {
+            occupiedByCurrentUser.add(appointmentTime);
+          } else {
+            occupiedByOthers.add(appointmentTime);
+          }
+        });
+        
+        // Generar slots con información de ocupación correcta
+        const slots = availableHours.map((hora: string) => {
+          const isOccupiedByCurrentUser = occupiedByCurrentUser.has(hora);
+          const isOccupiedByOthers = occupiedByOthers.has(hora);
+          
+          return {
+            hora,
+            doctor: doctor || { id: doctorId, nombre: 'Doctor', apellido: 'Desconocido', especialidad: 'General' },
+            fecha,
+            id: `${doctorId}_${fecha}_${hora}`,
+            // Usar timezone de Colombia para evitar conversiones UTC incorrectas
+            startTime: `${fecha}T${hora}:00-05:00`, // Colombia UTC-5
+            specialist: doctor,
+            isOccupied: isOccupiedByOthers, // Solo marcar como ocupado si es de otro paciente
+            isOccupiedByCurrentUser, // Agregar flag para citas del usuario actual
+            availableForCurrentUser: !isOccupiedByOthers // Disponible si no está ocupado por otros
+          };
+        });
 
         // Actualizar cache
         dispatch({ type: 'UPDATE_CACHE', payload: { key: cacheKey, data: slots } });
