@@ -133,7 +133,7 @@ Orto-Whave es una plataforma completa de gestión clínica desarrollada con **Ne
 
 #### Linux/macOS:
 ```bash
-git clone https://github.com/tu-usuario/Desarrollo-Orto-Whave.git
+git clone https://github.com/SNPL-glicth/Desarrollo-Orto-Whave.git
 cd Desarrollo-Orto-Whave
 chmod +x install.sh
 ./install.sh
@@ -141,7 +141,7 @@ chmod +x install.sh
 
 #### Windows:
 ```cmd
-git clone https://github.com/tu-usuario/Desarrollo-Orto-Whave.git
+git clone https://github.com/SNPL-glicth/Desarrollo-Orto-Whave.git
 cd Desarrollo-Orto-Whave
 install.bat
 ```
@@ -150,7 +150,7 @@ install.bat
 
 #### Paso 1: Clonar el repositorio
 ```bash
-git clone https://github.com/tu-usuario/Desarrollo-Orto-Whave.git
+git clone https://github.com/SNPL-glicth/Desarrollo-Orto-Whave.git
 cd Desarrollo-Orto-Whave
 ```
 
@@ -165,7 +165,7 @@ Editar `backend/.env`:
 DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=ortowhave
-DB_PASSWORD=Root123a
+DB_PASSWORD=Root1234a
 DB_DATABASE=orto_whave_db
 
 # JWT

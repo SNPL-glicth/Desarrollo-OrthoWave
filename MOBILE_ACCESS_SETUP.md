@@ -2,19 +2,19 @@
 
 ## 📱 Acceso desde Dispositivos Móviles Externos
 
-Esta guía explica cómo acceder a la aplicación Orto-Whave desde dispositivos móviles externos usando la IP `10.23.240.188`.
+Esta guía explica cómo acceder a la aplicación Orto-Whave desde dispositivos móviles y otros dispositivos en tu red local.
 
 ## 🔧 Configuraciones Realizadas
 
 ### 1. Frontend (React)
 - **Puerto**: 3000
 - **Configuración**: `HOST=0.0.0.0` en package.json
-- **Acceso**: `http://10.23.240.188:3000`
+- **Acceso**: `http://[TU_IP_LOCAL]:3000`
 
 ### 2. Backend (NestJS)
 - **Puerto**: 4000  
 - **Configuración**: `host: '0.0.0.0'` en main.ts
-- **Acceso**: `http://10.23.240.188:4000`
+- **Acceso**: `http://[TU_IP_LOCAL]:4000`
 
 ### 3. API Dinámica
 Se creó un sistema de configuración dinámica que detecta automáticamente la IP desde la cual se accede:
@@ -36,8 +36,7 @@ const getBaseURL = () => {
 El backend acepta conexiones desde:
 - `http://localhost:3000`
 - `http://127.0.0.1:3000` 
-- `http://192.168.20.29:3000`
-- `http://10.23.240.188:3000` ✅ **Nueva IP configurada**
+- `http://[TU_IP_LOCAL]:3000` (donde TU_IP_LOCAL es tu dirección IP en la red)
 
 ### 5. Firewall (UFW) 
 ```bash
@@ -53,9 +52,20 @@ sudo ufw allow 4000/tcp     # Backend NestJS
 - Frontend: `http://localhost:3000`
 - Backend: `http://localhost:4000`
 
-### Desde Dispositivos Móviles Externos
-- **Frontend**: `http://10.23.240.188:3000` ✅
-- **Backend**: `http://10.23.240.188:4000` ✅
+### Desde Dispositivos Móviles y Otros Dispositivos en la Red
+- **Frontend**: `http://[TU_IP_LOCAL]:3000`
+- **Backend**: `http://[TU_IP_LOCAL]:4000`
+
+**Para encontrar tu IP local:**
+```bash
+# En Linux/Mac
+hostname -I
+# o
+ip route get 1.1.1.1 | grep -oP 'src \K\S+'
+
+# En Windows
+ipconfig | findstr "IPv4"
+```
 
 ## ✅ Estado Actual
 
@@ -88,25 +98,34 @@ Status: active
 
 ### Backend
 ```bash
-cd /home/nicolas/Documentos/Desarrollo-Orto-Whave/backend
+cd backend
 npm run dev
 ```
 
 ### Frontend  
 ```bash
-cd /home/nicolas/Documentos/Desarrollo-Orto-Whave/frontend/my-app
+cd frontend/my-app
 npm start
+```
+
+### Opción Rápida (Ambos servicios)
+```bash
+# Linux/macOS
+./start.sh
+
+# Windows
+start.bat
 ```
 
 ## 📋 Pruebas de Conectividad
 
 ### 1. Verificar Backend
 ```bash
-curl http://10.23.240.188:4000
+curl http://[TU_IP_LOCAL]:4000
 ```
 
 ### 2. Verificar Frontend
-Abre en el navegador móvil: `http://10.23.240.188:3000`
+Abre en el navegador móvil: `http://[TU_IP_LOCAL]:3000`
 
 ## 🔍 Troubleshooting
 
@@ -127,8 +146,8 @@ Abre en el navegador móvil: `http://10.23.240.188:3000`
    ```
 
 ### Problema: "Error de CORS"
-- El CORS ya está configurado para `10.23.240.188:3000`
-- Si cambias de IP, actualiza el archivo `backend/src/main.ts`
+- El CORS está configurado para aceptar conexiones desde tu red local
+- Si cambias de IP, actualiza el archivo `backend/src/main.ts` con tu nueva IP
 
 ### Problema: "API no responde"
 - La configuración dinámica detecta automáticamente la IP
@@ -156,9 +175,10 @@ Abre en el navegador móvil: `http://10.23.240.188:3000`
 
 Para acceder desde tu dispositivo móvil:
 
-1. Conectar el dispositivo móvil a la misma red
-2. Abrir navegador móvil
-3. Navegar a: `http://10.23.240.188:3000`
-4. Iniciar sesión con cualquier cuenta existente
+1. **Encontrar tu IP local** usando los comandos mostrados arriba
+2. **Conectar el dispositivo móvil a la misma red WiFi**
+3. **Abrir navegador móvil**
+4. **Navegar a**: `http://[TU_IP_LOCAL]:3000` (reemplaza [TU_IP_LOCAL] con tu IP real)
+5. **Iniciar sesión** con cualquier cuenta existente
 
 ¡La aplicación ahora es completamente accesible desde dispositivos móviles externos! 🎉

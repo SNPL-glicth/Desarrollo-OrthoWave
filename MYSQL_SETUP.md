@@ -75,17 +75,17 @@ sudo mysql -u root -p
 
 ```sql
 -- Crear base de datos
-CREATE DATABASE ortowhave_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE orto_whave_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Crear usuario para la aplicación
-CREATE USER 'ortowhave'@'localhost' IDENTIFIED BY 'Tu_Password_Seguro_Aqui';
+CREATE USER 'ortowhave'@'localhost' IDENTIFIED BY 'Root1234a';
 
 -- Otorgar permisos completos al usuario
-GRANT ALL PRIVILEGES ON ortowhave_db.* TO 'ortowhave'@'localhost';
+GRANT ALL PRIVILEGES ON orto_whave_db.* TO 'ortowhave'@'localhost';
 
 -- Para desarrollo, también permitir desde cualquier host
-CREATE USER 'ortowhave'@'%' IDENTIFIED BY 'Tu_Password_Seguro_Aqui';
-GRANT ALL PRIVILEGES ON ortowhave_db.* TO 'ortowhave'@'%';
+CREATE USER 'ortowhave'@'%' IDENTIFIED BY 'Root1234a';
+GRANT ALL PRIVILEGES ON orto_whave_db.* TO 'ortowhave'@'%';
 
 -- Aplicar cambios
 FLUSH PRIVILEGES;
@@ -100,10 +100,10 @@ EXIT;
 ### 3. Verificar Conexión
 ```bash
 # Probar conexión con el nuevo usuario
-mysql -u ortowhave -p -h localhost ortowhave_db
+mysql -u ortowhave -p -h localhost orto_whave_db
 
 # O especificando el puerto
-mysql -u ortowhave -p -h localhost -P 3306 ortowhave_db
+mysql -u ortowhave -p -h localhost -P 3306 orto_whave_db
 ```
 
 ## Configuración de Variables de Entorno
@@ -115,8 +115,8 @@ DATABASE_TYPE=mysql
 DATABASE_HOST=localhost
 DATABASE_PORT=3306
 DATABASE_USERNAME=ortowhave
-DATABASE_PASSWORD=Tu_Password_Seguro_Aqui
-DATABASE_NAME=ortowhave_db
+DATABASE_PASSWORD=Root1234a
+DATABASE_NAME=orto_whave_db
 
 # Configuraciones adicionales de MySQL
 DATABASE_CHARSET=utf8mb4
@@ -149,7 +149,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   port: parseInt(process.env.DATABASE_PORT) || 3306,
   username: process.env.DATABASE_USERNAME || 'ortowhave',
   password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME || 'ortowhave_db',
+  database: process.env.DATABASE_NAME || 'orto_whave_db',
   charset: 'utf8mb4',
   collation: 'utf8mb4_unicode_ci',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
@@ -246,22 +246,22 @@ sudo service mysql restart
 ### Backup
 ```bash
 # Backup completo
-mysqldump -u ortowhave -p --single-transaction --routines --triggers ortowhave_db > backup_$(date +%Y%m%d_%H%M%S).sql
+mysqldump -u ortowhave -p --single-transaction --routines --triggers orto_whave_db > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Backup solo estructura
-mysqldump -u ortowhave -p --no-data ortowhave_db > estructura_$(date +%Y%m%d).sql
+mysqldump -u ortowhave -p --no-data orto_whave_db > estructura_$(date +%Y%m%d).sql
 
 # Backup automatizado (agregar a crontab)
-0 2 * * * /usr/bin/mysqldump -u ortowhave -pPASSWORD --single-transaction ortowhave_db > /backups/ortowhave_$(date +\%Y\%m\%d).sql
+0 2 * * * /usr/bin/mysqldump -u ortowhave -pRoot1234a --single-transaction orto_whave_db > /backups/ortowhave_$(date +\%Y\%m\%d).sql
 ```
 
 ### Restore
 ```bash
 # Restaurar desde backup
-mysql -u ortowhave -p ortowhave_db < backup_20250122_020000.sql
+mysql -u ortowhave -p orto_whave_db < backup_20250122_020000.sql
 
 # Restaurar solo estructura
-mysql -u ortowhave -p ortowhave_db < estructura_20250122.sql
+mysql -u ortowhave -p orto_whave_db < estructura_20250122.sql
 ```
 
 ## Monitoreo y Mantenimiento
@@ -283,7 +283,7 @@ SELECT
     table_name AS 'Table',
     round(((data_length + index_length) / 1024 / 1024), 2) AS 'Size (MB)'
 FROM information_schema.TABLES
-WHERE table_schema = 'ortowhave_db'
+WHERE table_schema = 'orto_whave_db'
 ORDER BY (data_length + index_length) DESC;
 
 -- Verificar fragmentación
@@ -291,7 +291,7 @@ SELECT
     table_name,
     round(data_free / 1024 / 1024, 2) AS 'Free Space (MB)'
 FROM information_schema.tables
-WHERE table_schema = 'ortowhave_db' AND data_free > 0;
+WHERE table_schema = 'orto_whave_db' AND data_free > 0;
 ```
 
 ### Optimización de Tablas
@@ -302,7 +302,7 @@ OPTIMIZE TABLE citas;
 -- Optimizar todas las tablas
 SELECT CONCAT('OPTIMIZE TABLE ', table_schema, '.', table_name, ';') 
 FROM information_schema.tables 
-WHERE table_schema = 'ortowhave_db';
+WHERE table_schema = 'orto_whave_db';
 ```
 
 ## Troubleshooting
@@ -380,7 +380,7 @@ CREATE USER 'ortowhave_ssl'@'%' IDENTIFIED BY 'password' REQUIRE SSL;
 # check_mysql.sh
 
 echo "Verificando conexión a MySQL..."
-mysql -u ortowhave -p$DATABASE_PASSWORD -h localhost -e "SELECT 1;" ortowhave_db
+mysql -u ortowhave -p$DATABASE_PASSWORD -h localhost -e "SELECT 1;" orto_whave_db
 
 if [ $? -eq 0 ]; then
     echo "✅ Conexión exitosa a MySQL"
@@ -402,7 +402,7 @@ BACKUP_FILE="$BACKUP_DIR/ortowhave_backup_$DATE.sql"
 mkdir -p $BACKUP_DIR
 
 echo "Iniciando backup de base de datos..."
-mysqldump -u ortowhave -p$DATABASE_PASSWORD --single-transaction --routines --triggers ortowhave_db > $BACKUP_FILE
+mysqldump -u ortowhave -p$DATABASE_PASSWORD --single-transaction --routines --triggers orto_whave_db > $BACKUP_FILE
 
 if [ $? -eq 0 ]; then
     echo "✅ Backup completado: $BACKUP_FILE"
