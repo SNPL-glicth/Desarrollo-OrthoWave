@@ -38,7 +38,7 @@ const DoctorProfileEditor: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile>({
-    usuarioId: user?.id || 0,
+    usuarioId: Number(user?.id) || 0,
     aceptaNuevosPacientes: true,
     duracionConsultaDefault: 30,
     activo: true
