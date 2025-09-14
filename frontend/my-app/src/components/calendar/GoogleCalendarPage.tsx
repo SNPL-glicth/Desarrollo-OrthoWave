@@ -341,6 +341,10 @@ const GoogleCalendarPage: React.FC = () => {
           }}
           onSignOut={handleSignOut}
           onNavigateToPatients={handleNavigateToPatients}
+          onNavigateToHome={() => {
+            setIsUserMenuOpen(false);
+            navigate('/');
+          }}
         />
       )}
 

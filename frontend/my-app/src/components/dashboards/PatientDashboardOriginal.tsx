@@ -16,13 +16,15 @@ interface UserAccountModalProps {
     avatar?: string;
   };
   onSignOut: () => void;
+  onNavigateToHome?: () => void;
 }
 
 const UserAccountModal: React.FC<UserAccountModalProps> = ({
   isOpen,
   onClose,
   currentUser,
-  onSignOut
+  onSignOut,
+  onNavigateToHome
 }) => {
   if (!isOpen) return null;
 
@@ -70,6 +72,19 @@ const UserAccountModal: React.FC<UserAccountModalProps> = ({
           <p className="text-sm text-gray-600 mb-4">
             {currentUser.email}
           </p>
+          
+          {/* Navigate to home button */}
+          {onNavigateToHome && (
+            <button
+              onClick={onNavigateToHome}
+              className="w-full mb-4 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              Ver Productos para Reservar
+            </button>
+          )}
         </div>
 
         {/* Footer */}
@@ -596,6 +611,10 @@ const SpecialistsView: React.FC = () => {
           avatar: undefined,
         }}
         onSignOut={handleLogout}
+        onNavigateToHome={() => {
+          setIsUserMenuOpen(false);
+          navigate('/');
+        }}
       />
     </div>
   );
