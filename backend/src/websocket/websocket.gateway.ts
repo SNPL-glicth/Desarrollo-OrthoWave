@@ -175,6 +175,29 @@ export class RealtimeWebSocketGateway implements OnGatewayConnection, OnGatewayD
     this.emitToAll(event, data);
   }
 
+  // Método específico para notificaciones
+  notifyNewNotification(userId: number, notification: any) {
+    const event = 'new_notification';
+    const data = {
+      notification,
+      timestamp: new Date().toISOString()
+    };
+
+    this.logger.log(`Enviando nueva notificación a usuario ${userId}:`, notification.titulo);
+    this.emitToUser(userId, event, data);
+  }
+
+  // Notificar actualización del contador de notificaciones
+  notifyNotificationCountUpdate(userId: number, unreadCount: number) {
+    const event = 'notification_count_update';
+    const data = {
+      unreadCount,
+      timestamp: new Date().toISOString()
+    };
+
+    this.emitToUser(userId, event, data);
+  }
+
   // Obtener usuarios conectados
   getConnectedUsers(): ConnectedUser[] {
     return Array.from(this.connectedUsers.values());
@@ -188,5 +211,218 @@ export class RealtimeWebSocketGateway implements OnGatewayConnection, OnGatewayD
   // Verificar si un usuario está conectado
   isUserConnected(userId: number): boolean {
     return Array.from(this.connectedUsers.values()).some(user => user.id === userId);
+  }
+
+  // =================== EVENTOS ESPECÍFICOS PARA TIEMPO REAL ===================
+
+  // Eventos para citas
+  notifyAppointmentCreated(appointment: any, doctorId: number, pacienteId: number) {
+    const event = 'appointment_created';
+    const data = {
+      appointment,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToUser(doctorId, event, data);
+    this.emitToUser(pacienteId, event, data);
+    this.emitToRole('admin', event, data);
+  }
+
+  notifyAppointmentUpdated(appointment: any, previousState?: any) {
+    const event = 'appointment_updated';
+    const data = {
+      appointment,
+      previousState,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToUser(appointment.doctorId, event, data);
+    this.emitToUser(appointment.pacienteId, event, data);
+    this.emitToRole('admin', event, data);
+  }
+
+  notifyAppointmentDeleted(appointmentId: number, doctorId: number, pacienteId: number) {
+    const event = 'appointment_deleted';
+    const data = {
+      appointmentId,
+      doctorId,
+      pacienteId,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToUser(doctorId, event, data);
+    this.emitToUser(pacienteId, event, data);
+    this.emitToRole('admin', event, data);
+  }
+
+  // Eventos para estados específicos de citas
+  notifyAppointmentStatusChange(appointment: any, oldStatus: string, newStatus: string) {
+    const event = 'appointment_status_changed';
+    const data = {
+      appointment,
+      oldStatus,
+      newStatus,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToUser(appointment.doctorId, event, data);
+    this.emitToUser(appointment.pacienteId, event, data);
+    this.emitToRole('admin', event, data);
+  }
+
+  // Eventos para dashboard
+  notifyDashboardDataUpdate(userId: number, dataType: string, data: any) {
+    const event = 'dashboard_data_update';
+    const payload = {
+      dataType,
+      data,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToUser(userId, event, payload);
+  }
+
+  notifyRoleDashboardUpdate(role: string, dataType: string, data: any) {
+    const event = 'role_dashboard_update';
+    const payload = {
+      dataType,
+      data,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToRole(role, event, payload);
+  }
+
+  // Eventos para perfiles médicos
+  notifyDoctorProfileUpdated(doctorId: number, profileData: any) {
+    const event = 'doctor_profile_updated';
+    const data = {
+      doctorId,
+      profileData,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToUser(doctorId, event, data);
+    this.emitToRole('admin', event, data);
+    this.emitToRole('paciente', event, data); // Para que pacientes vean cambios en disponibilidad
+  }
+
+  // Eventos para disponibilidad
+  notifyScheduleUpdated(doctorId: number, scheduleData: any) {
+    const event = 'schedule_updated';
+    const data = {
+      doctorId,
+      scheduleData,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToUser(doctorId, event, data);
+    this.emitToRole('admin', event, data);
+    this.emitToRole('paciente', event, data);
+  }
+
+  // Eventos para usuarios
+  notifyNewUserRegistered(userData: any) {
+    const event = 'new_user_registered';
+    const data = {
+      userData,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToRole('admin', event, data);
+    if (userData.rol === 'doctor') {
+      this.emitToRole('paciente', event, data);
+    }
+  }
+
+  // Eventos para productos
+  notifyProductUpdated(productData: any) {
+    const event = 'product_updated';
+    const data = {
+      productData,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToAll(event, data); // Todos pueden ver productos
+  }
+
+  // Eventos para historial clínico
+  notifyMedicalRecordUpdated(patientId: number, doctorId: number, recordData: any) {
+    const event = 'medical_record_updated';
+    const data = {
+      patientId,
+      doctorId,
+      recordData,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToUser(patientId, event, data);
+    this.emitToUser(doctorId, event, data);
+    this.emitToRole('admin', event, data);
+  }
+
+  // Eventos para documentos de pacientes
+  notifyPatientDocumentUpdated(patientId: number, documentData: any) {
+    const event = 'patient_document_updated';
+    const data = {
+      patientId,
+      documentData,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.emitToUser(patientId, event, data);
+    this.emitToRole('admin', event, data);
+    // Notificar a doctores que tengan citas con este paciente podría agregarse
+  }
+
+  // Evento genérico para refrescar listas
+  notifyListUpdate(listType: string, targetRole?: string, targetUserId?: number, data?: any) {
+    const event = 'list_update';
+    const payload = {
+      listType,
+      data,
+      timestamp: new Date().toISOString()
+    };
+    
+    if (targetUserId) {
+      this.emitToUser(targetUserId, event, payload);
+    } else if (targetRole) {
+      this.emitToRole(targetRole, event, payload);
+    } else {
+      this.emitToAll(event, payload);
+    }
+  }
+
+  // Evento para actualizaciones de contadores
+  notifyCounterUpdate(counterType: string, count: number, userId?: number, role?: string) {
+    const event = 'counter_update';
+    const data = {
+      counterType,
+      count,
+      timestamp: new Date().toISOString()
+    };
+    
+    if (userId) {
+      this.emitToUser(userId, event, data);
+    } else if (role) {
+      this.emitToRole(role, event, data);
+    }
+  }
+
+  // Evento para sincronización de calendario
+  notifyCalendarSync(doctorId?: number, data?: any) {
+    const event = 'calendar_sync';
+    const payload = {
+      doctorId,
+      data,
+      timestamp: new Date().toISOString()
+    };
+    
+    if (doctorId) {
+      this.emitToUser(doctorId, event, payload);
+      this.emitToRole('admin', event, payload);
+    } else {
+      this.emitToAll(event, payload);
+    }
   }
 }

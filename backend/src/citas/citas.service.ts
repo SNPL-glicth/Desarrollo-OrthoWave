@@ -102,16 +102,20 @@ export class CitasService {
 
     const citaGuardada = await this.citasRepository.save(nuevaCita);
     
-    // Emitir notificación WebSocket
+    // Emitir eventos WebSocket CRÍTICOS SOLAMENTE
     try {
-      this.websocketGateway.notifyCitaUpdate(
-        citaGuardada.id,
-        crearCitaDto.doctorId,
-        crearCitaDto.pacienteId,
-        'created'
+      // 1. ESENCIAL: Notificar al doctor que tiene una nueva solicitud pendiente
+      this.websocketGateway.notifyCounterUpdate(
+        'pending_appointments', 
+        await this.obtenerSolicitudesPendientesDoctor(crearCitaDto.doctorId).then(s => s.length),
+        crearCitaDto.doctorId
       );
+      
+      // 2. IMPORTANTE: Solo actualizar disponibilidad si realmente afecta horarios
+      this.websocketGateway.notifyCalendarSync(crearCitaDto.doctorId);
+      
     } catch (error) {
-      console.error('Error al enviar notificación WebSocket:', error);
+      console.error('Error al enviar eventos WebSocket críticos:', error);
     }
     
     return citaGuardada;
@@ -162,6 +166,10 @@ export class CitasService {
       throw new NotFoundException('Cita no encontrada');
     }
 
+    // Guardar estado anterior para eventos WebSocket
+    const estadoAnterior = cita.estado;
+    const citaAnterior = { ...cita };
+
     // Si se está aprobando la cita, agregar fecha de aprobación
     if (actualizarEstadoDto.estado === 'aprobada') {
       cita.fechaAprobacion = getCurrentColombiaDateTime();
@@ -189,16 +197,34 @@ export class CitasService {
       console.error('Error al crear notificación o enviar email:', error);
     }
     
-    // Emitir notificación WebSocket
+    // Emitir solo eventos WebSocket CRÍTICOS
     try {
-      this.websocketGateway.notifyCitaUpdate(
-        citaActualizada.id,
-        citaActualizada.doctorId,
-        citaActualizada.pacienteId,
-        'updated'
-      );
+      // 1. ESENCIAL: Solo notificar cambios de estado importantes
+      if (estadoAnterior !== citaActualizada.estado) {
+        // Solo estados que realmente importan para notificaciones inmediatas
+        if (['aprobada', 'rechazada', 'cancelada', 'confirmada'].includes(citaActualizada.estado)) {
+          this.websocketGateway.notifyAppointmentStatusChange(
+            citaActualizada, 
+            estadoAnterior, 
+            citaActualizada.estado
+          );
+        }
+      }
+      
+      // 2. ESENCIAL: Actualizar contador de solicitudes pendientes del doctor
+      if (citaActualizada.estado === 'aprobada' && estadoAnterior === 'pendiente') {
+        const pendingCount = await this.obtenerSolicitudesPendientesDoctor(citaActualizada.doctorId).then(s => s.length);
+        this.websocketGateway.notifyCounterUpdate('pending_appointments', pendingCount, citaActualizada.doctorId);
+      }
+      
+      // 3. IMPORTANTE: Actualizar disponibilidad solo en cambios críticos
+      if (['aprobada', 'cancelada', 'rechazada'].includes(citaActualizada.estado) && 
+          estadoAnterior === 'pendiente') {
+        this.websocketGateway.notifyCalendarSync(citaActualizada.doctorId);
+      }
+      
     } catch (error) {
-      console.error('Error al enviar notificación WebSocket:', error);
+      console.error('Error al enviar eventos WebSocket críticos:', error);
     }
     
     return citaActualizada;
@@ -350,6 +376,27 @@ export class CitasService {
 
   async eliminarCita(id: number): Promise<void> {
     const cita = await this.obtenerCitaPorId(id);
+    const doctorId = cita.doctorId;
+    const pacienteId = cita.pacienteId;
+    
     await this.citasRepository.remove(cita);
+    
+    // Emitir solo eventos WebSocket CRÍTICOS para eliminación
+    try {
+      // 1. ESENCIAL: Notificar eliminación solo a usuarios directamente involucrados
+      this.websocketGateway.notifyAppointmentDeleted(id, doctorId, pacienteId);
+      
+      // 2. IMPORTANTE: Liberar disponibilidad del doctor
+      this.websocketGateway.notifyCalendarSync(doctorId);
+      
+      // 3. ESENCIAL: Actualizar contador de pendientes si era una cita pendiente
+      if (cita.estado === 'pendiente') {
+        const pendingCount = await this.obtenerSolicitudesPendientesDoctor(doctorId).then(s => s.length);
+        this.websocketGateway.notifyCounterUpdate('pending_appointments', pendingCount, doctorId);
+      }
+      
+    } catch (error) {
+      console.error('Error al enviar eventos WebSocket críticos para eliminación:', error);
+    }
   }
 }

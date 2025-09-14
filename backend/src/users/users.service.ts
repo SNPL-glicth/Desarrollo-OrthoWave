@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Logger, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -8,6 +8,7 @@ import { Paciente } from '../pacientes/entities/paciente.entity';
 import { CrearUsuarioAdminDto } from './dto/crear-usuario-admin.dto';
 import { RegisterPatientSimpleDto } from '../auth/dto/register-patient-simple.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { RealtimeWebSocketGateway } from '../websocket/websocket.gateway';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -24,6 +25,8 @@ export class UsersService {
     @InjectRepository(Paciente)
     private pacientesRepository: Repository<Paciente>,
     private notificationsService: NotificationsService,
+    @Inject(forwardRef(() => RealtimeWebSocketGateway))
+    private websocketGateway: RealtimeWebSocketGateway,
   ) {}
 
   async crearUsuarioAdmin(crearUsuarioDto: CrearUsuarioAdminDto): Promise<User> {
@@ -89,6 +92,23 @@ export class UsersService {
       }
     }
 
+    // Emitir eventos WebSocket CRÍTICOS SOLAMENTE
+    try {
+      // Solo notificar si es un doctor (importante para pacientes)
+      if (rol.nombre === 'doctor') {
+        this.websocketGateway.notifyNewUserRegistered({
+          id: usuarioGuardado.id,
+          email: usuarioGuardado.email,
+          nombre: usuarioGuardado.nombre,
+          apellido: usuarioGuardado.apellido,
+          rol: rol.nombre
+        });
+      }
+      
+    } catch (error) {
+      this.logger.error('Error al enviar eventos WebSocket críticos para nuevo usuario:', error);
+    }
+    
     // Retornar usuario sin contraseña
     const { password, ...userData } = usuarioGuardado;
     return userData as User;
@@ -274,6 +294,15 @@ export class UsersService {
 
     Object.assign(usuario, actualizarData);
     const usuarioActualizado = await this.usersRepository.save(usuario);
+
+    // Solo notificar actualización crítica de perfil (opcional, podría eliminarse)
+    try {
+      // Solo notificar al usuario mismo sobre su actualización
+      this.websocketGateway.notifyUserUpdate(id, 'profile_update');
+      
+    } catch (error) {
+      this.logger.error('Error al enviar evento WebSocket crítico para actualización de usuario:', error);
+    }
 
     const { password, ...userData } = usuarioActualizado;
     return userData as User;

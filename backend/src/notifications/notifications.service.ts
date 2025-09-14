@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
 import { Cita } from '../citas/entities/cita.entity';
 import { User } from '../users/entities/user.entity';
+import { RealtimeWebSocketGateway } from '../websocket/websocket.gateway';
 
 @Injectable()
 export class NotificationsService {
@@ -14,6 +15,8 @@ export class NotificationsService {
     private citasRepository: Repository<Cita>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @Inject(forwardRef(() => RealtimeWebSocketGateway))
+    private webSocketGateway: RealtimeWebSocketGateway,
   ) {}
 
   async crearNotificacionConfirmacionCita(citaId: number) {
@@ -47,8 +50,15 @@ export class NotificationsService {
         leida: false,
       });
 
-      await this.notificationsRepository.save(notification);
+      const savedNotification = await this.notificationsRepository.save(notification);
       console.log('Notificación de confirmación creada para usuario:', cita.pacienteId);
+
+      // Enviar notificación en tiempo real via WebSocket
+      this.webSocketGateway.notifyNewNotification(cita.pacienteId, savedNotification);
+      
+      // Actualizar contador de notificaciones no leídas
+      const unreadCount = await this.contarNotificacionesNoLeidas(cita.pacienteId);
+      this.webSocketGateway.notifyNotificationCountUpdate(cita.pacienteId, unreadCount);
 
     } catch (error) {
       console.error('Error al crear notificación de confirmación:', error);
@@ -93,8 +103,15 @@ export class NotificationsService {
         leida: false,
       });
 
-      await this.notificationsRepository.save(notification);
+      const savedNotification = await this.notificationsRepository.save(notification);
       console.log('Notificación de completar perfil creada para usuario:', usuarioId);
+
+      // Enviar notificación en tiempo real via WebSocket
+      this.webSocketGateway.notifyNewNotification(usuarioId, savedNotification);
+      
+      // Actualizar contador de notificaciones no leídas
+      const unreadCount = await this.contarNotificacionesNoLeidas(usuarioId);
+      this.webSocketGateway.notifyNotificationCountUpdate(usuarioId, unreadCount);
 
     } catch (error) {
       console.error('Error al crear notificación de completar perfil:', error);
@@ -132,8 +149,15 @@ export class NotificationsService {
         leida: false,
       });
 
-      await this.notificationsRepository.save(notification);
+      const savedNotification = await this.notificationsRepository.save(notification);
       console.log('Notificación de cancelación creada para usuario:', cita.pacienteId);
+
+      // Enviar notificación en tiempo real via WebSocket
+      this.webSocketGateway.notifyNewNotification(cita.pacienteId, savedNotification);
+      
+      // Actualizar contador de notificaciones no leídas
+      const unreadCount = await this.contarNotificacionesNoLeidas(cita.pacienteId);
+      this.webSocketGateway.notifyNotificationCountUpdate(cita.pacienteId, unreadCount);
 
     } catch (error) {
       console.error('Error al crear notificación de cancelación:', error);
@@ -155,8 +179,13 @@ export class NotificationsService {
 
     if (notification) {
       notification.leida = true;
-      await this.notificationsRepository.save(notification);
-      return notification;
+      const updatedNotification = await this.notificationsRepository.save(notification);
+      
+      // Actualizar contador de notificaciones no leídas en tiempo real
+      const unreadCount = await this.contarNotificacionesNoLeidas(usuarioId);
+      this.webSocketGateway.notifyNotificationCountUpdate(usuarioId, unreadCount);
+      
+      return updatedNotification;
     }
 
     return null;
@@ -167,6 +196,9 @@ export class NotificationsService {
       { usuarioId, leida: false },
       { leida: true }
     );
+    
+    // Actualizar contador a 0 en tiempo real
+    this.webSocketGateway.notifyNotificationCountUpdate(usuarioId, 0);
   }
 
   async contarNotificacionesNoLeidas(usuarioId: number): Promise<number> {

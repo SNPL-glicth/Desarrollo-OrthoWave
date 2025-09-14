@@ -128,17 +128,73 @@ export const useRealtimeDashboard = (
       fetchData(true);
     };
 
-    // Registrar listeners
-    socket.on('dashboard_update', handleDashboardUpdate);
-    socket.on('cita_update', handleCitaUpdate);
-    socket.on('user_update', handleUserUpdate);
-    socket.on('system_update', handleSystemUpdate);
+    // Listeners para eventos específicos de datos
+    const handleDashboardDataUpdate = (updateData: any) => {
+      console.log('Dashboard data update received:', updateData);
+      fetchData(true);
+    };
+
+    const handleRoleDashboardUpdate = (updateData: any) => {
+      console.log('Role dashboard update received:', updateData);
+      fetchData(true);
+    };
+
+    const handleListUpdate = (updateData: any) => {
+      console.log('List update received:', updateData);
+      fetchData(true);
+    };
+
+    const handleAppointmentEvents = (updateData: any) => {
+      console.log('Appointment event received:', updateData);
+      // Solo actualizar si es relevante para el usuario
+      if (user && (updateData.doctorId === user.id || updateData.pacienteId === user.id || user.rol === 'admin')) {
+        fetchData(true);
+      }
+    };
+
+    const handleUserEvents = (updateData: any) => {
+      console.log('User event received:', updateData);
+      // Actualizar si es admin o si es el mismo usuario
+      if (user && (user.rol === 'admin' || updateData.userId === user.id)) {
+        fetchData(true);
+      }
+    };
+
+    const handleCounterUpdate = (updateData: any) => {
+      console.log('Counter update received:', updateData);
+      fetchData(true);
+    };
+
+    const handleScheduleUpdate = (updateData: any) => {
+      console.log('Schedule update received:', updateData);
+      // Actualizar si es un doctor o admin
+      if (user && (user.rol === 'doctor' || user.rol === 'admin')) {
+        fetchData(true);
+      }
+    };
+
+    // Registrar SOLO listeners CRÍTICOS para evitar saturación
+    
+    // 1. Eventos esenciales de notificaciones y contadores
+    socket.on('counter_update', handleCounterUpdate);
+    
+    // 2. Solo cambios de estado críticos de citas
+    socket.on('appointment_status_changed', handleAppointmentEvents);
+    
+    // 3. Solo nuevos doctores (importante para pacientes)
+    socket.on('new_user_registered', handleUserEvents);
+    
+    // 4. Solo cambios de horarios/disponibilidad
+    socket.on('schedule_updated', handleScheduleUpdate);
+    socket.on('calendar_sync', handleScheduleUpdate);
 
     return () => {
-      socket.off('dashboard_update', handleDashboardUpdate);
-      socket.off('cita_update', handleCitaUpdate);
-      socket.off('user_update', handleUserUpdate);
-      socket.off('system_update', handleSystemUpdate);
+      // Limpiar solo listeners críticos
+      socket.off('counter_update', handleCounterUpdate);
+      socket.off('appointment_status_changed', handleAppointmentEvents);
+      socket.off('new_user_registered', handleUserEvents);
+      socket.off('schedule_updated', handleScheduleUpdate);
+      socket.off('calendar_sync', handleScheduleUpdate);
     };
   }, [socket, isConnected, user, fetchData]);
 

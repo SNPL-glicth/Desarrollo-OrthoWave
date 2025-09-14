@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useWebSocket } from './useWebSocket';
 
 export interface Notification {
   id: number;
@@ -15,6 +16,7 @@ export interface Notification {
 
 export const useNotifications = () => {
   const { user } = useAuth();
+  const { socket, isConnected } = useWebSocket();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -128,20 +130,57 @@ export const useNotifications = () => {
     }
   }, []);
 
-  // Polling para obtener notificaciones nuevas
+  // WebSocket listeners para notificaciones en tiempo real
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+
+    console.log('Configurando listeners de WebSocket para notificaciones...');
+
+    const handleNewNotification = (data: any) => {
+      console.log('Nueva notificación recibida:', data);
+      const newNotification = data.notification;
+      
+      // Agregar la nueva notificación al estado
+      setNotifications(prev => [newNotification, ...prev]);
+      
+      // Incrementar el contador de no leídas
+      setUnreadCount(prev => prev + 1);
+    };
+
+    const handleNotificationCountUpdate = (data: any) => {
+      console.log('Contador de notificaciones actualizado:', data.unreadCount);
+      setUnreadCount(data.unreadCount);
+    };
+
+    // Registrar listeners
+    socket.on('new_notification', handleNewNotification);
+    socket.on('notification_count_update', handleNotificationCountUpdate);
+
+    return () => {
+      socket.off('new_notification', handleNewNotification);
+      socket.off('notification_count_update', handleNotificationCountUpdate);
+    };
+  }, [socket, isConnected]);
+
+  // Polling como fallback y carga inicial
   useEffect(() => {
     if (!user) return;
 
     // Cargar inicialmente
     fetchNotifications();
 
-    // Polling cada 30 segundos para nuevas notificaciones
-    const interval = setInterval(() => {
-      fetchUnreadCount();
-    }, 30000);
+    // Solo usar polling si WebSocket no está conectado
+    if (!isConnected) {
+      console.log('WebSocket no conectado, usando polling como fallback');
+      const interval = setInterval(() => {
+        fetchUnreadCount();
+      }, 30000);
 
-    return () => clearInterval(interval);
-  }, [user, fetchNotifications, fetchUnreadCount]);
+      return () => clearInterval(interval);
+    } else {
+      console.log('WebSocket conectado, notificaciones en tiempo real activas');
+    }
+  }, [user, fetchNotifications, fetchUnreadCount, isConnected]);
 
   return {
     notifications,
