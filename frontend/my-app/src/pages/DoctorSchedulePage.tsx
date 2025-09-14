@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import FlexibleScheduleManager from '../components/doctor/FlexibleScheduleManager';
 import DoctorAvailabilityManager from '../components/doctor/DoctorAvailabilityManager';
+import DoctorProfileEditor from '../components/doctor/DoctorProfileEditor';
 
 // Interfaces y constantes para futuro uso
 // interface DaySchedule {
@@ -28,6 +29,7 @@ const DoctorSchedulePage: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showLegacyMode, setShowLegacyMode] = useState(false);
+  const [activeTab, setActiveTab] = useState<'schedule' | 'profile'>('schedule');
 
   // Verificar que el usuario sea un doctor
   useEffect(() => {
@@ -123,29 +125,75 @@ const DoctorSchedulePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      {showLegacyMode ? (
-        <div className="p-4">
-          <DoctorAvailabilityManager 
-            doctorId={Number(user.id)}
-            onSave={(availability) => {
-              console.log('Availability saved:', availability);
-            }}
-          />
+      {/* Tabs */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('schedule')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'schedule'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Gestionar Horarios
+            </button>
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'profile'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Editar Perfil
+            </button>
+          </nav>
         </div>
-      ) : (
-        <FlexibleScheduleManager 
-          doctorId={Number(user.id)}
-          onSave={(schedules) => {
-            console.log('Flexible schedules saved:', schedules);
-          }}
-          onScheduleUpdate={() => {
-            console.log('Schedule updated - calendar should refresh');
-            // Aquí podríamos agregar lógica para actualizar el estado
-            // o notificar a otros componentes que los horarios han cambiado
-          }}
-        />
-      )}
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1">
+        {activeTab === 'schedule' ? (
+          // Sección de Horarios
+          showLegacyMode ? (
+            <div className="p-4">
+              <DoctorAvailabilityManager 
+                doctorId={Number(user.id)}
+                onSave={(availability) => {
+                  console.log('Availability saved:', availability);
+                }}
+              />
+            </div>
+          ) : (
+            <FlexibleScheduleManager 
+              doctorId={Number(user.id)}
+              onSave={(schedules) => {
+                console.log('Flexible schedules saved:', schedules);
+              }}
+              onScheduleUpdate={() => {
+                console.log('Schedule updated - calendar should refresh');
+                // Aquí podríamos agregar lógica para actualizar el estado
+                // o notificar a otros componentes que los horarios han cambiado
+              }}
+            />
+          )
+        ) : (
+          // Sección de Editar Perfil
+          <div className="p-6">
+            <div className="max-w-4xl mx-auto">
+              <DoctorProfileEditor />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
