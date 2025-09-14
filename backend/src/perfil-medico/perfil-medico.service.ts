@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PerfilMedico } from './entities/perfil-medico.entity';
 import { User } from '../users/entities/user.entity';
-import { RealtimeWebSocketGateway } from '../websocket/websocket.gateway';
+// import { RealtimeWebSocketGateway } from '../websocket/websocket.gateway';
 
 @Injectable()
 export class PerfilMedicoService {
@@ -12,8 +12,8 @@ export class PerfilMedicoService {
     private perfilMedicoRepository: Repository<PerfilMedico>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    @Inject(forwardRef(() => RealtimeWebSocketGateway))
-    private websocketGateway: RealtimeWebSocketGateway,
+    // @Inject(forwardRef(() => RealtimeWebSocketGateway))
+    // private websocketGateway: RealtimeWebSocketGateway,
   ) {}
 
   async crearPerfilMedico(perfilData: Partial<PerfilMedico>): Promise<PerfilMedico> {
@@ -47,10 +47,10 @@ export class PerfilMedicoService {
           actualizarData.horaAlmuerzoFin || actualizarData.aceptaNuevosPacientes) {
         
         // Notificar cambio de horarios (importante para disponibilidad)
-        this.websocketGateway.notifyScheduleUpdated(usuarioId, perfilActualizado);
+        // this.websocketGateway.notifyScheduleUpdated(usuarioId, perfilActualizado);
         
         // Sincronizar calendario solo para cambios de disponibilidad
-        this.websocketGateway.notifyCalendarSync(usuarioId);
+        // this.websocketGateway.notifyCalendarSync(usuarioId);
       }
       
     } catch (error) {

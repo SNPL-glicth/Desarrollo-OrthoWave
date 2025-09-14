@@ -5,6 +5,7 @@ import { Product } from './entities/product.entity';
 import { ProductReservation, ReservationStatus } from './entities/product-reservation.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { CreateReservationDto, UpdateReservationStatusDto, ReserveProductsDto } from './dto/create-reservation.dto';
+import { Paciente } from '../pacientes/entities/paciente.entity';
 
 @Injectable()
 export class ProductsService {
@@ -13,7 +14,22 @@ export class ProductsService {
     private productRepository: Repository<Product>,
     @InjectRepository(ProductReservation)
     private reservationRepository: Repository<ProductReservation>,
+    @InjectRepository(Paciente)
+    private pacienteRepository: Repository<Paciente>,
   ) {}
+
+  // HELPER METHODS
+  private async getPatientByUserId(userId: number): Promise<Paciente> {
+    const paciente = await this.pacienteRepository.findOne({
+      where: { usuarioId: userId }
+    });
+
+    if (!paciente) {
+      throw new NotFoundException('Paciente no encontrado para este usuario');
+    }
+
+    return paciente;
+  }
 
   // PRODUCTOS
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -60,7 +76,8 @@ export class ProductsService {
   }
 
   // RESERVAS DE PRODUCTOS
-  async reserveProducts(patientId: number, reserveDto: ReserveProductsDto): Promise<ProductReservation[]> {
+  async reserveProducts(userId: number, reserveDto: ReserveProductsDto): Promise<ProductReservation[]> {
+    const paciente = await this.getPatientByUserId(userId);
     const reservations: ProductReservation[] = [];
 
     for (const productId of reserveDto.product_ids) {
@@ -74,7 +91,7 @@ export class ProductsService {
       const totalPrice = product.price * quantity;
 
       const reservation = this.reservationRepository.create({
-        patient_id: patientId,
+        patient_id: paciente.id,
         product_id: productId,
         quantity,
         unit_price: product.price,
@@ -94,9 +111,10 @@ export class ProductsService {
     return reservations;
   }
 
-  async getPatientReservations(patientId: number): Promise<ProductReservation[]> {
+  async getPatientReservations(userId: number): Promise<ProductReservation[]> {
+    const paciente = await this.getPatientByUserId(userId);
     return await this.reservationRepository.find({
-      where: { patient_id: patientId },
+      where: { patient_id: paciente.id },
       order: { created_at: 'DESC' },
       relations: ['product']
     });
@@ -154,8 +172,8 @@ export class ProductsService {
     });
   }
 
-  async getReservationSummaryByPatient(patientId: number) {
-    const reservations = await this.getReservationsByPatient(patientId);
+  async getReservationSummaryByPatient(userId: number) {
+    const reservations = await this.getPatientReservations(userId);
     
     const summary = {
       pending: reservations.filter(r => r.status === ReservationStatus.PENDING),

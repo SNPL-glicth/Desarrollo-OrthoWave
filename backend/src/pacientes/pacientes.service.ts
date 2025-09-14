@@ -137,11 +137,16 @@ export class PacientesService {
       try {
         const perfilPaciente = await this.pacientesRepository.findOne({
           where: { usuarioId: usuario.id },
-          select: ['fechaNacimiento', 'eps', 'tipoAfiliacion']
+          select: ['id', 'fechaNacimiento', 'eps', 'tipoAfiliacion']
         });
 
         const pacienteCompleto = {
-          ...usuario,
+          id: perfilPaciente?.id || null, // ID de la tabla pacientes
+          usuarioId: usuario.id, // ID de la tabla usuarios
+          nombre: usuario.nombre,
+          apellido: usuario.apellido,
+          email: usuario.email,
+          telefono: usuario.telefono,
           fechaNacimiento: perfilPaciente?.fechaNacimiento,
           edad: perfilPaciente?.fechaNacimiento ? this.calcularEdad(perfilPaciente.fechaNacimiento) : null,
           eps: perfilPaciente?.eps,
@@ -152,7 +157,12 @@ export class PacientesService {
       } catch (error) {
         // Si no tiene perfil de paciente, agregar solo la información básica
         pacientesCompletos.push({
-          ...usuario,
+          id: null, // No hay ID de paciente
+          usuarioId: usuario.id,
+          nombre: usuario.nombre,
+          apellido: usuario.apellido,
+          email: usuario.email,
+          telefono: usuario.telefono,
           fechaNacimiento: null,
           edad: null,
           eps: null,

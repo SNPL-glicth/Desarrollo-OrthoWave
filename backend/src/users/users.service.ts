@@ -8,7 +8,7 @@ import { Paciente } from '../pacientes/entities/paciente.entity';
 import { CrearUsuarioAdminDto } from './dto/crear-usuario-admin.dto';
 import { RegisterPatientSimpleDto } from '../auth/dto/register-patient-simple.dto';
 import { NotificationsService } from '../notifications/notifications.service';
-import { RealtimeWebSocketGateway } from '../websocket/websocket.gateway';
+// import { RealtimeWebSocketGateway } from '../websocket/websocket.gateway';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -25,8 +25,8 @@ export class UsersService {
     @InjectRepository(Paciente)
     private pacientesRepository: Repository<Paciente>,
     private notificationsService: NotificationsService,
-    @Inject(forwardRef(() => RealtimeWebSocketGateway))
-    private websocketGateway: RealtimeWebSocketGateway,
+    // @Inject(forwardRef(() => RealtimeWebSocketGateway))
+    // private websocketGateway: RealtimeWebSocketGateway,
   ) {}
 
   async crearUsuarioAdmin(crearUsuarioDto: CrearUsuarioAdminDto): Promise<User> {
@@ -96,13 +96,13 @@ export class UsersService {
     try {
       // Solo notificar si es un doctor (importante para pacientes)
       if (rol.nombre === 'doctor') {
-        this.websocketGateway.notifyNewUserRegistered({
-          id: usuarioGuardado.id,
-          email: usuarioGuardado.email,
-          nombre: usuarioGuardado.nombre,
-          apellido: usuarioGuardado.apellido,
-          rol: rol.nombre
-        });
+        // this.websocketGateway.notifyNewUserRegistered({
+        //   id: usuarioGuardado.id,
+        //   email: usuarioGuardado.email,
+        //   nombre: usuarioGuardado.nombre,
+        //   apellido: usuarioGuardado.apellido,
+        //   rol: rol.nombre
+        // });
       }
       
     } catch (error) {
@@ -298,7 +298,7 @@ export class UsersService {
     // Solo notificar actualización crítica de perfil (opcional, podría eliminarse)
     try {
       // Solo notificar al usuario mismo sobre su actualización
-      this.websocketGateway.notifyUserUpdate(id, 'profile_update');
+      // this.websocketGateway.notifyUserUpdate(id, 'profile_update');
       
     } catch (error) {
       this.logger.error('Error al enviar evento WebSocket crítico para actualización de usuario:', error);

@@ -47,19 +47,19 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard)
   @Post('reserve')
   async reserveProducts(@Request() req, @Body() reserveDto: ReserveProductsDto) {
-    return this.productsService.reserveProducts(req.user.userId, reserveDto);
+    return this.productsService.reserveProducts(req.user.id, reserveDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('reservations/my')
   async getMyReservations(@Request() req) {
-    return this.productsService.getPatientReservations(req.user.userId);
+    return this.productsService.getPatientReservations(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('reservations/summary/my')
   async getMyReservationSummary(@Request() req) {
-    return this.productsService.getReservationSummaryByPatient(req.user.userId);
+    return this.productsService.getReservationSummaryByPatient(req.user.id);
   }
 
   // ENDPOINTS PARA DOCTORES/ADMINISTRADORES
@@ -88,6 +88,6 @@ export class ProductsController {
     @Request() req,
     @Body() updateDto: UpdateReservationStatusDto
   ) {
-    return this.productsService.updateReservationStatus(+id, req.user.userId, updateDto);
+    return this.productsService.updateReservationStatus(+id, req.user.id, updateDto);
   }
 }

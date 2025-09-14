@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { citasService } from '../../services/citasService';
 import { documentService, PatientDocument } from '../../services/documentService';
+import { productsService, ProductReservation } from '../../services/productsService';
 
 interface Paciente {
   id: number;
@@ -47,6 +48,11 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [documentsError, setDocumentsError] = useState<string | null>(null);
 
+  // Estados para reservas de productos
+  const [reservations, setReservations] = useState<ProductReservation[]>([]);
+  const [reservationsLoading, setReservationsLoading] = useState(false);
+  const [reservationsError, setReservationsError] = useState<string | null>(null);
+
   const fetchPatientAppointments = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -75,12 +81,27 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
     }
   }, [paciente.id]);
 
+  const fetchPatientReservations = useCallback(async () => {
+    setReservationsLoading(true);
+    setReservationsError(null);
+    try {
+      const patientReservations = await productsService.getPatientReservations(paciente.id);
+      setReservations(patientReservations.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    } catch (err: any) {
+      console.error('Error al obtener reservas del paciente:', err);
+      setReservationsError('Error al cargar las reservas de productos del paciente');
+    } finally {
+      setReservationsLoading(false);
+    }
+  }, [paciente.id]);
+
   useEffect(() => {
     if (isOpen && paciente.id) {
       fetchPatientAppointments();
       fetchPatientDocuments();
+      fetchPatientReservations();
     }
-  }, [isOpen, paciente.id, fetchPatientAppointments, fetchPatientDocuments]);
+  }, [isOpen, paciente.id, fetchPatientAppointments, fetchPatientDocuments, fetchPatientReservations]);
 
   // Obtener color por estado
   const getEstadoColor = (estado: string) => {
@@ -131,6 +152,50 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  // Función para actualizar estado de reserva
+  const handleUpdateReservationStatus = async (reservationId: number, status: string, notes?: string) => {
+    try {
+      await productsService.updateReservationStatus(reservationId, status, notes);
+      // Recargar las reservas para mostrar el cambio
+      await fetchPatientReservations();
+    } catch (error: any) {
+      console.error('Error updating reservation status:', error);
+      setReservationsError('Error al actualizar el estado de la reserva');
+    }
+  };
+
+  // Función para obtener el color del estado de reserva
+  const getReservationStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'confirmed':
+        return 'bg-green-100 text-green-800';
+      case 'delivered':
+        return 'bg-blue-100 text-blue-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Función para traducir estado al español
+  const translateStatus = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'Pendiente';
+      case 'confirmed':
+        return 'Confirmada';
+      case 'delivered':
+        return 'Entregada';
+      case 'cancelled':
+        return 'Cancelada';
+      default:
+        return status;
+    }
   };
 
   if (!isOpen) return null;
@@ -420,6 +485,149 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
                     <p className="text-sm text-gray-600">
                       Mostrando todos los {documents.length} documentos
                     </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Reservas de Productos */}
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <svg className="h-5 w-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M8 11v6h8v-6M8 11h8" />
+                </svg>
+                Reservas de Productos
+              </h3>
+              <button
+                onClick={fetchPatientReservations}
+                disabled={reservationsLoading}
+                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors"
+              >
+                {reservationsLoading ? 'Actualizando...' : 'Actualizar'}
+              </button>
+            </div>
+
+            {reservationsLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400 mx-auto"></div>
+                <p className="mt-2 text-gray-600">Cargando reservas...</p>
+              </div>
+            ) : reservationsError ? (
+              <div className="text-center py-8 text-red-600">
+                {reservationsError}
+              </div>
+            ) : reservations.length === 0 ? (
+              <div className="text-center py-8">
+                <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M8 11v6h8v-6M8 11h8" />
+                </svg>
+                <p className="text-gray-600">El paciente no tiene reservas de productos</p>
+                <p className="text-sm text-gray-500 mt-2">Las reservas de productos aparecerán aquí cuando el paciente reserve productos.</p>
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="space-y-4">
+                  {reservations.map((reservation) => (
+                    <div key={reservation.id} className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                        <div className="flex-1">
+                          <div className="flex items-start space-x-4">
+                            <img
+                              src={reservation.product?.image_url || '/images/products/default.png'}
+                              alt={reservation.product?.name}
+                              className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                              onError={(e) => {
+                                e.currentTarget.src = 'https://via.placeholder.com/64x64/E5E7EB/9CA3AF?text=Producto';
+                              }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-lg font-medium text-gray-900 mb-1">
+                                {reservation.product?.name || 'Producto no disponible'}
+                              </h4>
+                              <p className="text-sm text-gray-600 mb-2">
+                                {reservation.product?.description || 'Sin descripción'}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                                <span><strong>Cantidad:</strong> {reservation.quantity}</span>
+                                <span><strong>Precio unitario:</strong> ${Number(reservation.unit_price).toLocaleString()}</span>
+                                <span><strong>Total:</strong> ${Number(reservation.total_price).toLocaleString()}</span>
+                                <span><strong>Reservado:</strong> {formatDate(reservation.created_at)}</span>
+                              </div>
+                              {reservation.notes && (
+                                <div className="mt-2 p-2 bg-blue-50 rounded border">
+                                  <p className="text-xs font-medium text-blue-700">Notas del paciente:</p>
+                                  <p className="text-sm text-blue-600">{reservation.notes}</p>
+                                </div>
+                              )}
+                              {reservation.doctor_notes && (
+                                <div className="mt-2 p-2 bg-green-50 rounded border">
+                                  <p className="text-xs font-medium text-green-700">Notas del doctor:</p>
+                                  <p className="text-sm text-green-600">{reservation.doctor_notes}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col items-end space-y-3 lg:ml-6">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getReservationStatusColor(reservation.status)}`}>
+                            {translateStatus(reservation.status)}
+                          </span>
+                          
+                          {/* Botones de acción */}
+                          <div className="flex flex-wrap gap-2">
+                            {reservation.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => handleUpdateReservationStatus(reservation.id, 'confirmed')}
+                                  className="inline-flex items-center px-3 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors"
+                                >
+                                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  Confirmar
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateReservationStatus(reservation.id, 'cancelled', 'Cancelada por el doctor')}
+                                  className="inline-flex items-center px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 transition-colors"
+                                >
+                                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                  Cancelar
+                                </button>
+                              </>
+                            )}
+                            {reservation.status === 'confirmed' && (
+                              <button
+                                onClick={() => handleUpdateReservationStatus(reservation.id, 'delivered', 'Producto entregado al paciente')}
+                                className="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
+                              >
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                                Marcar como Entregado
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {reservations.length > 0 && (
+                  <div className="mt-4 p-3 bg-primary-50 rounded-lg">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-primary-700 font-medium">
+                        Total reservas: {reservations.length}
+                      </span>
+                      <span className="text-primary-600">
+                        Total valor: ${reservations.reduce((total, r) => total + Number(r.total_price), 0).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
