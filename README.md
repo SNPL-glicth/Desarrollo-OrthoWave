@@ -250,11 +250,11 @@ npm start
 > ⚠️ **Importante**: Cambia estas credenciales inmediatamente en producción.
 
 ### **Doctor Principal Configurado**
-- **Nombre**: Dr. Juan Carlos Médico Principal
+- **Nombre**: Dr. Juan Carlos Médico Director
 - **Especialidad**: Medicina General
 - **Subespecialidades**: Medicina Interna, Medicina Preventiva
 - **Horario**: Lunes a Viernes, 8:00 AM - 5:00 PM
-- **Tarifa**: $80,000 COP
+- **Tarifa aproximada**: $80,000 COP (valor de referencia)
 - **Duración por consulta**: 45 minutos
 - **Estado**: Acepta nuevos pacientes ✅
 
