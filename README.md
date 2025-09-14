@@ -1,5 +1,9 @@
-# Sistema Orto-Whave 🏥
+# Sistema Orto-Whave
 *Sistema Completo de Gestión para Clínicas de Ortopedia y Traumatología*
+
+**Desarrollado por:** Sergio Nicolas Pachon
+
+*Sistema integral de gestión clínica con notificaciones en tiempo real y arquitectura WebSocket optimizada*
 
 ---
 
@@ -44,7 +48,11 @@ start.bat
 
 ## 🌟 Descripción General
 
-Orto-Whave es una plataforma completa de gestión clínica desarrollada con **NestJS** (Backend) y **React + TypeScript** (Frontend), diseñada específicamente para clínicas de ortopedia y traumatología. El sistema ofrece una gestión integral de pacientes, doctores, citas médicas y notificaciones en tiempo real.
+Orto-Whave es una plataforma completa de gestión clínica desarrollada con **NestJS** (Backend) y **React + TypeScript** (Frontend), diseñada específicamente para clínicas de ortopedia y traumatología. 
+
+El sistema integra **WebSocket optimizado** para comunicación en tiempo real, **sistema de notificaciones instantáneas**, **gestión avanzada de citas** con validación en tiempo real, **dashboards especializados por rol** y **sistema de productos** para reservas.
+
+**Desarrollado por Sergio Nicolas Pachon** como sistema integral para modernizar la gestión de clínicas médicas.
 
 ## 🎯 Características Principales
 
@@ -68,17 +76,26 @@ Orto-Whave es una plataforma completa de gestión clínica desarrollada con **Ne
 - **Calendario unificado** con vistas día/semana/mes
 - **Horarios específicos por doctor** con breaks y días laborables
 
-### 🔔 **Sistema de Notificaciones**
-- **Notificaciones automáticas** cuando cambia el estado de una cita
-- **Campana de notificaciones** en tiempo real
-- **Tipos de notificación**: Confirmación, cancelación, recordatorios
+### 🔔 **Sistema de Notificaciones en Tiempo Real**
+- **WebSocket optimizado** para notificaciones instantáneas
+- **Notificaciones automáticas** cuando doctor aprueba/rechaza citas
+- **Campana de notificaciones** con contador en tiempo real
+- **Tipos de notificación**: Confirmación, cancelación, recordatorios, completar perfil
 - **Marcado de leído** individual o masivo
-- **Limpieza automática** de notificaciones antiguas
+- **Limpieza automática** de notificaciones antiguas (30 días)
+- **Fallback a polling** cuando WebSocket no está disponible
 
 ### 📊 **Dashboards Especializados**
-- **Dashboard Admin**: Gestión de usuarios y estadísticas del sistema
+- **Dashboard Admin**: Gestión de usuarios, estadísticas del sistema y productos
 - **Dashboard Doctor**: Citas pendientes, confirmadas y gestión de pacientes
-- **Dashboard Paciente**: Doctores disponibles y historial de citas
+- **Dashboard Paciente**: Doctores disponibles, historial de citas y reserva de productos
+- **Navegación integrada** desde perfiles a página principal de productos
+
+### 📱 **Sistema de Productos y Reservas**
+- **Catálogo de productos** médicos y ortopédicos
+- **Reserva de productos** desde dashboards de usuario
+- **Navegación directa** desde modales de perfil a página Home
+- **Integración completa** con sistema de usuarios y roles
 
 ### 🔄 **Sistema de Tiempo Real Optimizado**
 - **WebSocket crítico** para eventos esenciales (70% reducción)
@@ -92,28 +109,35 @@ Orto-Whave es una plataforma completa de gestión clínica desarrollada con **Ne
 
 ### **Backend (NestJS)**
 ```typescript
-- NestJS 9+ - Framework de Node.js escalable
+- NestJS 10+ - Framework de Node.js escalable
 - TypeScript - Desarrollo tipado y robusto
-- TypeORM - ORM para gestión de base de datos
-- MySQL - Base de datos principal
-- JWT - Autenticación segura
-- Bcrypt - Encriptación de contraseñas
-- Nodemailer - Envío de emails
-- Class-validator - Validación de datos
+- TypeORM - ORM para gestión de base de datos MySQL
+- MySQL - Base de datos principal con configuración optimizada
+- Socket.IO - WebSocket para comunicación tiempo real optimizada
+- JWT - Autenticación segura con tokens
+- Bcrypt - Encriptación de contraseñas (salt rounds: 12)
+- Nodemailer - Envío de emails con Gmail SMTP
+- Class-validator - Validación robusta de datos
 - CORS - Configuración de seguridad
+- Cache Manager - Sistema de caché con TTL
+- Multer - Manejo de archivos y documentos
 ```
 
 ### **Frontend (React)**
 ```typescript
-- React 18+ - Biblioteca de UI moderna
-- TypeScript - Tipado estático
-- Tailwind CSS - Estilos modernos y responsivos
-- React Router - Navegación SPA
-- Axios - Cliente HTTP
-- React Bootstrap - Componentes UI
-- Context API - Gestión de estado global
-- Hooks personalizados - Lógica reutilizable
-- Big Calendar - Visualización de calendarios
+- React 18+ - Biblioteca de UI moderna con hooks avanzados
+- TypeScript - Tipado estático robusto
+- Tailwind CSS - Estilos modernos, responsivos y optimizados
+- React Router DOM - Navegación SPA con rutas protegidas
+- Socket.IO Client - WebSocket cliente optimizado
+- Fetch API - Cliente HTTP nativo con manejo de errores
+- React Bootstrap - Componentes UI modernos
+- Context API - Gestión de estado global (AuthContext)
+- Hooks personalizados - Lógica reutilizable tiempo real
+- Big Calendar - Visualización avanzada de calendarios
+- Date-fns - Manejo optimizado de fechas
+- React Icons - Iconografía completa
+- ESLint + Prettier - Calidad de código
 ```
 
 ## 📋 Requisitos del Sistema
@@ -163,28 +187,35 @@ cp backend/.env.example backend/.env
 
 Editar `backend/.env`:
 ```env
-# Base de datos MySQL
+# Base de datos MySQL (configuración actualizada)
 DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=ortowhave
 DB_PASSWORD=Root1234a
 DB_DATABASE=orto_whave_db
 
-# JWT
-JWT_SECRET=tu_jwt_secret_muy_seguro_aqui
+# JWT con tiempo de expiración
+JWT_SECRET=tu_jwt_secret_muy_seguro_de_al_menos_32_caracteres
+JWT_EXPIRES_IN=24h
 
-# Email (Gmail configurado)
+# Email (Gmail con App Password)
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USER=tu_email@gmail.com
-MAIL_PASS=tu_app_password
-MAIL_FROM="Orto-Whave" <tu_email@gmail.com>
+MAIL_PASS=tu_app_password_de_gmail
+MAIL_FROM="Sistema Orto-Whave" <tu_email@gmail.com>
 MAIL_SECURE=true
 
-# API
+# API y WebSocket
 API_PORT=4000
 API_URL=http://localhost:4000
 FRONTEND_URL=http://localhost:3000
+WEBSOCKET_CORS_ORIGIN=http://localhost:3000
+
+# Configuración adicional
+NODE_ENV=development
+CACHE_TTL=300
+NOTIFICATION_CLEANUP_DAYS=30
 ```
 
 #### Paso 3: Instalar dependencias
@@ -243,9 +274,9 @@ npm start
 
 | Rol | Email | Contraseña | Funciones |
 |-----|-------|------------|-----------|
-| **Admin** | `admin@ortowhave.com` | `admin123` | Gestión completa de usuarios y sistema |
-| **Doctor** | `doctor.principal@ortowhave.com` | `doctor123` | Gestión de citas y pacientes |
-| **Paciente** | `paciente@ortowhave.com` | `paciente123` | Agendamiento de citas |
+| **Admin** | `admin@ortowhave.com` | `admin123` | Gestión completa de usuarios, sistema y productos |
+|| **Doctor** | `doctor.principal@ortowhave.com` | `doctor123` | Gestión de citas, pacientes y horarios |
+|| **Paciente** | `paciente@ortowhave.com` | `paciente123` | Agendamiento de citas y reserva de productos |
 
 > ⚠️ **Importante**: Cambia estas credenciales inmediatamente en producción.
 
@@ -392,12 +423,17 @@ interface IndependentSlot {
 
 #### **Endpoints de Citas:**
 ```typescript
-POST   /citas                      # Crear nueva cita
-GET    /citas/mis-citas           # Obtener mis citas
-GET    /citas/doctor/:id          # Citas por doctor
-PATCH  /citas/:id/estado          # Actualizar estado
-GET    /citas/disponibilidad      # Consultar disponibilidad
-DELETE /citas/:id                 # Eliminar cita (admin)
+POST   /citas                              # Crear nueva cita
+GET    /citas/mis-citas                   # Obtener mis citas
+GET    /citas/doctor/:id                  # Citas por doctor
+GET    /citas/paciente/:id                # Citas por paciente
+PATCH  /citas/:id/estado                  # Actualizar estado
+PATCH  /citas/:id/aprobar                 # Aprobar solicitud cita
+PATCH  /citas/:id/rechazar               # Rechazar solicitud cita
+GET    /citas/disponibilidad             # Consultar disponibilidad
+GET    /citas/mis-solicitudes-pendientes # Solicitudes pendientes doctor
+GET    /citas/mi-conteo-solicitudes-pendientes # Contador pendientes
+DELETE /citas/:id                         # Eliminar cita
 ```
 
 ### **🔔 Sistema de Notificaciones**
@@ -882,9 +918,30 @@ cd Desarrollo-Orto-Whave
 # o install.bat && start.bat  # Windows
 ```
 
-**¡Orto-Whave está listo para transformar la gestión de tu clínica! 🏥✨**
+**¡Orto-Whave está listo para transformar la gestión de tu clínica!**
 
 ---
 
-*Desarrollado con ❤️ por el equipo de Orto-Whave*  
-*Última actualización: Enero 2025 - v2.0.0*
+## Autoría y Créditos
+
+**Desarrollado por:** Sergio Nicolas Pachon
+
+**Características del sistema:**
+- Sistema completo de gestión clínica
+- Arquitectura WebSocket optimizada para tiempo real
+- Más de 50 componentes especializados
+- 20+ hooks personalizados
+- Sistema de notificaciones instantáneo
+- Optimizaciones de rendimiento del 70%
+- Documentación completa y actualizada
+
+**Tecnologías principales:**
+- Backend: NestJS + TypeScript + MySQL + Socket.IO
+- Frontend: React + TypeScript + Tailwind CSS + Socket.IO Client
+- Tiempo real: WebSocket optimizado con eventos críticos
+- Base de datos: MySQL con TypeORM
+
+**Contacto del desarrollador:** Sergio Nicolas Pachon
+
+*Última actualización: Septiembre 2025 - v2.1.0*  
+*Sistema con WebSocket optimizado y notificaciones en tiempo real*
