@@ -83,35 +83,7 @@ export const useRealtimeAppointments = (userId?: number, userRole?: string) => {
 
     console.log('Configurando listeners de WebSocket para citas...');
 
-    // Listener para nuevas citas
-    const handleAppointmentCreated = (data: any) => {
-      console.log('Nueva cita creada:', data);
-      const newAppointment = data.appointment;
-      
-      // Solo añadir si es relevante para el usuario actual
-      const targetUserId = userId || user?.id;
-      if (newAppointment.doctorId === targetUserId || 
-          newAppointment.pacienteId === targetUserId ||
-          user?.rol === 'admin') {
-        setAppointments(prev => [newAppointment, ...prev]);
-        setLastUpdate(new Date());
-      }
-    };
-
-    // Listener para citas actualizadas
-    const handleAppointmentUpdated = (data: any) => {
-      console.log('Cita actualizada:', data);
-      const updatedAppointment = data.appointment;
-      
-      setAppointments(prev => 
-        prev.map(apt => 
-          apt.id === updatedAppointment.id 
-            ? { ...apt, ...updatedAppointment }
-            : apt
-        )
-      );
-      setLastUpdate(new Date());
-    };
+    // Listeners para eventos críticos de citas
 
     // Listener para cambios de estado
     const handleAppointmentStatusChanged = (data: any) => {
@@ -138,21 +110,7 @@ export const useRealtimeAppointments = (userId?: number, userRole?: string) => {
       setLastUpdate(new Date());
     };
 
-    // Listener genérico para actualizaciones de listas
-    const handleListUpdate = (data: any) => {
-      if (data.listType === 'appointments') {
-        console.log('Actualizando lista de citas por evento genérico');
-        fetchAppointments();
-      }
-    };
-
-    // Listener para actualizaciones del dashboard
-    const handleDashboardDataUpdate = (data: any) => {
-      if (data.dataType === 'appointments') {
-        console.log('Actualizando citas por evento de dashboard');
-        fetchAppointments();
-      }
-    };
+    // Solo listeners críticos necesarios
 
     // Registrar SOLO listeners CRÍTICOS para citas
     socket.on('appointment_status_changed', handleAppointmentStatusChanged); // Estados importantes

@@ -100,49 +100,7 @@ export const useRealtimeDashboard = (
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    const handleDashboardUpdate = (updateData: any) => {
-      console.log('Dashboard update received:', updateData);
-      // Actualizar datos inmediatamente
-      fetchData(true);
-    };
-
-    const handleCitaUpdate = (updateData: any) => {
-      console.log('Cita update received:', updateData);
-      // Actualizar si el usuario está involucrado
-      if (user && (updateData.doctorId === user.id || updateData.pacienteId === user.id)) {
-        fetchData(true);
-      }
-    };
-
-    const handleUserUpdate = (updateData: any) => {
-      console.log('User update received:', updateData);
-      // Actualizar si es información relevante para el usuario actual
-      if (user && (updateData.userId === user.id || user.rol === 'admin')) {
-        fetchData(true);
-      }
-    };
-
-    const handleSystemUpdate = (updateData: any) => {
-      console.log('System update received:', updateData);
-      // Actualizar datos del sistema
-      fetchData(true);
-    };
-
-    // Listeners para eventos específicos de datos
-    const handleDashboardDataUpdate = (updateData: any) => {
-      console.log('Dashboard data update received:', updateData);
-      fetchData(true);
-    };
-
-    const handleRoleDashboardUpdate = (updateData: any) => {
-      console.log('Role dashboard update received:', updateData);
-      fetchData(true);
-    };
-
-    const handleListUpdate = (updateData: any) => {
-      console.log('List update received:', updateData);
-      fetchData(true);
-    };
+    // Listeners para eventos críticos optimizados
 
     const handleAppointmentEvents = (updateData: any) => {
       console.log('Appointment event received:', updateData);
