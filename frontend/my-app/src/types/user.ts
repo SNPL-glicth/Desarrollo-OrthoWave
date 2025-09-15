@@ -18,8 +18,6 @@ export interface User {
   profileImage?: string;
   createdAt?: string;
   updatedAt?: string;
-  universidadEgreso?: string;
-  añoGraduacion?: number;
   biografia?: string;
   aceptaNuevosPacientes?: boolean;
   tarifaConsulta?: number;

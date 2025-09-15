@@ -5,6 +5,8 @@ import api from '../../services/api';
 import ScalableDoctorCalendar from '../patient/ScalableDoctorCalendar';
 import citasService from '../../services/citasService';
 import NotificationBell from '../notifications/NotificationBell';
+import DoctorInfoModal from '../patient/DoctorInfoModal';
+import { User as ServiceUser } from '../../services/userService';
 
 // Component para el User Account Modal (sin botón "mis pacientes")
 interface UserAccountModalProps {
@@ -159,6 +161,8 @@ const SpecialistsView: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [showDoctorInfoModal, setShowDoctorInfoModal] = useState(false);
+  const [selectedDoctorForInfo, setSelectedDoctorForInfo] = useState<ServiceUser | null>(null);
   
   // Función para refrescar la lista de doctores
   const refreshDoctores = useCallback(async () => {
@@ -545,8 +549,22 @@ const SpecialistsView: React.FC = () => {
                     </button>
                     <button
                       onClick={() => {
-                        // Mostrar información detallada del doctor
-                        alert(`Información de Dr. ${doctor.usuario.nombre} ${doctor.usuario.apellido}\n\nEspecialidad: ${doctor.especialidad}\nEmail: ${doctor.usuario.email}\nTeléfono: ${doctor.usuario.telefono || 'No disponible'}`);
+                        // Convertir doctor a ServiceUser format para el modal
+                        const doctorAsServiceUser: ServiceUser = {
+                          id: doctor.usuarioId.toString(),
+                          firstName: doctor.usuario.nombre,
+                          lastName: doctor.usuario.apellido,
+                          email: doctor.usuario.email,
+                          phone: doctor.usuario.telefono,
+                          role: 'doctor',
+                          specialization: doctor.especialidad,
+                          consultationFee: doctor.tarifaConsulta,
+                          biography: doctor.biografia,
+                          createdAt: doctor.createdAt || new Date().toISOString(),
+                          updatedAt: doctor.updatedAt,
+                        };
+                        setSelectedDoctorForInfo(doctorAsServiceUser);
+                        setShowDoctorInfoModal(true);
                       }}
                       className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
                     >
@@ -615,6 +633,13 @@ const SpecialistsView: React.FC = () => {
           setIsUserMenuOpen(false);
           navigate('/');
         }}
+      />
+      
+      {/* Doctor Info Modal */}
+      <DoctorInfoModal
+        show={showDoctorInfoModal}
+        onHide={() => setShowDoctorInfoModal(false)}
+        doctor={selectedDoctorForInfo}
       />
     </div>
   );

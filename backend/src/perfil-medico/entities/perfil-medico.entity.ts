@@ -22,10 +22,10 @@ export class PerfilMedico {
   @Column({ type: 'simple-array', nullable: true })
   subespecialidades: string[];
 
-  @Column({ name: 'universidad_egreso' })
+  @Column({ name: 'universidad_egreso', nullable: true })
   universidadEgreso: string;
 
-  @Column({ name: 'año_graduacion' })
+  @Column({ name: 'año_graduacion', nullable: true })
   añoGraduacion: number;
 
   @Column({ type: 'text', nullable: true })

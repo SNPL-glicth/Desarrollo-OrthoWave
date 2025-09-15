@@ -3,7 +3,8 @@ import { Card, Row, Col, Button, Badge, Spinner } from 'react-bootstrap';
 import { userService, User as ServiceUser } from '../../services/userService';
 import { appointmentService, CreateAppointmentData } from '../../services/appointmentService';
 import { toast } from 'react-toastify';
-import UserInfoOffcanvas from './UserInfoOffcanvas';
+import DoctorInfoModal from './DoctorInfoModal';
+import api from '../../services/api';
 import './DoctorSummaryCard.css';
 
 // Componentes simples para reemplazar los íconos
@@ -20,7 +21,7 @@ const DoctorSummaryCard: React.FC<DoctorSummaryCardProps> = ({ onScheduleAppoint
   const [doctors, setDoctors] = useState<ServiceUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState<ServiceUser | null>(null);
-  const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     loadDoctors();
@@ -29,11 +30,25 @@ const DoctorSummaryCard: React.FC<DoctorSummaryCardProps> = ({ onScheduleAppoint
   const loadDoctors = async () => {
     try {
       setLoading(true);
-      const response = await userService.getAllUsers();
-      const activeDoctors = response.filter((user: ServiceUser) => 
-        user.role === 'doctor'
-      );
-      setDoctors(activeDoctors);
+      // Usar el endpoint que trae doctores con perfil médico completo
+      const response = await api.get('/perfil-medico/doctores-disponibles');
+      
+      // Convertir los datos al formato ServiceUser
+      const doctorsWithProfile = response.data.map((doctor: any) => ({
+        id: doctor.usuarioId.toString(),
+        firstName: doctor.usuario?.nombre || '',
+        lastName: doctor.usuario?.apellido || '',
+        email: doctor.usuario?.email || '',
+        phone: doctor.usuario?.telefono || '',
+        role: 'doctor' as const,
+        specialization: doctor.especialidad || '',
+        consultationFee: doctor.tarifaConsulta || 0,
+        biography: doctor.biografia || '',
+        createdAt: doctor.fechaCreacion || new Date().toISOString(),
+        updatedAt: doctor.fechaActualizacion || new Date().toISOString(),
+      }));
+      
+      setDoctors(doctorsWithProfile);
     } catch (error) {
       console.error('Error loading doctors:', error);
       toast.error('Error al cargar los doctores');
@@ -70,20 +85,20 @@ const DoctorSummaryCard: React.FC<DoctorSummaryCardProps> = ({ onScheduleAppoint
 
   const handleDoctorClick = (doctor: ServiceUser) => {
     setSelectedDoctor(doctor);
-    setShowOffcanvas(true);
+    setShowModal(true);
   };
 
   if (loading) {
     return (
       <Card className="h-100">
-        <Card.Header className="bg-primary text-white">
+        <Card.Header className="bg-secondary text-white">
           <div className="d-flex align-items-center">
             <UserMdIcon />
             <h5 className="mb-0">Doctores Disponibles</h5>
           </div>
         </Card.Header>
         <Card.Body className="d-flex justify-content-center align-items-center">
-          <Spinner animation="border" variant="primary" />
+          <Spinner animation="border" variant="secondary" />
         </Card.Body>
       </Card>
     );
@@ -92,11 +107,11 @@ const DoctorSummaryCard: React.FC<DoctorSummaryCardProps> = ({ onScheduleAppoint
   return (
     <>
       <Card className="h-100">
-        <Card.Header className="bg-primary text-white">
+        <Card.Header className="bg-secondary text-white">
           <div className="d-flex align-items-center">
             <UserMdIcon />
             <h5 className="mb-0">Doctores Disponibles</h5>
-            <Badge bg="light" text="primary" className="ms-auto">
+            <Badge bg="light" text="secondary" className="ms-auto">
               {doctors.length}
             </Badge>
           </div>
@@ -116,13 +131,27 @@ const DoctorSummaryCard: React.FC<DoctorSummaryCardProps> = ({ onScheduleAppoint
                   <Row className="align-items-center">
                     <Col xs={12} md={8}>
                       <div className="d-flex align-items-center">
-                        <div className="avatar-circle bg-primary text-white me-3">
+                        <div className="avatar-circle bg-secondary text-white me-3">
                           <div style={{ fontSize: '20px' }}>
                             👩‍⚕️
                           </div>
                         </div>
                         <div>
-                          <h6 className="mb-1 fw-bold">{doctor.firstName} {doctor.lastName}</h6>
+                          <h6 className="mb-1 fw-bold">Dr. {doctor.firstName} {doctor.lastName}</h6>
+                          {/* Especialidad */}
+                          {doctor.specialization && (
+                            <div className="mb-1">
+                              <small className="text-secondary fw-medium">{doctor.specialization}</small>
+                            </div>
+                          )}
+                          {/* Tarifa */}
+                          {doctor.consultationFee && (
+                            <div className="mb-2">
+                              <span className="badge bg-light text-dark">
+                                ${doctor.consultationFee.toLocaleString()} por consulta
+                              </span>
+                            </div>
+                          )}
                           <div className="d-flex align-items-center text-muted small">
                             <EnvelopeIcon size={12} />
                             <span className="me-3">{doctor.email}</span>
@@ -139,14 +168,14 @@ const DoctorSummaryCard: React.FC<DoctorSummaryCardProps> = ({ onScheduleAppoint
                     <Col xs={12} md={4} className="text-end">
                       <div className="d-flex flex-column flex-md-row gap-2">
                         <Button
-                          variant="outline-primary"
+                          variant="outline-secondary"
                           size="sm"
                           onClick={() => handleDoctorClick(doctor)}
                         >
                           Ver Info
                         </Button>
                         <Button
-                          variant="primary"
+                          variant="secondary"
                           size="sm"
           onClick={() => handleScheduleAppointment(doctor.id)}
                         >
@@ -163,10 +192,10 @@ const DoctorSummaryCard: React.FC<DoctorSummaryCardProps> = ({ onScheduleAppoint
         </Card.Body>
       </Card>
 
-      <UserInfoOffcanvas
-        show={showOffcanvas}
-        onHide={() => setShowOffcanvas(false)}
-        user={selectedDoctor}
+      <DoctorInfoModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        doctor={selectedDoctor}
       />
     </>
   );

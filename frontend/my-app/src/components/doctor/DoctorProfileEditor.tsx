@@ -26,12 +26,6 @@ interface DoctorProfile {
   activo?: boolean;
 }
 
-interface UserProfile {
-  nombre: string;
-  apellido: string;
-  telefono?: string;
-  email: string;
-}
 
 const DoctorProfileEditor: React.FC = () => {
   const { user } = useAuth();
@@ -43,22 +37,6 @@ const DoctorProfileEditor: React.FC = () => {
     duracionConsultaDefault: 30,
     activo: true
   });
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    nombre: user?.nombre || '',
-    apellido: user?.apellido || '',
-    telefono: user?.telefono || '',
-    email: user?.email || ''
-  });
-
-  const diasSemana = [
-    { key: 'lunes', label: 'Lunes' },
-    { key: 'martes', label: 'Martes' },
-    { key: 'miercoles', label: 'Miércoles' },
-    { key: 'jueves', label: 'Jueves' },
-    { key: 'viernes', label: 'Viernes' },
-    { key: 'sabado', label: 'Sábado' },
-    { key: 'domingo', label: 'Domingo' }
-  ];
 
   // Duración fija - no modificable por el doctor
 
@@ -134,16 +112,6 @@ const DoctorProfileEditor: React.FC = () => {
     }));
   };
 
-  const handleDiasAtencionChange = (dia: string) => {
-    const diasActuales = doctorProfile.diasAtencion || [];
-    const yaSeleccionado = diasActuales.includes(dia);
-    
-    if (yaSeleccionado) {
-      handleInputChange('diasAtencion', diasActuales.filter(d => d !== dia));
-    } else {
-      handleInputChange('diasAtencion', [...diasActuales, dia]);
-    }
-  };
 
   const formatCurrency = (value: number | undefined) => {
     if (!value) return '';
@@ -218,33 +186,6 @@ const DoctorProfileEditor: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Universidad de Egreso
-            </label>
-            <input
-              type="text"
-              value={doctorProfile.universidadEgreso || ''}
-              onChange={(e) => handleInputChange('universidadEgreso', e.target.value)}
-              placeholder="Ej: Universidad Nacional"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Año de Graduación
-            </label>
-            <input
-              type="number"
-              value={doctorProfile.añoGraduacion || ''}
-              onChange={(e) => handleInputChange('añoGraduacion', parseInt(e.target.value) || undefined)}
-              placeholder="Ej: 2015"
-              min="1950"
-              max={new Date().getFullYear()}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
         </div>
 
         {/* Tarifa de Consulta */}
@@ -281,50 +222,7 @@ const DoctorProfileEditor: React.FC = () => {
           </div>
         </div>
 
-        {/* Información de Contacto */}
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Información de Consultorio</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Teléfono del Consultorio
-              </label>
-              <input
-                type="tel"
-                value={doctorProfile.telefonoConsultorio || ''}
-                onChange={(e) => handleInputChange('telefonoConsultorio', e.target.value)}
-                placeholder="(+57) 300 123 4567"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ciudad
-              </label>
-              <input
-                type="text"
-                value={doctorProfile.ciudad || ''}
-                onChange={(e) => handleInputChange('ciudad', e.target.value)}
-                placeholder="Ej: Bogotá"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Dirección del Consultorio
-              </label>
-              <input
-                type="text"
-                value={doctorProfile.direccionConsultorio || ''}
-                onChange={(e) => handleInputChange('direccionConsultorio', e.target.value)}
-                placeholder="Ej: Calle 123 # 45-67, Consultorio 101"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-        </div>
+        {/* Información removida - ubicación centralizada */}
 
         {/* Biografía */}
         <div>

@@ -11,8 +11,10 @@ export interface User {
   rating?: number;
   experience?: string;
   profileImage?: string;
+  consultationFee?: number;
+  biography?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export const userService = {

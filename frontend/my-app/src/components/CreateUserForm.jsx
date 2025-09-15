@@ -14,8 +14,6 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
     // Campos específicos para doctor
     especialidad: '',
     numeroRegistroMedico: '',
-    universidadEgreso: '',
-    añoGraduacion: '',
     biografia: '',
     tarifaConsulta: '',
     // Campos específicos para paciente (simplificados como registro normal)
@@ -75,8 +73,6 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
       rolId: activeTab === 'admin' ? 1 : activeTab === 'doctor' ? 2 : 3,
       especialidad: '',
       numeroRegistroMedico: '',
-      universidadEgreso: '',
-      añoGraduacion: '',
       biografia: '',
       tarifaConsulta: ''
     });
@@ -148,8 +144,6 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
         userData.perfilMedico = {
           especialidad: formData.especialidad,
           numeroRegistroMedico: formData.numeroRegistroMedico,
-          universidadEgreso: formData.universidadEgreso,
-          añoGraduacion: parseInt(formData.añoGraduacion),
           biografia: formData.biografia,
           tarifaConsulta: parseFloat(formData.tarifaConsulta) || 0,
           aceptaNuevosPacientes: true,
@@ -383,33 +377,6 @@ const CreateUserForm = ({ onClose, onUserCreated }) => {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Universidad de Egreso *</label>
-                    <input
-                      type="text"
-                      name="universidadEgreso"
-                      value={formData.universidadEgreso}
-                      onChange={handleInputChange}
-                      required={isDoctor}
-                      placeholder="Ej: Universidad Nacional"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Año de Graduación *</label>
-                    <input
-                      type="number"
-                      name="añoGraduacion"
-                      value={formData.añoGraduacion}
-                      onChange={handleInputChange}
-                      required={isDoctor}
-                      min="1980"
-                      max="2024"
-                      placeholder="Ej: 2015"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-                    />
-                  </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Tarifa Consulta (COP)</label>
