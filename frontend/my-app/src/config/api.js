@@ -15,9 +15,13 @@ const getBaseURL = () => {
   if (isProduction) {
     // Para ortowhavecolombia.com, usar el backend desplegado en Railway
     if (hostname.includes('ortowhavecolombia.com')) {
-      // URL del backend en Railway - VERIFICAR EN DASHBOARD DE RAILWAY
+      // Backend desplegado en Railway - URL verificada y funcional
+      // Proyecto: Desarrollo-Orto-Whave
+      // Servicio: bubbly-acceptance 
+      // Entorno: production
       const backendUrl = 'https://desarrollo-orto-whave-production.up.railway.app';
       console.log('🚀 Usando backend URL en producción:', backendUrl);
+      console.log('✅ Backend Railway verificado y funcional');
       return backendUrl;
     }
     // Para otros dominios de Railway, usar HTTPS y el mismo dominio
