@@ -3,13 +3,25 @@
 // Función para obtener la URL base del backend dinámicamente
 const getBaseURL = () => {
   const hostname = window.location.hostname;
+  const port = window.location.port;
+  
+  // Detectar si estamos en producción (Railway o similar)
+  const isProduction = hostname.includes('railway.app') || 
+                      hostname.includes('up.railway.app') || 
+                      hostname.includes('ortowhavecolombia.com') ||
+                      (hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.startsWith('192.168') && !hostname.startsWith('10.'));
+  
+  // Si estamos en producción, usar HTTPS y el mismo dominio
+  if (isProduction) {
+    return `https://${hostname}`;
+  }
   
   // Si estamos accediendo desde localhost, usar localhost para el backend
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:4000';
   }
   
-  // Para cualquier otra IP (incluyendo 10.23.240.188), usar esa misma IP para el backend
+  // Para IPs locales (desarrollo en red local), usar puerto 4000
   return `http://${hostname}:4000`;
 };
 
