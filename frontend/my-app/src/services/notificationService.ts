@@ -1,6 +1,7 @@
 import { Notification } from '../hooks/useNotifications';
+import { API_CONFIG } from '../config/api.js';
 
-const API_BASE = 'http://localhost:4000';
+const API_BASE = API_CONFIG.BASE_URL;
 
 class NotificationService {
   private getAuthHeaders() {
