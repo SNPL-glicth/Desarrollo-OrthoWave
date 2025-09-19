@@ -15,13 +15,6 @@ export const COLOMBIA_TIMEZONE = 'America/Bogota';
  * Configurar timezone al inicializar la aplicación
  */
 export const initializeColombiaTimezone = (): void => {
-  // Verificar que el navegador reconoce la zona horaria
-  const testDate = new Date();
-  const formatter = new Intl.DateTimeFormat('es-CO', {
-    timeZone: COLOMBIA_TIMEZONE,
-    timeZoneName: 'short'
-  });
-  
   // Frontend timezone configurado para Colombia
 };
 
@@ -32,17 +25,7 @@ export const initializeColombiaTimezone = (): void => {
 export const getCurrentColombiaDate = (): Date => {
   const now = new Date();
   
-  // Método 1: Usar toLocaleString con timezone de Colombia
-  const colombiaTimeString = now.toLocaleString('en-CA', {
-    timeZone: COLOMBIA_TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  }).replace(', ', 'T');
+  // Método: Calcular timezone de Colombia
   
   // Crear Date object que represente la hora de Colombia
   // Necesitamos ajustar porque JavaScript interpreta esto como hora local

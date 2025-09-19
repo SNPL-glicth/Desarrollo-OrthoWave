@@ -324,25 +324,17 @@ export const CitaProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Verificar estado de autenticación antes de la llamada
-    const user = authService.getCurrentUser();
-    const token = localStorage.getItem('token');
 
     try {
       const response = await api.get('/perfil-medico/doctores-disponibles');
       const doctors = response.data;
       
-      console.log('✅ Doctors loaded successfully:', doctors?.length || 0, 'doctors');
+      // Doctores cargados exitosamente
       
       dispatch({ type: 'UPDATE_CACHE', payload: { key: cacheKey, data: doctors } });
       dispatch({ type: 'SET_DOCTORS', payload: doctors });
     } catch (error: any) {
-      console.error('❌ Error al cargar doctores:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        hasAuthHeader: !!error.config?.headers?.Authorization
-      });
+      console.error('Error al cargar doctores:', error);
     }
   }, [isCacheValid, getCached]);
 
@@ -358,17 +350,7 @@ export const CitaProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // Debug: Verificar estado de autenticación antes de la llamada
-    const user = authService.getCurrentUser();
-    const token = localStorage.getItem('token');
-    
-    console.log('🎯 Fetching specialties - Auth status:', {
-      hasUser: !!user,
-      hasToken: !!token,
-      userId: user?.id,
-      userRole: user?.rol,
-      tokenPreview: token ? `${token.substring(0, 10)}...` : 'No token'
-    });
+    // Verificar estado de autenticación antes de la llamada
 
     try {
       const response = await api.get('/dashboard/citas/especialidades');
@@ -376,19 +358,12 @@ export const CitaProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: (index + 1).toString(),
         name: especialidad
       }));
-      
-      console.log('✅ Specialties loaded successfully:', specialties?.length || 0, 'specialties');
+      // Especialidades cargadas exitosamente
       
       dispatch({ type: 'UPDATE_CACHE', payload: { key: cacheKey, data: specialties } });
       dispatch({ type: 'SET_SPECIALTIES', payload: specialties });
     } catch (error: any) {
-      console.error('❌ Error al cargar especialidades:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        hasAuthHeader: !!error.config?.headers?.Authorization
-      });
+      console.error('Error al cargar especialidades:', error);
     }
   }, [isCacheValid, getCached]);
 
@@ -449,25 +424,13 @@ export const CitaProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Cargar datos iniciales
   useEffect(() => {
-    console.log('🚀 CitasContext: Loading initial data...');
-    
     const user = authService.getCurrentUser();
     const token = localStorage.getItem('token');
     
-    console.log('🔐 Initial auth check:', {
-      hasUser: !!user,
-      hasToken: !!token,
-      userRole: user?.rol,
-      currentPath: window.location.pathname
-    });
-    
     // Solo cargar datos si el usuario está autenticado
     if (user && token) {
-      console.log('✅ User authenticated, loading doctors and specialties...');
       fetchDoctors();
       fetchSpecialties();
-    } else {
-      console.log('⚠️ User not authenticated, skipping data load');
     }
   }, [fetchDoctors, fetchSpecialties]);
 
