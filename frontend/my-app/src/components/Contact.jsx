@@ -136,8 +136,9 @@ const Contact = () => {
         </motion.p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start">
-        {/* Columna del formulario */}
+      {/* Sección superior: Formulario y Mapa */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start mb-12">
+        {/* Formulario de contacto */}
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -240,7 +241,7 @@ const Contact = () => {
           </form>
         </motion.div>
 
-        {/* Columna de información de contacto */}
+        {/* Mapa de Google */}
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -248,50 +249,88 @@ const Contact = () => {
           variants={containerVariants}
           className="bg-white rounded-xl shadow-xl p-4 sm:p-6 md:p-8"
         >
-          <motion.div variants={itemVariants} className="mb-6 sm:mb-8">
+          <motion.div variants={itemVariants}>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
-              Información de contacto
+              Nuestra Ubicación
             </h3>
-            <div className="space-y-4 sm:space-y-6">
-              <div className="flex items-start">
-                <MapPinIcon className="h-6 w-6 text-primary mt-1" />
-                <div className="ml-3">
-                  <h4 className="text-sm sm:text-base font-medium text-gray-800">Dirección</h4>
-                  <p className="text-sm sm:text-base text-gray-600 mt-1">
-                    Cll. 134 # 7 B - 83 Of. 122, Bogotá, Colombia
-                  </p>
+            <div className="relative w-full h-64 sm:h-80 rounded-lg overflow-hidden">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3976.3!2d-74.0351!3d4.7231!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e3f85b123456789%3A0x123456789abcdef0!2sCalle%20134%20%237B-83%2C%20Bogot%C3%A1%2C%20Colombia!5e0!3m2!1ses!2sco!4v1700000000000!5m2!1ses!2sco"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Ubicación OrthoWave - Cll. 134 # 7 B - 83 Of. 122, Bogotá"
+              ></iframe>
+            </div>
+            <p className="text-sm text-gray-600 mt-3">
+              <MapPinIcon className="h-4 w-4 inline mr-1" />
+              Cll. 134 # 7 B - 83 Of. 122, Bogotá, Colombia
+            </p>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Sección inferior: Información de contacto */}
+      <div className="max-w-4xl mx-auto">
+        {/* Información de contacto */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={containerVariants}
+          className="bg-white rounded-xl shadow-xl p-4 sm:p-6 md:p-8"
+        >
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            {/* Información de contacto */}
+            <div>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
+                Información de contacto
+              </h3>
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex items-start">
+                  <MapPinIcon className="h-6 w-6 text-primary mt-1" />
+                  <div className="ml-3">
+                    <h4 className="text-sm sm:text-base font-medium text-gray-800">Dirección</h4>
+                    <p className="text-sm sm:text-base text-gray-600 mt-1">
+                      Cll. 134 # 7 B - 83 Of. 122, Bogotá, Colombia
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start">
-                <PhoneIcon className="h-6 w-6 text-primary mt-1" />
-                <div className="ml-3">
-                  <h4 className="text-sm sm:text-base font-medium text-gray-800">Teléfono</h4>
-                  <p className="text-sm sm:text-base text-gray-600 mt-1">
-                    6015200010 - 6015200010
-                  </p>
+                <div className="flex items-start">
+                  <PhoneIcon className="h-6 w-6 text-primary mt-1" />
+                  <div className="ml-3">
+                    <h4 className="text-sm sm:text-base font-medium text-gray-800">Teléfono</h4>
+                    <p className="text-sm sm:text-base text-gray-600 mt-1">
+                      6015200010 - 6015200010
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </motion.div>
 
-          <motion.div variants={itemVariants}>
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
-              Horario de atención
-            </h3>
-            <div className="space-y-2 sm:space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm sm:text-base text-gray-600">Lunes - Viernes</span>
-                <span className="text-sm sm:text-base text-gray-800 font-medium">8:00 AM - 6:00 PM</span>
+            {/* Horario de atención */}
+            <div>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
+                Horario de atención
+              </h3>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm sm:text-base text-gray-700 font-medium">Lunes - Viernes</span>
+                  <span className="text-sm sm:text-base text-primary font-semibold">8:00 AM - 6:00 PM</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm sm:text-base text-gray-700 font-medium">Sábados</span>
+                  <span className="text-sm sm:text-base text-primary font-semibold">9:00 AM - 1:00 PM</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm sm:text-base text-gray-700 font-medium">Domingos</span>
+                  <span className="text-sm sm:text-base text-red-600 font-semibold">Cerrado</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm sm:text-base text-gray-600">Sábados</span>
-                <span className="text-sm sm:text-base text-gray-800 font-medium">9:00 AM - 1:00 PM</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm sm:text-base text-gray-600">Domingos</span>
-                <span className="text-sm sm:text-base text-gray-800 font-medium">Cerrado</span>
-              </div>
-          </div>
+            </div>
           </motion.div>
         </motion.div>
       </div>

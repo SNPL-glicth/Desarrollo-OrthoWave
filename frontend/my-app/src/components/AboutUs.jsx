@@ -13,7 +13,7 @@ const AboutUs = () => {
     },
     {
       name: "Allianz",
-      logo: "/images/Logos/allianz.webp",
+      logo: "/images/Logos/logo_allianz.webp",
       description: "Cobertura internacional en servicios médicos",
       url: "https://www.allianz.co/"
     },
