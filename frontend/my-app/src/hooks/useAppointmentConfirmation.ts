@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNotifications } from './useNotifications';
+import { API_CONFIG } from '../config/api.js';
 
 export interface AppointmentForConfirmation {
   citaId: number;
@@ -56,7 +57,7 @@ export const useAppointmentConfirmation = () => {
       setConfirmationLoading(true);
       
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:4000/citas/${appointmentToConfirm.citaId}/confirm`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/citas/${appointmentToConfirm.citaId}/confirm`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,

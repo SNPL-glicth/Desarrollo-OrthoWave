@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useWebSocket } from './useWebSocket';
+import { API_CONFIG } from '../config/api.js';
 
 export interface Appointment {
   id: number;
@@ -48,13 +49,13 @@ export const useRealtimeAppointments = (userId?: number, userRole?: string) => {
 
       let endpoint = '';
       if (targetUserRole === 'doctor') {
-        endpoint = `http://localhost:4000/citas/doctor/${targetUserId}`;
+        endpoint = `${API_CONFIG.BASE_URL}/citas/doctor/${targetUserId}`;
       } else if (targetUserRole === 'paciente') {
-        endpoint = `http://localhost:4000/citas/paciente/${targetUserId}`;
+        endpoint = `${API_CONFIG.BASE_URL}/citas/paciente/${targetUserId}`;
       } else if (targetUserRole === 'admin') {
-        endpoint = 'http://localhost:4000/citas'; // Suponiendo que hay un endpoint para admin
+        endpoint = `${API_CONFIG.BASE_URL}/citas`; // Suponiendo que hay un endpoint para admin
       } else {
-        endpoint = 'http://localhost:4000/citas/mis-citas';
+        endpoint = `${API_CONFIG.BASE_URL}/citas/mis-citas`;
       }
 
       const response = await fetch(endpoint, {
@@ -144,7 +145,7 @@ export const useRealtimeAppointments = (userId?: number, userRole?: string) => {
   // Funciones para operaciones CRUD en tiempo real
   const createAppointment = useCallback(async (appointmentData: any) => {
     try {
-      const response = await fetch('http://localhost:4000/citas', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/citas`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(appointmentData),
@@ -165,7 +166,7 @@ export const useRealtimeAppointments = (userId?: number, userRole?: string) => {
 
   const updateAppointmentStatus = useCallback(async (appointmentId: number, statusData: any) => {
     try {
-      const response = await fetch(`http://localhost:4000/citas/${appointmentId}/estado`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/citas/${appointmentId}/estado`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify(statusData),

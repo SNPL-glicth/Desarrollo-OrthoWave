@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+import { API_CONFIG } from '../config/api.js';
 
 interface WebSocketHook {
   socket: Socket | null;
@@ -30,7 +31,7 @@ export const useWebSocket = (): WebSocketHook => {
         
         console.log('Connecting to WebSocket...');
         
-        const socket = io('http://localhost:4000', {
+        const socket = io(API_CONFIG.BASE_URL, {
           auth: {
             token: token
           },

@@ -1,4 +1,5 @@
 import { CalendarEvent } from '../types/calendar';
+import { API_CONFIG } from '../config/api.js';
 
 export interface BlockedSchedule {
   id: number;
@@ -17,7 +18,7 @@ export interface BlockedSchedule {
 }
 
 class BlockedScheduleService {
-  private baseUrl = 'http://localhost:4000/doctor-availability';
+  private baseUrl = `${API_CONFIG.BASE_URL}/doctor-availability`;
 
   /**
    * Obtener todos los horarios bloqueados del doctor actual

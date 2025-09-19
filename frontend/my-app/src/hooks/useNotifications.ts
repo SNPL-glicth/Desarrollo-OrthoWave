@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useWebSocket } from './useWebSocket';
+import { API_CONFIG } from '../config/api.js';
 
 export interface Notification {
   id: number;
@@ -39,7 +40,7 @@ export const useNotifications = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('http://localhost:4000/notifications', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/notifications`, {
         headers: getAuthHeaders(),
       });
 
@@ -67,7 +68,7 @@ export const useNotifications = () => {
     if (!user) return;
 
     try {
-      const response = await fetch('http://localhost:4000/notifications/unread-count', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/notifications/unread-count`, {
         headers: getAuthHeaders(),
       });
 
@@ -83,7 +84,7 @@ export const useNotifications = () => {
   // Marcar notificación como leída
   const markAsRead = useCallback(async (notificationId: number) => {
     try {
-      const response = await fetch(`http://localhost:4000/notifications/${notificationId}/read`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/notifications/${notificationId}/read`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
       });
@@ -111,7 +112,7 @@ export const useNotifications = () => {
   // Marcar todas como leídas
   const markAllAsRead = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:4000/notifications/read-all', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/notifications/read-all`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
       });
