@@ -25,10 +25,14 @@ async function bootstrap() {
   // Configurar interceptor de logging global
   app.useGlobalInterceptors(new LoggingInterceptor());
 
-  // Configurar CORS para desarrollo en red local
+  // Configurar CORS para desarrollo y producción
   const corsOptions = {
     origin: process.env.NODE_ENV === 'production'
-      ? process.env.FRONTEND_URLS?.split(',') || ['https://your-domain.com']
+      ? [
+          'https://www.ortowhavecolombia.com',
+          'https://ortowhavecolombia.com',
+          ...(process.env.FRONTEND_URLS?.split(',') || [])
+        ]
       : [
           'http://localhost:3000', 
           'http://localhost:8080', 
