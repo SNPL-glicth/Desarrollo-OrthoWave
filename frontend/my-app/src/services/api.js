@@ -22,8 +22,18 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    console.log('🔍 API Request Debug:', {
+      url: config.url,
+      method: config.method?.toUpperCase(),
+      hasToken: !!token,
+      tokenPreview: token ? `${token.substring(0, 10)}...` : 'No token',
+      headers: config.headers
+    });
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn('⚠️ No token found in localStorage for request:', config.url);
     }
     return config;
   },
@@ -34,8 +44,24 @@ api.interceptors.request.use(
 
 // Interceptor para manejar errores de respuesta
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('✅ API Response Success:', {
+      url: response.config.url,
+      status: response.status,
+      method: response.config.method?.toUpperCase()
+    });
+    return response;
+  },
   (error) => {
+    console.error('❌ API Response Error:', {
+      url: error.config?.url,
+      method: error.config?.method?.toUpperCase(),
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      hasToken: !!error.config?.headers?.Authorization
+    });
+    
     if (error.response) {
       // El servidor respondió con un código de estado fuera del rango 2xx
       if (error.response.status === 401) {
