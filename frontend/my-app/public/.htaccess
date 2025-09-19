@@ -1,6 +1,15 @@
 Options -MultiViews
 RewriteEngine On
 
+# API proxy rules - redirect API calls to Railway backend
+RewriteRule ^auth/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/auth/$1 [P,L]
+RewriteRule ^users/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/users/$1 [P,L]
+RewriteRule ^citas/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/citas/$1 [P,L]
+RewriteRule ^pacientes/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/pacientes/$1 [P,L]
+RewriteRule ^notifications/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/notifications/$1 [P,L]
+RewriteRule ^socket\.io/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/socket.io/$1 [P,L]
+RewriteRule ^api/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/api/$1 [P,L]
+
 # Handle React Router - catch all routes and serve index.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

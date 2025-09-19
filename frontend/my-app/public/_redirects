@@ -1,3 +1,12 @@
+# API redirects to Railway backend
+/auth/*  https://desarrollo-orto-whave-production.up.railway.app/auth/:splat  200
+/users/*  https://desarrollo-orto-whave-production.up.railway.app/users/:splat  200
+/citas/*  https://desarrollo-orto-whave-production.up.railway.app/citas/:splat  200
+/pacientes/*  https://desarrollo-orto-whave-production.up.railway.app/pacientes/:splat  200
+/notifications/*  https://desarrollo-orto-whave-production.up.railway.app/notifications/:splat  200
+/socket.io/*  https://desarrollo-orto-whave-production.up.railway.app/socket.io/:splat  200
+/api/*  https://desarrollo-orto-whave-production.up.railway.app/api/:splat  200
+
 # Redirects for React Router SPA
 # All routes should serve index.html so React Router can handle routing
 /*    /index.html   200
