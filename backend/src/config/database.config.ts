@@ -6,11 +6,11 @@ config();
 // Configuración para desarrollo con MySQL
 const developmentMySQLConfig: TypeOrmModuleOptions = {
   type: 'mysql',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '3306', 10),
-  username: process.env.DB_USERNAME || 'ortowhave',
-  password: process.env.DB_PASSWORD || 'Root123a',
-  database: process.env.DB_DATABASE || 'orto_whave_db',
+  host: process.env.DB_HOST || 'mainline.proxy.rlwy.net',
+  port: parseInt(process.env.DB_PORT || '15576', 10),
+  username: process.env.DB_USERNAME || 'root',
+  password: process.env.DB_PASSWORD || 'AnFZIsTtYazUEsstWEiAMxtIHHJuHUhH',
+  database: process.env.DB_DATABASE || 'railway',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   synchronize: false, // Deshabilitado para evitar conflictos
   logging: ['error', 'warn'], // Solo mostrar errores y warnings
@@ -26,11 +26,11 @@ const developmentMySQLConfig: TypeOrmModuleOptions = {
 // Configuración para producción con MySQL
 const productionConfig: TypeOrmModuleOptions = {
   type: 'mysql',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '3306', 10),
-  username: process.env.DB_USERNAME || 'ortowhave',
-  password: process.env.DB_PASSWORD || 'Root123a',
-  database: process.env.DB_DATABASE || 'orto_whave_db',
+  host: process.env.DB_HOST || 'mainline.proxy.rlwy.net',
+  port: parseInt(process.env.DB_PORT || '15576', 10),
+  username: process.env.DB_USERNAME || 'root',
+  password: process.env.DB_PASSWORD || 'AnFZIsTtYazUEsstWEiAMxtIHHJuHUhH',
+  database: process.env.DB_DATABASE || 'railway',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   synchronize: false, // Mantener en false para producción
   migrationsRun: true,

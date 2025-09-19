@@ -5,11 +5,11 @@ config();
 
 export default new DataSource({
   type: 'mysql',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '3306', 10),
-  username: process.env.DB_USERNAME || 'ortowhave',
-  password: process.env.DB_PASSWORD || 'Root123a',
-  database: process.env.DB_DATABASE || 'orto_whave_db',
+  host: process.env.DB_HOST || 'mainline.proxy.rlwy.net',
+  port: parseInt(process.env.DB_PORT || '15576', 10),
+  username: process.env.DB_USERNAME || 'root',
+  password: process.env.DB_PASSWORD || 'AnFZIsTtYazUEsstWEiAMxtIHHJuHUhH',
+  database: process.env.DB_DATABASE || 'railway',
   entities: ['src/**/*.entity{.ts,.js}'],
   migrations: ['src/migrations/*{.ts,.js}'],
   migrationsTableName: 'migrations',
