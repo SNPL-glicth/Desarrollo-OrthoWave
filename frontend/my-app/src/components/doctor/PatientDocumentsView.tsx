@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { documentService, PatientDocument } from '../../services/documentService';
+import { API_CONFIG } from '../../config/api';
 
 interface PatientDocumentsViewProps {
   patientId: number;
@@ -40,7 +41,7 @@ const PatientDocumentsView: React.FC<PatientDocumentsViewProps> = ({
 
   const handleViewDocument = (document: PatientDocument) => {
     console.log('Abriendo documento:', document);
-    const viewUrl = `http://localhost:4000/api/patient-documents/${document.id}/view`;
+    const viewUrl = `${API_CONFIG.BASE_URL}/api/patient-documents/${document.id}/view`;
     
     // Abrir en nueva pestaña con configuraciones específicas
     const newWindow = window.open(
@@ -57,7 +58,7 @@ const PatientDocumentsView: React.FC<PatientDocumentsViewProps> = ({
 
   const handleDownloadDocument = (doc: PatientDocument) => {
     console.log('Descargando documento:', doc);
-    const downloadUrl = `http://localhost:4000/api/patient-documents/${doc.id}/download`;
+    const downloadUrl = `${API_CONFIG.BASE_URL}/api/patient-documents/${doc.id}/download`;
     
     const link = window.document.createElement('a');
     link.href = downloadUrl;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { API_CONFIG } from '../../config/api';
 
 interface DoctorProfile {
   id?: number;
@@ -50,7 +51,7 @@ const DoctorProfileEditor: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:4000/perfil-medico/mi-perfil`, {
+      const response = await axios.get(`${API_CONFIG.BASE_URL}/perfil-medico/mi-perfil`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -86,11 +87,11 @@ const DoctorProfileEditor: React.FC = () => {
 
       // Crear o actualizar perfil médico
       if (doctorProfile.id) {
-        await axios.patch('http://localhost:4000/perfil-medico/mi-perfil', profileData, {
+        await axios.patch(`${API_CONFIG.BASE_URL}/perfil-medico/mi-perfil`, profileData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post('http://localhost:4000/perfil-medico', profileData, {
+        await axios.post(`${API_CONFIG.BASE_URL}/perfil-medico`, profileData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }

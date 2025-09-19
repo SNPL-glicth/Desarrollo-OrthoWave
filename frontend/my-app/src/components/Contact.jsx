@@ -258,7 +258,7 @@ const Contact = () => {
                 <div className="ml-3">
                   <h4 className="text-sm sm:text-base font-medium text-gray-800">Dirección</h4>
                   <p className="text-sm sm:text-base text-gray-600 mt-1">
-                    Calle 123 #45-67, Bogotá, Colombia
+                    Cll. 134 # 7 B - 83 Of. 122, Bogotá, Colombia
                   </p>
                 </div>
               </div>
@@ -267,7 +267,7 @@ const Contact = () => {
                 <div className="ml-3">
                   <h4 className="text-sm sm:text-base font-medium text-gray-800">Teléfono</h4>
                   <p className="text-sm sm:text-base text-gray-600 mt-1">
-                    +57 300 123 4567
+                    6015200010 - 6015200010
                   </p>
                 </div>
               </div>

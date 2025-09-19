@@ -97,14 +97,14 @@ const Footer = () => {
               <li className="flex items-start space-x-3">
                 <MapPinIcon className="h-6 w-6 text-primary flex-shrink-0" />
                 <span className="text-gray-600 text-sm leading-relaxed">
-                  Calle 134 # 7B - 83, Consultorio 122
+                  Cll. 134 # 7 B - 83 Of. 122
                   <br />
-                  Edificio El Bosque, Bogotá
+                  Bogotá, Colombia
                 </span>
               </li>
               <li className="flex items-center space-x-3">
                 <PhoneIcon className="h-6 w-6 text-primary flex-shrink-0" />
-                <span className="text-gray-600 text-sm">+57 311 228 1755</span>
+                <span className="text-gray-600 text-sm">6015200010 - 6015200010</span>
               </li>
               <li className="flex items-center space-x-3">
                 <EnvelopeIcon className="h-6 w-6 text-primary flex-shrink-0" />

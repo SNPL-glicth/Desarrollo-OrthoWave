@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { API_CONFIG } from '../../config/api';
 
 interface PatientProfile {
   usuarioId: number;
@@ -48,7 +49,7 @@ const PatientProfileComponent: React.FC = () => {
           return;
         }
 
-        const response = await fetch('http://localhost:4000/pacientes/mi-perfil', {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/pacientes/mi-perfil`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -118,7 +119,7 @@ const PatientProfileComponent: React.FC = () => {
       console.log('Datos a enviar:', JSON.stringify(dataToSend, null, 2));
       console.log('Usuario en dataToSend:', dataToSend.usuario);
 
-      const response = await fetch('http://localhost:4000/pacientes/mi-perfil', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/pacientes/mi-perfil`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,

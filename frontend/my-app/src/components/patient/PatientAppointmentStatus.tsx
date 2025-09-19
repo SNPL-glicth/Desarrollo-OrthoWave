@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import AppointmentConfirmationModal from './AppointmentConfirmationModal';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import NotificationBell from '../NotificationBell';
+import { API_CONFIG } from '../../config/api';
 import NotificationBell from '../notifications/NotificationBell';
 import ProductReservationStatus from './ProductReservationStatus';
 
@@ -151,7 +152,7 @@ const PatientAppointmentStatus: React.FC = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:4000/citas/paciente/${user?.id}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/citas/paciente/${user?.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -210,7 +211,7 @@ const PatientAppointmentStatus: React.FC = () => {
       setConfirmationLoading(true);
       
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:4000/citas/${appointmentToConfirm.citaId}/estado`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/citas/${appointmentToConfirm.citaId}/estado`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,

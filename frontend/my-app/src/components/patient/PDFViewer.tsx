@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PatientDocument } from '../../services/documentService';
+import { API_CONFIG } from '../../config/api';
 
 interface PDFViewerProps {
   isOpen: boolean;
@@ -44,7 +45,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ isOpen, onClose, document }) => {
   const downloadDocument = () => {
     if (document) {
       const link = window.document.createElement('a');
-      link.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000'}/api/patient-documents/${document.id}/download`;
+      link.href = `${API_CONFIG.BASE_URL}/api/patient-documents/${document.id}/download`;
       link.download = document.originalName;
       link.click();
     }
@@ -171,7 +172,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ isOpen, onClose, document }) => {
               style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}
             >
               <iframe
-                src={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000'}/api/patient-documents/${document.id}/view`}
+                src={`${API_CONFIG.BASE_URL}/api/patient-documents/${document.id}/view`}
                 className="w-full h-full border-0"
                 onLoad={handleIframeLoad}
                 onError={handleIframeError}

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import ScheduleEditorModal from './ScheduleEditorModal';
+import { API_CONFIG } from '../../config/api';
 
 // Types
 interface TimeSlot {
@@ -258,7 +259,7 @@ const InteractiveScheduleCalendar: React.FC<InteractiveScheduleCalendarProps> = 
   const blockDateRange = async (startDate: string, endDate: string, reason: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:4000/doctor-availability/block-dates', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/doctor-availability/block-dates`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

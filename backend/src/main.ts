@@ -31,6 +31,8 @@ async function bootstrap() {
       ? [
           'https://www.ortowhavecolombia.com',
           'https://ortowhavecolombia.com',
+          'https://owc-orthowave.com',
+          'https://www.owc-orthowave.com',
           ...(process.env.FRONTEND_URLS?.split(',') || [])
         ]
       : [
