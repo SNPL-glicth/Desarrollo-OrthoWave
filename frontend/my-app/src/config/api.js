@@ -3,7 +3,6 @@
 // Función para obtener la URL base del backend dinámicamente
 const getBaseURL = () => {
   const hostname = window.location.hostname;
-  const port = window.location.port;
   
   // Detectar si estamos en producción (Railway o similar)
   const isProduction = hostname.includes('railway.app') || 
