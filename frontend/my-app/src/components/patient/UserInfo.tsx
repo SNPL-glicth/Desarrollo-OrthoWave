@@ -10,7 +10,7 @@ const UserInfo: React.FC = () => {
                 </div>
                 <div className="ml-4">
                     <h2 className="text-xl font-semibold">Usuario</h2>
-                    <p className="text-gray-600">paciente@ortowhave.co</p>
+                    <p className="text-gray-600">paciente@orthowave.co</p>
                 </div>
             </div>
             

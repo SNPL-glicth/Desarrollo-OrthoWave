@@ -4,6 +4,7 @@ import { es } from 'date-fns/locale';
 import { citasService } from '../../services/citasService';
 import { documentService, PatientDocument } from '../../services/documentService';
 import { productsService, ProductReservation } from '../../services/productsService';
+import { API_CONFIG } from '../../config/api.js';
 
 interface Paciente {
   id: number;
@@ -132,7 +133,7 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({
   };
 
   const handleViewDocument = (document: PatientDocument) => {
-    const url = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000'}/api/patient-documents/${document.id}/view`;
+    const url = `${API_CONFIG.BASE_URL}/api/patient-documents/${document.id}/view`;
     window.open(url, '_blank');
   };
 

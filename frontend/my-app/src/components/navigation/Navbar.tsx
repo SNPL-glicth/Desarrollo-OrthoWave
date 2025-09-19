@@ -14,8 +14,8 @@ const Navbar: React.FC = () => {
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
                         <Link to="/" className="flex items-center text-white font-bold text-xl">
-                            <img src="/images/logo_pequeño.ico" alt="OrtoWhave Logo" className="w-8 h-8 mr-2" />
-                            OrtoWhave
+                            <img src="/images/logo_pequeño.ico" alt="OrthoWave Logo" className="w-8 h-8 mr-2" />
+                            OrthoWave
                         </Link>
                         
                         <div className="hidden md:block">

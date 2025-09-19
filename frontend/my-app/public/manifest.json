@@ -1,7 +1,7 @@
 {
-  "short_name": "OrtoWhave",
-  "name": "OrtoWhave Colombia - Citas Médicas",
-  "description": "Sistema de gestión de citas médicas para OrtoWhave Colombia",
+  "short_name": "OrthoWave",
+  "name": "OrthoWave Colombia - Citas Médicas",
+  "description": "Sistema de gestión de citas médicas para OrthoWave Colombia",
   "icons": [
     {
       "src": "images/logo_pequeño.ico",

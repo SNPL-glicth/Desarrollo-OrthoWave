@@ -284,7 +284,7 @@ const PatientAppointmentStatus: React.FC = () => {
         <header className="bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-4 sm:px-6">
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <img className="h-6 sm:h-8" src="/images/White logo - no background_page-0001.webp" alt="OrtoWhave" />
+              <img className="h-6 sm:h-8" src="/images/White logo - no background_page-0001.webp" alt="OrthoWave" />
               <h1 className="text-lg sm:text-xl font-semibold text-gray-800 truncate">Estados de Citas</h1>
             </div>
 
@@ -336,7 +336,7 @@ const PatientAppointmentStatus: React.FC = () => {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-4 sm:px-6">
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <img className="h-6 sm:h-8" src="/images/White logo - no background_page-0001.webp" alt="OrtoWhave" />
+            <img className="h-6 sm:h-8" src="/images/White logo - no background_page-0001.webp" alt="OrthoWave" />
             <h1 className="text-lg sm:text-xl font-semibold text-gray-800 truncate">Estados de Citas</h1>
           </div>
 

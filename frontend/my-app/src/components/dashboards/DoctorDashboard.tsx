@@ -83,11 +83,11 @@ const DoctorDashboard: React.FC = () => {
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo OrtoWhave - lado izquierdo */}
+            {/* Logo OrthoWave - lado izquierdo */}
             <div className="flex items-center space-x-3">
-              <img className="h-8 w-auto" src="/images/White logo - no background_page-0001.webp" alt="OrtoWhave" />
+              <img className="h-8 w-auto" src="/images/White logo - no background_page-0001.webp" alt="OrthoWave" />
               <div className="hidden sm:block">
-                <h1 className="text-lg font-semibold text-gray-900">OrtoWhave</h1>
+                <h1 className="text-lg font-semibold text-gray-900">OrthoWave</h1>
                 <p className="text-xs text-gray-500">Sistema de Ortopedia</p>
               </div>
             </div>

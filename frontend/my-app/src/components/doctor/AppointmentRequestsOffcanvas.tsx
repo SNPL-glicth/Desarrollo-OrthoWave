@@ -98,7 +98,7 @@ const AppointmentRequestsOffcanvas: React.FC<AppointmentRequestsOffcanvasProps> 
         }`}
         style={{ zIndex: 9999 }}
       >
-        {/* Header moderno con tema OrtoWhave */}
+        {/* Header moderno con tema OrthoWave */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200/50 bg-gradient-to-r from-gray-600/50 to-gray-700/50">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl flex items-center justify-center">

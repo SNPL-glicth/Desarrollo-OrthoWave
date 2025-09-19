@@ -96,7 +96,7 @@ class ProductsService {
   // CARRITO DE COMPRAS (local storage)
   getCart(): CartItem[] {
     try {
-      const cart = localStorage.getItem('ortowhave_cart');
+      const cart = localStorage.getItem('orthowave_cart');
       return cart ? JSON.parse(cart) : [];
     } catch (error) {
       console.error('Error getting cart:', error);
@@ -124,7 +124,7 @@ class ProductsService {
         cart.push({ product, quantity });
       }
 
-      localStorage.setItem('ortowhave_cart', JSON.stringify(cart));
+      localStorage.setItem('orthowave_cart', JSON.stringify(cart));
       return true; // Se agregó exitosamente
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -136,7 +136,7 @@ class ProductsService {
     try {
       let cart = this.getCart();
       cart = cart.filter(item => item.product.id !== productId);
-      localStorage.setItem('ortowhave_cart', JSON.stringify(cart));
+      localStorage.setItem('orthowave_cart', JSON.stringify(cart));
     } catch (error) {
       console.error('Error removing from cart:', error);
     }
@@ -152,7 +152,7 @@ class ProductsService {
           this.removeFromCart(productId);
         } else {
           item.quantity = quantity;
-          localStorage.setItem('ortowhave_cart', JSON.stringify(cart));
+          localStorage.setItem('orthowave_cart', JSON.stringify(cart));
         }
       }
     } catch (error) {
@@ -162,7 +162,7 @@ class ProductsService {
 
   clearCart(): void {
     try {
-      localStorage.removeItem('ortowhave_cart');
+      localStorage.removeItem('orthowave_cart');
     } catch (error) {
       console.error('Error clearing cart:', error);
     }

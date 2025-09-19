@@ -184,7 +184,7 @@ const PatientDashboard: React.FC = () => {
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex justify-between items-center py-3 sm:py-4 px-2 sm:px-6">
           <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-            <img className="h-6 sm:h-8 flex-shrink-0" src="/images/White logo - no background_page-0001.webp" alt="OrtoWhave" />
+            <img className="h-6 sm:h-8 flex-shrink-0" src="/images/White logo - no background_page-0001.webp" alt="OrthoWave" />
             <h1 className="text-base sm:text-lg lg:text-2xl font-semibold text-gray-800 truncate">Hola, {user.nombre}</h1>
           </div>
 
@@ -263,7 +263,7 @@ const PatientDashboard: React.FC = () => {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  <span>info@ortowhave.com</span>
+                  <span>info@orthowave.com</span>
                 </div>
               </div>
             </div>
