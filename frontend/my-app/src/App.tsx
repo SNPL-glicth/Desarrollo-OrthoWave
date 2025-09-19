@@ -49,118 +49,143 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <CartProvider>
-        <CitaProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/registro-pendiente" element={<RegistroPendientePage />} />
-              <Route path="/verify-email" element={<VerifyEmailPage />} />
-              <Route path="/verification" element={<VerificationPage />} />
-              <Route path="/recuperar-contrasena" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route
-                path="/dashboard/admin"
-                element={
+        <Router>
+          <Routes>
+            {/* Rutas públicas sin CitaProvider */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/registro-pendiente" element={<RegistroPendientePage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/verification" element={<VerificationPage />} />
+            <Route path="/recuperar-contrasena" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/dashboard" element={<AutoRedirect />} />
+            <Route path="/debug" element={<DebugInfo />} />
+            
+            {/* Rutas protegidas CON CitaProvider */}
+            <Route
+              path="/dashboard/admin"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="admin">
                     <AdminDashboard />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/doctor"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/dashboard/doctor"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="doctor">
                     <GoogleCalendarPage />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/doctor/pacientes"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/dashboard/doctor/pacientes"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="doctor">
                     <DoctorDashboard />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/patient"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/dashboard/patient"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="paciente">
                     <PatientDashboardRouter />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/patient/agendar"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/dashboard/patient/agendar"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="paciente">
                     <PatientDashboardRouter />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/patient/perfil"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/dashboard/patient/perfil"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="paciente">
                     <PatientDashboardRouter />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/patient/estados-citas"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/dashboard/patient/estados-citas"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="paciente">
                     <PatientDashboardRouter />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/patient/documentos"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/dashboard/patient/documentos"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="paciente">
                     <PatientDashboardRouter />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/usuarios/crear"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/usuarios/crear"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="admin">
                     <CreateUserPage />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/usuarios"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/usuarios"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="admin">
                     <UserManagement />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/calendar"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="doctor">
                     <GoogleCalendarPage />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/doctor/schedule"
-                element={
+                </CitaProvider>
+              }
+            />
+            <Route
+              path="/doctor/schedule"
+              element={
+                <CitaProvider>
                   <ProtectedRoute role="doctor">
                     <DoctorSchedulePage />
                   </ProtectedRoute>
-                }
-              />
-              <Route path="/dashboard" element={<AutoRedirect />} />
-              <Route path="/debug" element={<DebugInfo />} />
-            </Routes>
-          </Router>
-        </CitaProvider>
+                </CitaProvider>
+              }
+            />
+          </Routes>
+        </Router>
       </CartProvider>
     </AuthProvider>
   );

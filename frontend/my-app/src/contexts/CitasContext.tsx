@@ -469,8 +469,14 @@ export const CitaProvider: React.FC<{ children: React.ReactNode }> = ({ children
       currentPath: window.location.pathname
     });
     
-    fetchDoctors();
-    fetchSpecialties();
+    // Solo cargar datos si el usuario está autenticado
+    if (user && token) {
+      console.log('✅ User authenticated, loading doctors and specialties...');
+      fetchDoctors();
+      fetchSpecialties();
+    } else {
+      console.log('⚠️ User not authenticated, skipping data load');
+    }
   }, [fetchDoctors, fetchSpecialties]);
 
   // Cleanup al desmontar
