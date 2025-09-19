@@ -17,7 +17,7 @@ const Footer = () => {
           {/* Logo y descripción */}
           <div className="col-span-1 md:col-span-2 lg:col-span-1">
             <img
-              src="/images/White logo - no background_page-0001.webp"
+              src="/images/orthowave-logo.svg"
               alt="OWC Orthowave Colombia"
               className="h-16 w-auto mb-6"
             />

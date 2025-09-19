@@ -184,7 +184,7 @@ const PatientDashboard: React.FC = () => {
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex justify-between items-center py-3 sm:py-4 px-2 sm:px-6">
           <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-            <img className="h-6 sm:h-8 flex-shrink-0" src="/images/White logo - no background_page-0001.webp" alt="OrthoWave" />
+            <img className="h-6 sm:h-8 flex-shrink-0" src="/images/orthowave-logo.svg" alt="OrthoWave" />
             <h1 className="text-base sm:text-lg lg:text-2xl font-semibold text-gray-800 truncate">Hola, {user.nombre}</h1>
           </div>
 
