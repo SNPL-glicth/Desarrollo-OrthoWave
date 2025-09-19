@@ -10,12 +10,13 @@ const getBaseURL = () => {
                       hostname.includes('up.railway.app') || 
                       hostname.includes('ortowhavecolombia.com') ||
                       hostname.includes('owc-orthowave.com') ||
+                      hostname.includes('www.owc-orthowave.com') ||
                       (hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.startsWith('192.168') && !hostname.startsWith('10.'));
   
   // Si estamos en producción, usar la URL específica del backend de Railway
   if (isProduction) {
     // Para ortowhavecolombia.com y owc-orthowave.com, usar el backend desplegado en Railway
-    if (hostname.includes('ortowhavecolombia.com') || hostname.includes('owc-orthowave.com')) {
+    if (hostname.includes('ortowhavecolombia.com') || hostname.includes('owc-orthowave.com') || hostname.includes('www.owc-orthowave.com')) {
       // Backend desplegado en Railway - URL verificada y funcional
       // Proyecto: Desarrollo-Orto-Whave
       // Servicio: bubbly-acceptance 
