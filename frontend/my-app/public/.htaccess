@@ -1,27 +1,7 @@
 Options -MultiViews
 RewriteEngine On
 
-# Handle CORS for API requests
-Header always set Access-Control-Allow-Origin "*"
-Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-Header always set Access-Control-Allow-Headers "Content-Type, Authorization, Accept, Origin, X-Requested-With"
-
-# Handle preflight requests
-RewriteCond %{REQUEST_METHOD} OPTIONS
-RewriteRule ^(.*)$ $1 [R=200,L]
-
-# API proxy rules - redirect API calls to backend
-RewriteRule ^api/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/api/$1 [P,L]
-RewriteRule ^auth/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/auth/$1 [P,L]
-RewriteRule ^users/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/users/$1 [P,L]
-RewriteRule ^citas/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/citas/$1 [P,L]
-RewriteRule ^pacientes/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/pacientes/$1 [P,L]
-RewriteRule ^perfil-medico/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/perfil-medico/$1 [P,L]
-RewriteRule ^doctor-availability/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/doctor-availability/$1 [P,L]
-RewriteRule ^patient-documents/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/patient-documents/$1 [P,L]
-RewriteRule ^notifications/(.*)$ https://desarrollo-orto-whave-production.up.railway.app/notifications/$1 [P,L]
-
-# Handle React Router - catch all other routes and serve index.html
+# Handle React Router - catch all routes and serve index.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.html [L]
