@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { documentService, PatientDocument } from '../../services/documentService';
 import DocumentUpload from './DocumentUpload';
+import { API_CONFIG } from '../../config/api.js';
 
 const MyDocuments: React.FC = () => {
   const { user } = useAuth();
@@ -65,13 +66,13 @@ const MyDocuments: React.FC = () => {
 
   const handleViewDocument = (document: PatientDocument) => {
     console.log('Abriendo documento:', document);
-    const viewUrl = `http://localhost:4000/api/patient-documents/${document.id}/view`;
+    const viewUrl = `${API_CONFIG.BASE_URL}/api/patient-documents/${document.id}/view`;
     window.open(viewUrl, '_blank', 'width=800,height=600');
   };
 
   const handleDownloadDocument = (document: PatientDocument) => {
     console.log('Descargando documento:', document);
-    const downloadUrl = `http://localhost:4000/api/patient-documents/${document.id}/download`;
+    const downloadUrl = `${API_CONFIG.BASE_URL}/api/patient-documents/${document.id}/download`;
     const link = window.document.createElement('a');
     link.href = downloadUrl;
     link.download = document.originalName;
