@@ -5,7 +5,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import NotificationBell from '../NotificationBell';
 import { API_CONFIG } from '../../config/api';
-import NotificationBell from '../notifications/NotificationBell';
 import ProductReservationStatus from './ProductReservationStatus';
 
 // Component para el User Account Modal (sin botón "mis pacientes")
