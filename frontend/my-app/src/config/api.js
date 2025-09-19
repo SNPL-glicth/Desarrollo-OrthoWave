@@ -21,10 +21,6 @@ const getBaseURL = () => {
       // Servicio: bubbly-acceptance 
       // Entorno: production
       const backendUrl = 'https://desarrollo-orto-whave-production.up.railway.app';
-      console.log('🚀 Usando backend URL en producción:', backendUrl);
-      console.log('✅ Backend Railway verificado y funcional');
-      console.log('🔄 Deployment timestamp:', new Date().toISOString());
-      console.log('🌐 Frontend domain:', hostname);
       return backendUrl;
     }
     // Para otros dominios de Railway, usar HTTPS y el mismo dominio

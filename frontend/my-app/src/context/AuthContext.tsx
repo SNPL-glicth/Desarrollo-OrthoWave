@@ -85,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setIsAuthenticated(false);
           }
         } else {
-          console.log('No hay token almacenado');
+        // No hay token almacenado
           setUser(null);
           setToken(null);
           setIsAuthenticated(false);

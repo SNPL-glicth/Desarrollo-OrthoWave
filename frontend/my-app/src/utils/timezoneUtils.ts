@@ -22,9 +22,7 @@ export const initializeColombiaTimezone = (): void => {
     timeZoneName: 'short'
   });
   
-  console.log('🌍 Frontend timezone configurado:', COLOMBIA_TIMEZONE);
-  console.log('⏰ Fecha actual Colombia:', getCurrentColombiaDate().toISOString());
-  console.log('🔍 Verificación timezone navegador:', formatter.format(testDate));
+  // Frontend timezone configurado para Colombia
 };
 
 /**
@@ -54,12 +52,7 @@ export const getCurrentColombiaDate = (): Date => {
   const colombiaOffset = -5 * 60 * 60 * 1000; // -5 horas en milisegundos
   const colombiaTime = nowUTC + colombiaOffset;
   
-  console.log('🌍 Timezone debug:', {
-    originalNow: now.toISOString(),
-    colombiaTimeString,
-    calculatedColombia: new Date(colombiaTime).toISOString(),
-    localTimezoneOffset: now.getTimezoneOffset()
-  });
+  // Cálculo de timezone para Colombia
   
   return new Date(colombiaTime);
 };
@@ -163,22 +156,7 @@ export const isDateInPastColombia = (date: Date): boolean => {
   const todayColombia = new Date(nowColombia.getFullYear(), nowColombia.getMonth(), nowColombia.getDate());
   const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   
-  // Debug logging para entender el problema
-  console.log('🔍 isDateInPastColombia debug:', {
-    nowColombia: nowColombia.toISOString(),
-    todayColombia: todayColombia.toISOString(),
-    targetDate: targetDate.toISOString(),
-    dateInput: date.toISOString(),
-    result: targetDate < todayColombia,
-    comparison: {
-      targetYear: targetDate.getFullYear(),
-      targetMonth: targetDate.getMonth(),
-      targetDay: targetDate.getDate(),
-      todayYear: todayColombia.getFullYear(),
-      todayMonth: todayColombia.getMonth(),
-      todayDay: todayColombia.getDate()
-    }
-  });
+  // Validación de fecha en timezone Colombia
   
   return targetDate < todayColombia;
 };

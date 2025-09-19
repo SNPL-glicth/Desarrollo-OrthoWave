@@ -323,17 +323,9 @@ export const CitaProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // Debug: Verificar estado de autenticación antes de la llamada
+    // Verificar estado de autenticación antes de la llamada
     const user = authService.getCurrentUser();
     const token = localStorage.getItem('token');
-    
-    console.log('🏥 Fetching doctors - Auth status:', {
-      hasUser: !!user,
-      hasToken: !!token,
-      userId: user?.id,
-      userRole: user?.rol,
-      tokenPreview: token ? `${token.substring(0, 10)}...` : 'No token'
-    });
 
     try {
       const response = await api.get('/perfil-medico/doctores-disponibles');
