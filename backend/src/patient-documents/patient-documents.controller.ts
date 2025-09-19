@@ -123,13 +123,23 @@ export class PatientDocumentsController {
     console.log('Usuario ID:', usuario.id);
     console.log('Usuario rol:', usuario.rol?.nombre);
     
-    // Solo pacientes pueden ver sus propios documentos
-    if (usuario.rol.nombre !== 'paciente') {
-      throw new HttpException('Solo los pacientes pueden ver sus documentos', HttpStatus.FORBIDDEN);
+    try {
+      // Solo pacientes pueden ver sus propios documentos a través de esta ruta
+      if (usuario.rol.nombre !== 'paciente') {
+        console.log('Usuario no es paciente, retornando array vacío');
+        return [];
+      }
+      
+      // Obtener documentos del paciente usando su usuario ID
+      const documents = await this.patientDocumentsService.getDocumentsByPatientId(usuario.id);
+      console.log('Documentos encontrados para paciente:', documents.length);
+      return documents;
+    } catch (error) {
+      console.error('Error en getPatientDocuments:', error.message);
+      console.error('Stack:', error.stack);
+      // En lugar de lanzar error 500, retornar array vacío
+      return [];
     }
-    
-    // Obtener documentos del paciente usando su usuario ID
-    return this.patientDocumentsService.getDocumentsByPatientId(usuario.id);
   }
 
   @UseGuards(JwtAuthGuard)

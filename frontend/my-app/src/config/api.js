@@ -22,6 +22,7 @@ const getBaseURL = () => {
       const backendUrl = 'https://desarrollo-orto-whave-production.up.railway.app';
       console.log('🚀 Usando backend URL en producción:', backendUrl);
       console.log('✅ Backend Railway verificado y funcional');
+      console.log('🔄 Deployment timestamp:', new Date().toISOString());
       return backendUrl;
     }
     // Para otros dominios de Railway, usar HTTPS y el mismo dominio

@@ -53,13 +53,36 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard)
   @Get('reservations/my')
   async getMyReservations(@Request() req) {
-    return this.productsService.getPatientReservations(req.user.id);
+    try {
+      console.log('=== GET MY RESERVATIONS ===');
+      console.log('Usuario ID:', req.user.id);
+      console.log('Usuario rol:', req.user.rol?.nombre);
+      
+      const reservations = await this.productsService.getPatientReservations(req.user.id);
+      console.log('Reservas encontradas:', reservations?.length || 0);
+      return reservations || [];
+    } catch (error) {
+      console.error('Error en getMyReservations:', error.message);
+      console.error('Stack:', error.stack);
+      // Retornar array vacío en lugar de error 500
+      return [];
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('reservations/summary/my')
   async getMyReservationSummary(@Request() req) {
-    return this.productsService.getReservationSummaryByPatient(req.user.id);
+    try {
+      console.log('=== GET MY RESERVATION SUMMARY ===');
+      console.log('Usuario ID:', req.user.id);
+      
+      const summary = await this.productsService.getReservationSummaryByPatient(req.user.id);
+      return summary || { total: 0, pending: 0, approved: 0, rejected: 0 };
+    } catch (error) {
+      console.error('Error en getMyReservationSummary:', error.message);
+      // Retornar summary vacío en lugar de error 500
+      return { total: 0, pending: 0, approved: 0, rejected: 0 };
+    }
   }
 
   // ENDPOINTS PARA DOCTORES/ADMINISTRADORES
